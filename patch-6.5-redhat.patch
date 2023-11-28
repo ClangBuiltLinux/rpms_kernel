@@ -41,7 +41,7 @@
  40 files changed, 561 insertions(+), 190 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index a6e152146028..af6bab938da2 100644
+index 80e2b991dd0f..419da09a664e 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -22,6 +22,18 @@ $(if $(filter __%, $(MAKECMDGOALS)), \
@@ -1139,7 +1139,7 @@ index f35647c470af..e57357f23306 100644
  {
  }
 diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
-index eb65170b97ff..e8b906b6ffbf 100644
+index d78c75fedf11..e4a1e84a8d3e 100644
 --- a/drivers/pci/quirks.c
 +++ b/drivers/pci/quirks.c
 @@ -4408,6 +4408,30 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_BROADCOM, 0x9000,
@@ -1351,7 +1351,7 @@ index ab088c662e88..f974f9d9a7c5 100644
  enum efi_secureboot_mode efi_get_secureboot_mode(efi_get_variable_t *get_var)
  {
 diff --git a/include/linux/lsm_hook_defs.h b/include/linux/lsm_hook_defs.h
-index af796986baee..83e1cb0ca159 100644
+index 1d71a043460c..ecd237e34a4d 100644
 --- a/include/linux/lsm_hook_defs.h
 +++ b/include/linux/lsm_hook_defs.h
 @@ -405,6 +405,8 @@ LSM_HOOK(void, LSM_RET_VOID, bpf_prog_free_security, struct bpf_prog_aux *aux)
