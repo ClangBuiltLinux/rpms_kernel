@@ -1,5 +1,5 @@
-"https://gitlab.com/cki-project/kernel-ark/-/commit"/46a1ee8aad436b0fd4ff52c6b61c03b68dd70ea3
- 46a1ee8aad436b0fd4ff52c6b61c03b68dd70ea3 Revert "cpupower: Bump soname version"
+"https://gitlab.com/cki-project/kernel-ark/-/commit"/1e428c83449221a891e2fa26872eed6242712a96
+ 1e428c83449221a891e2fa26872eed6242712a96 Revert "cpupower: Bump soname version"
 
 "https://gitlab.com/cki-project/kernel-ark/-/commit"/e56840b5f971b4d0f4032f6f5ab95c0c5ba40f8e
  e56840b5f971b4d0f4032f6f5ab95c0c5ba40f8e nouveau: fix devinit paths to only handle display on GSP.
