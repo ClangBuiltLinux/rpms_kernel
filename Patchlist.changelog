@@ -1,5 +1,8 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/25a3d5732c5423a758fec7e3377ef9b4cc92e98d
- 25a3d5732c5423a758fec7e3377ef9b4cc92e98d Revert "cpupower: Bump soname version"
+https://gitlab.com/cki-project/kernel-ark/-/commit/8409b81d4207b257d9fa41f38db1e2b4827a54da
+ 8409b81d4207b257d9fa41f38db1e2b4827a54da Revert "cpupower: Bump soname version"
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/2c6b48dfc4f3aad194a99c23f8d3e604c1a5593f
+ 2c6b48dfc4f3aad194a99c23f8d3e604c1a5593f wifi: brcmfmac: cfg80211: Handle SSID based pmksa deletion
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/64905c656dbdbc1a21d838d33e10699e391f185b
  64905c656dbdbc1a21d838d33e10699e391f185b Bluetooth: hci_event: Fix setting DISCOVERY_FINDING for passive scanning
