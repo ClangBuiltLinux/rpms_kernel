@@ -1,5 +1,8 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/3498c7c03440d91e307149ff05b0637a750fa3d4
- 3498c7c03440d91e307149ff05b0637a750fa3d4 Revert "cpupower: Bump soname version"
+https://gitlab.com/cki-project/kernel-ark/-/commit/c3be1c8ba3dc3a70fb65546e836193ce584de02b
+ c3be1c8ba3dc3a70fb65546e836193ce584de02b Revert "cpupower: Bump soname version"
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/d42657488c703c24d1fffaecced0b3b82d30b393
+ d42657488c703c24d1fffaecced0b3b82d30b393 selinux: revert our use of vma_is_initial_heap()
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/3a19264d7608d1c0cb6adff9f45883887a30ba29
  3a19264d7608d1c0cb6adff9f45883887a30ba29 Revert "ata: libata-scsi: Honor the D_SENSE bit for CK_COND=1 and no error"
