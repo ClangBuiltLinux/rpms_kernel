@@ -160,18 +160,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 6.10.13
-%define specversion 6.10.13
+%define specrpmversion 6.10.14
+%define specversion 6.10.14
 %define patchversion 6.10
 %define pkgrelease 100
 %define kversion 6
-%define tarfile_release 6.10.13
+%define tarfile_release 6.10.14
 # This is needed to do merge window version magic
 %define patchlevel 10
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 100%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 6.10.13
+%define kabiversion 6.10.14
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4043,10 +4043,14 @@ fi\
 #
 #
 %changelog
-* Fri Oct 04 2024 Augusto Caringi <acaringi@redhat.com> [6.10.13-100]
+* Thu Oct 10 2024 Augusto Caringi <acaringi@redhat.com> [6.10.14-100]
 - Turn off libbpf dynamic for perf on F39 (Justin M. Forbes)
 - Revert "cpupower: Bump soname version" (Justin M. Forbes)
 - Drop soname for libcpupower.so since we reverted the bump (Justin M. Forbes)
+
+* Thu Oct 10 2024 Augusto Caringi <acaringi@redhat.com> [6.10.14-0]
+- Config updates for 6.11.3 (Justin M. Forbes)
+- Linux v6.10.14
 
 * Fri Oct 04 2024 Augusto Caringi <acaringi@redhat.com> [6.10.13-0]
 - Linux v6.10.13
