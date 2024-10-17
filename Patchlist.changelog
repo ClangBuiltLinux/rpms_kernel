@@ -1,5 +1,5 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/764c492003f00a93351934b510822645a533433b
- 764c492003f00a93351934b510822645a533433b Revert "cpupower: Bump soname version"
+https://gitlab.com/cki-project/kernel-ark/-/commit/82c96e3c1ce3029cf1f97deb910fd8c303a3ad0a
+ 82c96e3c1ce3029cf1f97deb910fd8c303a3ad0a Revert "cpupower: Bump soname version"
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/b630c41705d79da0dfb19aa07a8985ba6fb61a02
  b630c41705d79da0dfb19aa07a8985ba6fb61a02 HID: amd_sfh: Switch to device-managed dmam_alloc_coherent()
