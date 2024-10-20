@@ -163,13 +163,13 @@ Summary: The Linux kernel
 %define specrpmversion 6.11.4
 %define specversion 6.11.4
 %define patchversion 6.11
-%define pkgrelease 100
+%define pkgrelease 101
 %define kversion 6
 %define tarfile_release 6.11.4
 # This is needed to do merge window version magic
 %define patchlevel 11
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 100%{?buildid}%{?dist}
+%define specrelease 101%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.11.4
 
@@ -4128,10 +4128,13 @@ fi\
 #
 #
 %changelog
-* Thu Oct 17 2024 Augusto Caringi <acaringi@redhat.com> [6.11.4-100]
+* Sun Oct 20 2024 Justin M. Forbes <jforbes@fedoraproject.org> [6.11.4-101]
 - Turn off libbpf dynamic for perf on F39 (Justin M. Forbes)
 - Revert "cpupower: Bump soname version" (Justin M. Forbes)
 - Drop soname for libcpupower.so since we reverted the bump (Justin M. Forbes)
+- Add bluetooth bzs to BugsFixed (Justin M. Forbes)
+- Bluetooth: btusb: Fix not being able to reconnect after suspend (Luiz Augusto von Dentz)
+- Bluetooth: btusb: Fix regression with fake CSR controllers 0a12:0001 (Luiz Augusto von Dentz)
 
 * Thu Oct 17 2024 Augusto Caringi <acaringi@redhat.com> [6.11.4-0]
 - Add F39 and F40 to release_targets (Justin M. Forbes)
