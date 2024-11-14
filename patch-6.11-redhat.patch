@@ -48,7 +48,7 @@
  47 files changed, 980 insertions(+), 234 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index 692bbdf40fb5f..07f9ce1d24774 100644
+index b8641dde171ff..0f03b97ae87f2 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -22,6 +22,18 @@ $(if $(filter __%, $(MAKECMDGOALS)), \
@@ -126,7 +126,7 @@ index 84c08b46519da..c281697142b1a 100644
  			reg = <0x40000000 0x100>;
  			interrupt-controller;
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 89b331575ed49..1934eeb898044 100644
+index 402ae0297993c..bdfabc559adc6 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
 @@ -1366,7 +1366,7 @@ endchoice
