@@ -1,5 +1,5 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/d932ca24978269c7ee77d6b2e70bb5b25cbb5035
- d932ca24978269c7ee77d6b2e70bb5b25cbb5035 Revert "cpupower: Bump soname version"
+https://gitlab.com/cki-project/kernel-ark/-/commit/41149211717aeda4414e41a5eddee11b605f3a85
+ 41149211717aeda4414e41a5eddee11b605f3a85 Revert "cpupower: Bump soname version"
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/5726a406fa039a9c1cf831953428f87caff38745
  5726a406fa039a9c1cf831953428f87caff38745 Bluetooth: btusb: Fix not being able to reconnect after suspend
