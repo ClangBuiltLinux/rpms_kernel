@@ -1,54 +1,46 @@
- Makefile                                           |  40 +++
- arch/arm/boot/dts/broadcom/bcm2837.dtsi            |   2 +-
+ Makefile                                           |  40 +++++++
+ arch/arm/Kconfig                                   |   4 +-
  arch/arm64/Kconfig                                 |   2 +-
- arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi      |  16 ++
- arch/arm64/boot/dts/broadcom/Makefile              |   1 +
- arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dts   |  64 +++++
- arch/arm64/boot/dts/broadcom/bcm2712.dtsi          | 283 +++++++++++++++++++++
- .../dts/qcom/sc8280xp-lenovo-thinkpad-x13s.dts     |  67 +++++
+ .../boot/dts/qcom/x1e80100-asus-vivobook-s15.dts   |   8 ++
  arch/s390/include/asm/ipl.h                        |   1 +
  arch/s390/kernel/ipl.c                             |   5 +
  arch/s390/kernel/setup.c                           |   4 +
- arch/x86/kernel/setup.c                            |  22 +-
- certs/extract-cert.c                               |  25 +-
- crypto/akcipher.c                                  |   6 +-
- crypto/dh.c                                        |  25 ++
- crypto/seqiv.c                                     |  15 +-
- crypto/testmgr.c                                   |   4 +-
- drivers/acpi/apei/hest.c                           |   8 +
- drivers/acpi/irq.c                                 |  17 +-
- drivers/acpi/scan.c                                |   9 +
- drivers/ata/libahci.c                              |  18 ++
- drivers/char/ipmi/ipmi_dmi.c                       |  15 ++
- drivers/char/ipmi/ipmi_msghandler.c                |  16 +-
+ arch/x86/kernel/setup.c                            |  22 ++--
+ drivers/acpi/apei/hest.c                           |   8 ++
+ drivers/acpi/irq.c                                 |  17 ++-
+ drivers/acpi/scan.c                                |   9 ++
+ drivers/ata/libahci.c                              |  18 +++
+ drivers/bluetooth/btusb.c                          |   2 +
+ drivers/char/ipmi/ipmi_dmi.c                       |  15 +++
+ drivers/char/ipmi/ipmi_msghandler.c                |  16 ++-
  drivers/firmware/efi/Makefile                      |   1 +
- drivers/firmware/efi/efi.c                         | 124 ++++++---
- drivers/firmware/efi/secureboot.c                  |  38 +++
- drivers/hid/hid-rmi.c                              |  66 -----
- drivers/hwtracing/coresight/coresight-etm4x-core.c |  19 ++
- drivers/input/rmi4/rmi_driver.c                    | 124 +++++----
- drivers/iommu/iommu.c                              |  22 ++
- drivers/media/platform/qcom/camss/camss-video.c    |   6 -
- drivers/media/platform/qcom/camss/camss.c          |   5 +-
- drivers/pci/quirks.c                               |  24 ++
- drivers/scsi/sd.c                                  |  10 +
- drivers/usb/core/hub.c                             |   7 +
- include/linux/crypto.h                             |   2 +
- include/linux/efi.h                                |  22 +-
+ drivers/firmware/efi/efi.c                         | 124 +++++++++++++++------
+ drivers/firmware/efi/secureboot.c                  |  38 +++++++
+ drivers/hid/hid-rmi.c                              |  66 -----------
+ drivers/hwtracing/coresight/coresight-etm4x-core.c |  19 ++++
+ drivers/input/rmi4/rmi_driver.c                    | 124 ++++++++++++---------
+ drivers/iommu/iommu.c                              |  22 ++++
+ drivers/pci/pci-driver.c                           |  29 +++++
+ drivers/pci/quirks.c                               |  24 ++++
+ drivers/scsi/sd.c                                  |  10 ++
+ drivers/usb/core/hub.c                             |   7 ++
+ include/linux/efi.h                                |  22 ++--
  include/linux/lsm_hook_defs.h                      |   2 +
+ include/linux/pci.h                                |   4 +
  include/linux/rmi.h                                |   1 +
  include/linux/security.h                           |   5 +
  kernel/module/signing.c                            |   9 +-
- scripts/sign-file.c                                |  29 +--
  scripts/tags.sh                                    |   2 +
  security/integrity/platform_certs/load_uefi.c      |   6 +-
- security/lockdown/Kconfig                          |  13 +
+ security/lockdown/Kconfig                          |  13 +++
  security/lockdown/lockdown.c                       |   1 +
- security/security.c                                |  12 +
- 47 files changed, 974 insertions(+), 241 deletions(-)
+ security/security.c                                |  12 ++
+ tools/tracing/rtla/src/utils.c                     |  36 +++---
+ tools/tracing/rtla/src/utils.h                     |   2 +
+ 39 files changed, 554 insertions(+), 196 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index 7bcf0c32ea5e..f2c0bc57ebaa 100644
+index 70070e64d267..bd0d495cf065 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -22,6 +22,18 @@ $(if $(filter __%, $(MAKECMDGOALS)), \
@@ -88,7 +80,7 @@ index 7bcf0c32ea5e..f2c0bc57ebaa 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1849,6 +1872,23 @@ endif
+@@ -1859,6 +1882,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -112,24 +104,27 @@ index 7bcf0c32ea5e..f2c0bc57ebaa 100644
  $(MODORDER): $(build-dir)
  	@:
  
-diff --git a/arch/arm/boot/dts/broadcom/bcm2837.dtsi b/arch/arm/boot/dts/broadcom/bcm2837.dtsi
-index 84c08b46519d..c281697142b1 100644
---- a/arch/arm/boot/dts/broadcom/bcm2837.dtsi
-+++ b/arch/arm/boot/dts/broadcom/bcm2837.dtsi
-@@ -9,7 +9,7 @@ soc {
- 			 <0x40000000 0x40000000 0x00001000>;
- 		dma-ranges = <0xc0000000 0x00000000 0x3f000000>;
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index 202397be76d8..3d4ba33d4305 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -1228,9 +1228,9 @@ config HIGHMEM
+ 	  If unsure, say n.
  
--		local_intc: local_intc@40000000 {
-+		local_intc: interrupt-controller@40000000 {
- 			compatible = "brcm,bcm2836-l1-intc";
- 			reg = <0x40000000 0x100>;
- 			interrupt-controller;
+ config HIGHPTE
+-	bool "Allocate 2nd-level pagetables from highmem" if EXPERT
++	bool "Allocate 2nd-level pagetables from highmem"
+ 	depends on HIGHMEM
+-	default y
++	default n
+ 	help
+ 	  The VM uses one page of physical memory for each page table.
+ 	  For systems with a lot of processes, this can use a lot of
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index c8cba20a4d11..40a1665236ab 100644
+index 22f8a7bca6d2..a9e2b0c90cc7 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -1365,7 +1365,7 @@ endchoice
+@@ -1383,7 +1383,7 @@ endchoice
  
  config ARM64_FORCE_52BIT
  	bool "Force 52-bit virtual addresses for userspace"
@@ -138,496 +133,25 @@ index c8cba20a4d11..40a1665236ab 100644
  	help
  	  For systems with 52-bit userspace VAs enabled, the kernel will attempt
  	  to maintain compatibility with older software by providing 48-bit VAs
-diff --git a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
-index e868ca5ae753..a5c3920e0f04 100644
---- a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
-+++ b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
-@@ -263,6 +263,14 @@ gpu0_thermal: gpu0-thermal {
- 			polling-delay-passive = <0>;
- 			polling-delay = <0>;
- 			thermal-sensors = <&ths 1>;
-+
-+			trips {
-+				gpu0_crit: gpu0-crit {
-+					temperature = <110000>;
-+					hysteresis = <2000>;
-+					type = "critical";
-+				};
-+			};
- 		};
- 
- 		gpu1_thermal: gpu1-thermal {
-@@ -270,6 +278,14 @@ gpu1_thermal: gpu1-thermal {
- 			polling-delay-passive = <0>;
- 			polling-delay = <0>;
- 			thermal-sensors = <&ths 2>;
-+
-+			trips {
-+				gpu1_crit: gpu1-crit {
-+					temperature = <110000>;
-+					hysteresis = <2000>;
-+					type = "critical";
-+				};
-+			};
- 		};
- 	};
- 
-diff --git a/arch/arm64/boot/dts/broadcom/Makefile b/arch/arm64/boot/dts/broadcom/Makefile
-index 8b4591ddd27c..92565e9781ad 100644
---- a/arch/arm64/boot/dts/broadcom/Makefile
-+++ b/arch/arm64/boot/dts/broadcom/Makefile
-@@ -6,6 +6,7 @@ DTC_FLAGS := -@
- dtb-$(CONFIG_ARCH_BCM2835) += bcm2711-rpi-400.dtb \
- 			      bcm2711-rpi-4-b.dtb \
- 			      bcm2711-rpi-cm4-io.dtb \
-+			      bcm2712-rpi-5-b.dtb \
- 			      bcm2837-rpi-3-a-plus.dtb \
- 			      bcm2837-rpi-3-b.dtb \
- 			      bcm2837-rpi-3-b-plus.dtb \
-diff --git a/arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dts b/arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dts
-new file mode 100644
-index 000000000000..2bdbb6780242
---- /dev/null
-+++ b/arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dts
-@@ -0,0 +1,64 @@
-+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
-+/dts-v1/;
-+
-+#include <dt-bindings/gpio/gpio.h>
-+#include "bcm2712.dtsi"
-+
-+/ {
-+	compatible = "raspberrypi,5-model-b", "brcm,bcm2712";
-+	model = "Raspberry Pi 5";
-+
-+	aliases {
-+		serial10 = &uart10;
-+	};
-+
-+	chosen: chosen {
-+		stdout-path = "serial10:115200n8";
-+	};
-+
-+	/* Will be filled by the bootloader */
-+	memory@0 {
-+		device_type = "memory";
-+		reg = <0 0 0 0x28000000>;
-+	};
-+
-+	sd_io_1v8_reg: sd-io-1v8-reg {
-+		compatible = "regulator-gpio";
-+		regulator-name = "vdd-sd-io";
-+		regulator-min-microvolt = <1800000>;
-+		regulator-max-microvolt = <3300000>;
-+		regulator-boot-on;
-+		regulator-always-on;
-+		regulator-settling-time-us = <5000>;
-+		gpios = <&gio_aon 3 GPIO_ACTIVE_HIGH>;
-+		states = <1800000 1>,
-+			 <3300000 0>;
-+	};
-+
-+	sd_vcc_reg: sd-vcc-reg {
-+		compatible = "regulator-fixed";
-+		regulator-name = "vcc-sd";
-+		regulator-min-microvolt = <3300000>;
-+		regulator-max-microvolt = <3300000>;
-+		regulator-boot-on;
-+		enable-active-high;
-+		gpios = <&gio_aon 4 GPIO_ACTIVE_HIGH>;
-+	};
-+};
-+
-+/* The Debug UART, on Rpi5 it's on JST-SH 1.0mm 3-pin connector
-+ * labeled "UART", i.e. the interface with the system console.
-+ */
-+&uart10 {
-+	status = "okay";
-+};
-+
-+/* SDIO1 is used to drive the SD card */
-+&sdio1 {
-+	vqmmc-supply = <&sd_io_1v8_reg>;
-+	vmmc-supply = <&sd_vcc_reg>;
-+	bus-width = <4>;
-+	sd-uhs-sdr50;
-+	sd-uhs-ddr50;
-+	sd-uhs-sdr104;
-+};
-diff --git a/arch/arm64/boot/dts/broadcom/bcm2712.dtsi b/arch/arm64/boot/dts/broadcom/bcm2712.dtsi
-new file mode 100644
-index 000000000000..6e5a984c1d4e
---- /dev/null
-+++ b/arch/arm64/boot/dts/broadcom/bcm2712.dtsi
-@@ -0,0 +1,283 @@
-+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
-+#include <dt-bindings/interrupt-controller/arm-gic.h>
-+
-+/ {
-+	compatible = "brcm,bcm2712";
-+
-+	#address-cells = <2>;
-+	#size-cells = <2>;
-+
-+	interrupt-parent = <&gicv2>;
-+
-+	clocks {
-+		/* The oscillator is the root of the clock tree. */
-+		clk_osc: clk-osc {
-+			compatible = "fixed-clock";
-+			#clock-cells = <0>;
-+			clock-output-names = "osc";
-+			clock-frequency = <54000000>;
-+		};
-+
-+		clk_vpu: clk-vpu {
-+			compatible = "fixed-clock";
-+			#clock-cells = <0>;
-+			clock-frequency = <750000000>;
-+			clock-output-names = "vpu-clock";
-+		};
-+
-+		clk_uart: clk-uart {
-+			compatible = "fixed-clock";
-+			#clock-cells = <0>;
-+			clock-frequency = <9216000>;
-+			clock-output-names = "uart-clock";
-+		};
-+
-+		clk_emmc2: clk-emmc2 {
-+			compatible = "fixed-clock";
-+			#clock-cells = <0>;
-+			clock-frequency = <200000000>;
-+			clock-output-names = "emmc2-clock";
-+		};
-+	};
-+
-+	cpus: cpus {
-+		#address-cells = <1>;
-+		#size-cells = <0>;
-+
-+		/* Source for L1 d/i cache-line-size, cache-sets, cache-size
-+		 * https://developer.arm.com/documentation/100798/0401/L1-memory-system/About-the-L1-memory-system?lang=en
-+		 * Source for L2 cache-line-size and cache-sets:
-+		 * https://developer.arm.com/documentation/100798/0401/L2-memory-system/About-the-L2-memory-system?lang=en
-+		 * and for cache-size:
-+		 * https://www.raspberrypi.com/documentation/computers/processors.html#bcm2712
-+		 */
-+		cpu0: cpu@0 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a76";
-+			reg = <0x000>;
-+			enable-method = "psci";
-+			d-cache-size = <0x10000>;
-+			d-cache-line-size = <64>;
-+			d-cache-sets = <256>; // 64KiB(size)/64(line-size)=1024ways/4-way set
-+			i-cache-size = <0x10000>;
-+			i-cache-line-size = <64>;
-+			i-cache-sets = <256>; // 64KiB(size)/64(line-size)=1024ways/4-way set
-+			next-level-cache = <&l2_cache_l0>;
-+
-+			l2_cache_l0: l2-cache-l0 {
-+				compatible = "cache";
-+				cache-size = <0x80000>;
-+				cache-line-size = <128>;
-+				cache-sets = <1024>; //512KiB(size)/64(line-size)=8192ways/8-way set
-+				cache-level = <2>;
-+				cache-unified;
-+				next-level-cache = <&l3_cache>;
-+			};
-+		};
-+
-+		cpu1: cpu@1 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a76";
-+			reg = <0x100>;
-+			enable-method = "psci";
-+			d-cache-size = <0x10000>;
-+			d-cache-line-size = <64>;
-+			d-cache-sets = <256>; // 64KiB(size)/64(line-size)=1024ways/4-way set
-+			i-cache-size = <0x10000>;
-+			i-cache-line-size = <64>;
-+			i-cache-sets = <256>; // 64KiB(size)/64(line-size)=1024ways/4-way set
-+			next-level-cache = <&l2_cache_l1>;
-+
-+			l2_cache_l1: l2-cache-l1 {
-+				compatible = "cache";
-+				cache-size = <0x80000>;
-+				cache-line-size = <128>;
-+				cache-sets = <1024>; //512KiB(size)/64(line-size)=8192ways/8-way set
-+				cache-level = <2>;
-+				cache-unified;
-+				next-level-cache = <&l3_cache>;
-+			};
-+		};
-+
-+		cpu2: cpu@2 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a76";
-+			reg = <0x200>;
-+			enable-method = "psci";
-+			d-cache-size = <0x10000>;
-+			d-cache-line-size = <64>;
-+			d-cache-sets = <256>; // 64KiB(size)/64(line-size)=1024ways/4-way set
-+			i-cache-size = <0x10000>;
-+			i-cache-line-size = <64>;
-+			i-cache-sets = <256>; // 64KiB(size)/64(line-size)=1024ways/4-way set
-+			next-level-cache = <&l2_cache_l2>;
-+
-+			l2_cache_l2: l2-cache-l2 {
-+				compatible = "cache";
-+				cache-size = <0x80000>;
-+				cache-line-size = <128>;
-+				cache-sets = <1024>; //512KiB(size)/64(line-size)=8192ways/8-way set
-+				cache-level = <2>;
-+				cache-unified;
-+				next-level-cache = <&l3_cache>;
-+			};
-+		};
-+
-+		cpu3: cpu@3 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a76";
-+			reg = <0x300>;
-+			enable-method = "psci";
-+			d-cache-size = <0x10000>;
-+			d-cache-line-size = <64>;
-+			d-cache-sets = <256>; // 64KiB(size)/64(line-size)=1024ways/4-way set
-+			i-cache-size = <0x10000>;
-+			i-cache-line-size = <64>;
-+			i-cache-sets = <256>; // 64KiB(size)/64(line-size)=1024ways/4-way set
-+			next-level-cache = <&l2_cache_l3>;
-+
-+			l2_cache_l3: l2-cache-l3 {
-+				compatible = "cache";
-+				cache-size = <0x80000>;
-+				cache-line-size = <128>;
-+				cache-sets = <1024>; //512KiB(size)/64(line-size)=8192ways/8-way set
-+				cache-level = <2>;
-+				cache-unified;
-+				next-level-cache = <&l3_cache>;
-+			};
-+		};
-+
-+		/* Source for cache-line-size and cache-sets:
-+		 * https://developer.arm.com/documentation/100453/0401/L3-cache?lang=en
-+		 * Source for cache-size:
-+		 * https://www.raspberrypi.com/documentation/computers/processors.html#bcm2712
-+		 */
-+		l3_cache: l3-cache {
-+			compatible = "cache";
-+			cache-size = <0x200000>;
-+			cache-line-size = <64>;
-+			cache-sets = <2048>; // 2MiB(size)/64(line-size)=32768ways/16-way set
-+			cache-level = <3>;
-+			cache-unified;
-+		};
-+	};
-+
-+	psci {
-+		method = "smc";
-+		compatible = "arm,psci-1.0", "arm,psci-0.2";
-+	};
-+
-+	rmem: reserved-memory {
-+		ranges;
-+		#address-cells = <2>;
-+		#size-cells = <2>;
-+
-+		atf@0 {
-+			reg = <0x0 0x0 0x0 0x80000>;
-+			no-map;
-+		};
-+
-+		cma: linux,cma {
-+			compatible = "shared-dma-pool";
-+			size = <0x0 0x4000000>; /* 64MB */
-+			reusable;
-+			linux,cma-default;
-+			alloc-ranges = <0x0 0x00000000 0x0 0x40000000>;
-+		};
-+	};
-+
-+	soc: soc@107c000000 {
-+		compatible = "simple-bus";
-+		ranges = <0x00000000  0x10 0x00000000  0x80000000>;
-+		#address-cells = <1>;
-+		#size-cells = <1>;
-+
-+		sdio1: mmc@fff000 {
-+			compatible = "brcm,bcm2712-sdhci",
-+				     "brcm,sdhci-brcmstb";
-+			reg = <0x00fff000 0x260>,
-+			      <0x00fff400 0x200>;
-+			reg-names = "host", "cfg";
-+			interrupts = <GIC_SPI 273 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks = <&clk_emmc2>;
-+			clock-names = "sw_sdio";
-+			mmc-ddr-3_3v;
-+		};
-+
-+		system_timer: timer@7c003000 {
-+			compatible = "brcm,bcm2835-system-timer";
-+			reg = <0x7c003000 0x1000>;
-+			interrupts = <GIC_SPI 64 IRQ_TYPE_LEVEL_HIGH>,
-+				     <GIC_SPI 65 IRQ_TYPE_LEVEL_HIGH>,
-+				     <GIC_SPI 66 IRQ_TYPE_LEVEL_HIGH>,
-+				     <GIC_SPI 67 IRQ_TYPE_LEVEL_HIGH>;
-+			clock-frequency = <1000000>;
-+		};
-+
-+		mailbox: mailbox@7c013880 {
-+			compatible = "brcm,bcm2835-mbox";
-+			reg = <0x7c013880 0x40>;
-+			interrupts = <GIC_SPI 33 IRQ_TYPE_LEVEL_HIGH>;
-+			#mbox-cells = <0>;
-+		};
-+
-+		local_intc: interrupt-controller@7cd00000 {
-+			compatible = "brcm,bcm2836-l1-intc";
-+			reg = <0x7cd00000 0x100>;
-+		};
-+
-+		uart10: serial@7d001000 {
-+			compatible = "arm,pl011", "arm,primecell";
-+			reg = <0x7d001000 0x200>;
-+			interrupts = <GIC_SPI 121 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks = <&clk_uart>, <&clk_vpu>;
-+			clock-names = "uartclk", "apb_pclk";
-+			arm,primecell-periphid = <0x00241011>;
-+			status = "disabled";
-+		};
-+
-+		interrupt-controller@7d517000 {
-+			compatible = "brcm,bcm7271-l2-intc";
-+			reg = <0x7d517000 0x10>;
-+			interrupts = <GIC_SPI 247 IRQ_TYPE_LEVEL_HIGH>;
-+			interrupt-controller;
-+			#interrupt-cells = <1>;
-+		};
-+
-+		gio_aon: gpio@7d517c00 {
-+			compatible = "brcm,bcm7445-gpio", "brcm,brcmstb-gpio";
-+			reg = <0x7d517c00 0x40>;
-+			gpio-controller;
-+			#gpio-cells = <2>;
-+			brcm,gpio-bank-widths = <17 6>;
-+			/* The lack of 'interrupt-controller' property here is intended:
-+			 * don't use GIO_AON as an interrupt controller because it will
-+			 * clash with the firmware monitoring the PMIC interrupt via the VPU.
-+			 */
-+		};
-+
-+		gicv2: interrupt-controller@7fff9000 {
-+			compatible = "arm,gic-400";
-+			reg = <0x7fff9000 0x1000>,
-+			      <0x7fffa000 0x2000>,
-+			      <0x7fffc000 0x2000>,
-+			      <0x7fffe000 0x2000>;
-+			interrupt-controller;
-+			#interrupt-cells = <3>;
-+		};
-+	};
-+
-+	timer {
-+		compatible = "arm,armv8-timer";
-+		interrupts = <GIC_PPI 13 (GIC_CPU_MASK_SIMPLE(4) |
-+					  IRQ_TYPE_LEVEL_LOW)>,
-+			     <GIC_PPI 14 (GIC_CPU_MASK_SIMPLE(4) |
-+					  IRQ_TYPE_LEVEL_LOW)>,
-+			     <GIC_PPI 11 (GIC_CPU_MASK_SIMPLE(4) |
-+					  IRQ_TYPE_LEVEL_LOW)>,
-+			     <GIC_PPI 10 (GIC_CPU_MASK_SIMPLE(4) |
-+					  IRQ_TYPE_LEVEL_LOW)>,
-+			     <GIC_PPI 12 (GIC_CPU_MASK_SIMPLE(4) |
-+					  IRQ_TYPE_LEVEL_LOW)>;
-+	};
-+};
-diff --git a/arch/arm64/boot/dts/qcom/sc8280xp-lenovo-thinkpad-x13s.dts b/arch/arm64/boot/dts/qcom/sc8280xp-lenovo-thinkpad-x13s.dts
-index b27143f81867..320706c88cdd 100644
---- a/arch/arm64/boot/dts/qcom/sc8280xp-lenovo-thinkpad-x13s.dts
-+++ b/arch/arm64/boot/dts/qcom/sc8280xp-lenovo-thinkpad-x13s.dts
-@@ -592,6 +592,57 @@ vreg_l10d: ldo10 {
+diff --git a/arch/arm64/boot/dts/qcom/x1e80100-asus-vivobook-s15.dts b/arch/arm64/boot/dts/qcom/x1e80100-asus-vivobook-s15.dts
+index fb4a48a1e2a8..2e32533a6b1e 100644
+--- a/arch/arm64/boot/dts/qcom/x1e80100-asus-vivobook-s15.dts
++++ b/arch/arm64/boot/dts/qcom/x1e80100-asus-vivobook-s15.dts
+@@ -328,6 +328,14 @@ vreg_l3j_0p8: ldo3 {
  	};
  };
  
-+&camss {
-+	vdda-phy-supply = <&vreg_l6d>;
-+	vdda-pll-supply = <&vreg_l4d>;
-+
++&gpu {
 +	status = "okay";
 +
-+	ports {
-+		port@0 {
-+			csiphy0_lanes01_ep: endpoint@0 {
-+				reg = <0>;
-+				clock-lanes = <7>;
-+				data-lanes = <0 1>;
-+				remote-endpoint = <&ov5675_ep>;
-+			};
-+		};
++	zap-shader {
++		firmware-name = "qcom/x1e80100/ASUSTeK/vivobook-s15/qcdxkmsuc8380.mbn";
 +	};
 +};
 +
-+&cci2 {
-+	status = "okay";
-+};
-+
-+&cci2_i2c1 {
-+	camera@10 {
-+		compatible = "ovti,ov5675";
-+		reg = <0x10>;
-+
-+		reset-gpios = <&tlmm 15 GPIO_ACTIVE_LOW>;
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&cam_rgb_default>;
-+
-+		clocks = <&camcc CAMCC_MCLK3_CLK>;
-+
-+		orientation = <0>;	/* Front facing */
-+
-+		avdd-supply = <&vreg_l6q>;
-+		dvdd-supply = <&vreg_l2q>;
-+		dovdd-supply = <&vreg_l7q>;
-+
-+		port {
-+			ov5675_ep: endpoint {
-+				clock-lanes = <0>;
-+				data-lanes = <1 2>;
-+				link-frequencies = /bits/ 64 <450000000>;
-+				remote-endpoint = <&csiphy0_lanes01_ep>;
-+			};
-+		};
-+
-+	};
-+};
-+
- &dispcc0 {
+ &i2c0 {
+ 	clock-frequency = <400000>;
  	status = "okay";
- };
-@@ -1436,6 +1487,22 @@ cam_indicator_en: cam-indicator-en-state {
- 		bias-disable;
- 	};
- 
-+	cam_rgb_default: cam-rgb-default-state {
-+		mclk-pins {
-+			pins = "gpio17";
-+			function = "cam_mclk";
-+			drive-strength = <16>;
-+			bias-disable;
-+		};
-+
-+		sc-rgb-xshut-n-pins {
-+			pins = "gpio15";
-+			function = "gpio";
-+			drive-strength = <2>;
-+			bias-disable;
-+		};
-+	};
-+
- 	edp_reg_en: edp-reg-en-state {
- 		pins = "gpio25";
- 		function = "gpio";
 diff --git a/arch/s390/include/asm/ipl.h b/arch/s390/include/asm/ipl.h
 index b0d00032479d..afb9544fb007 100644
 --- a/arch/s390/include/asm/ipl.h
@@ -676,7 +200,7 @@ index a3fea683b227..a3162d93f437 100644
  	/* boot_command_line has been already set up in early.c */
  	*cmdline_p = boot_command_line;
 diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index 6129dc2ba784..feaf5fd3f37d 100644
+index f1fea506e20f..6af50d80f54a 100644
 --- a/arch/x86/kernel/setup.c
 +++ b/arch/x86/kernel/setup.c
 @@ -21,6 +21,7 @@
@@ -701,7 +225,7 @@ index 6129dc2ba784..feaf5fd3f37d 100644
  	reserve_ibft_region();
  	x86_init.resources.dmi_setup();
  
-@@ -1065,19 +1073,7 @@ void __init setup_arch(char **cmdline_p)
+@@ -1070,19 +1078,7 @@ void __init setup_arch(char **cmdline_p)
  	/* Allocate bigger log buffer */
  	setup_log_buf(1);
  
@@ -722,171 +246,6 @@ index 6129dc2ba784..feaf5fd3f37d 100644
  
  	reserve_initrd();
  
-diff --git a/certs/extract-cert.c b/certs/extract-cert.c
-index 70e9ec89d87d..f5fb74916cee 100644
---- a/certs/extract-cert.c
-+++ b/certs/extract-cert.c
-@@ -21,7 +21,6 @@
- #include <openssl/bio.h>
- #include <openssl/pem.h>
- #include <openssl/err.h>
--#include <openssl/engine.h>
- 
- /*
-  * OpenSSL 3.0 deprecates the OpenSSL's ENGINE API.
-@@ -122,28 +121,8 @@ int main(int argc, char **argv)
- 		fclose(f);
- 		exit(0);
- 	} else if (!strncmp(cert_src, "pkcs11:", 7)) {
--		ENGINE *e;
--		struct {
--			const char *cert_id;
--			X509 *cert;
--		} parms;
--
--		parms.cert_id = cert_src;
--		parms.cert = NULL;
--
--		ENGINE_load_builtin_engines();
--		drain_openssl_errors();
--		e = ENGINE_by_id("pkcs11");
--		ERR(!e, "Load PKCS#11 ENGINE");
--		if (ENGINE_init(e))
--			drain_openssl_errors();
--		else
--			ERR(1, "ENGINE_init");
--		if (key_pass)
--			ERR(!ENGINE_ctrl_cmd_string(e, "PIN", key_pass, 0), "Set PKCS#11 PIN");
--		ENGINE_ctrl_cmd(e, "LOAD_CERT_CTRL", 0, &parms, NULL, 1);
--		ERR(!parms.cert, "Get X.509 from PKCS#11");
--		write_cert(parms.cert);
-+		fprintf(stderr, "Error: pkcs11 not implemented\n");
-+		exit(1);
- 	} else {
- 		BIO *b;
- 		X509 *x509;
-diff --git a/crypto/akcipher.c b/crypto/akcipher.c
-index e0ff5f4dda6d..098a52ded759 100644
---- a/crypto/akcipher.c
-+++ b/crypto/akcipher.c
-@@ -126,14 +126,12 @@ int crypto_register_akcipher(struct akcipher_alg *alg)
- {
- 	struct crypto_alg *base = &alg->base;
- 
--	if (!alg->sign)
--		alg->sign = akcipher_default_op;
-+	alg->sign = akcipher_default_op;
- 	if (!alg->verify)
- 		alg->verify = akcipher_default_op;
- 	if (!alg->encrypt)
- 		alg->encrypt = akcipher_default_op;
--	if (!alg->decrypt)
--		alg->decrypt = akcipher_default_op;
-+	alg->decrypt = akcipher_default_op;
- 	if (!alg->set_priv_key)
- 		alg->set_priv_key = akcipher_default_set_key;
- 
-diff --git a/crypto/dh.c b/crypto/dh.c
-index 68d11d66c0b5..6e3e515b2452 100644
---- a/crypto/dh.c
-+++ b/crypto/dh.c
-@@ -227,10 +227,35 @@ static int dh_compute_value(struct kpp_request *req)
- 
- 		/* SP800-56A rev 3 5.6.2.1.3 key check */
- 		} else {
-+			MPI val_pct;
-+
- 			if (dh_is_pubkey_valid(ctx, val)) {
- 				ret = -EAGAIN;
- 				goto err_free_val;
- 			}
-+
-+			/*
-+			 * SP800-56Arev3, 5.6.2.1.4: ("Owner Assurance
-+			 * of Pair-wise Consistency"): recompute the
-+			 * public key and check if the results match.
-+			 */
-+			val_pct = mpi_alloc(0);
-+			if (!val_pct) {
-+				ret = -ENOMEM;
-+				goto err_free_val;
-+			}
-+
-+			ret = _compute_val(ctx, base, val_pct);
-+			if (ret) {
-+				mpi_free(val_pct);
-+				goto err_free_val;
-+			}
-+
-+			if (mpi_cmp(val, val_pct) != 0) {
-+				fips_fail_notify();
-+				panic("dh: pair-wise consistency test failed\n");
-+			}
-+			mpi_free(val_pct);
- 		}
- 	}
- 
-diff --git a/crypto/seqiv.c b/crypto/seqiv.c
-index 17e11d51ddc3..9c136a3b6267 100644
---- a/crypto/seqiv.c
-+++ b/crypto/seqiv.c
-@@ -132,6 +132,19 @@ static int seqiv_aead_decrypt(struct aead_request *req)
- 	return crypto_aead_decrypt(subreq);
- }
- 
-+static int aead_init_seqiv(struct crypto_aead *aead)
-+{
-+	int err;
-+
-+	err = aead_init_geniv(aead);
-+	if (err)
-+		return err;
-+
-+	crypto_aead_set_flags(aead, CRYPTO_TFM_FIPS_COMPLIANCE);
-+
-+	return 0;
-+}
-+
- static int seqiv_aead_create(struct crypto_template *tmpl, struct rtattr **tb)
- {
- 	struct aead_instance *inst;
-@@ -149,7 +162,7 @@ static int seqiv_aead_create(struct crypto_template *tmpl, struct rtattr **tb)
- 	inst->alg.encrypt = seqiv_aead_encrypt;
- 	inst->alg.decrypt = seqiv_aead_decrypt;
- 
--	inst->alg.init = aead_init_geniv;
-+	inst->alg.init = aead_init_seqiv;
- 	inst->alg.exit = aead_exit_geniv;
- 
- 	inst->alg.base.cra_ctxsize = sizeof(struct aead_geniv_ctx);
-diff --git a/crypto/testmgr.c b/crypto/testmgr.c
-index f02cb075bd68..669e306f1cb2 100644
---- a/crypto/testmgr.c
-+++ b/crypto/testmgr.c
-@@ -4216,7 +4216,7 @@ static int test_akcipher_one(struct crypto_akcipher *tfm,
- 	 * Don't invoke (decrypt or sign) test which require a private key
- 	 * for vectors with only a public key.
- 	 */
--	if (vecs->public_key_vec) {
-+	if (1 || vecs->public_key_vec) {
- 		err = 0;
- 		goto free_all;
- 	}
-@@ -5093,14 +5093,12 @@ static const struct alg_test_desc alg_test_descs[] = {
- 	}, {
- 		.alg = "ecdh-nist-p256",
- 		.test = alg_test_kpp,
--		.fips_allowed = 1,
- 		.suite = {
- 			.kpp = __VECS(ecdh_p256_tv_template)
- 		}
- 	}, {
- 		.alg = "ecdh-nist-p384",
- 		.test = alg_test_kpp,
--		.fips_allowed = 1,
- 		.suite = {
- 			.kpp = __VECS(ecdh_p384_tv_template)
- 		}
 diff --git a/drivers/acpi/apei/hest.c b/drivers/acpi/apei/hest.c
 index 20d757687e3d..90a13f20f052 100644
 --- a/drivers/acpi/apei/hest.c
@@ -950,7 +309,7 @@ index 1687483ff319..390b67f19181 100644
  	return ctx.rc;
  }
 diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index 22ae7829a915..1329032ed09b 100644
+index 7ecc401fb97f..52917b177122 100644
 --- a/drivers/acpi/scan.c
 +++ b/drivers/acpi/scan.c
 @@ -1802,6 +1802,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
@@ -998,6 +357,19 @@ index fdfa7b266218..f5f8ba457c93 100644
  	/* wait for engine to stop. This could be as long as 500 msec */
  	tmp = ata_wait_register(ap, port_mmio + PORT_CMD,
  				PORT_CMD_LIST_ON, PORT_CMD_LIST_ON, 1, 500);
+diff --git a/drivers/bluetooth/btusb.c b/drivers/bluetooth/btusb.c
+index e9534fbc92e3..9f79342585ef 100644
+--- a/drivers/bluetooth/btusb.c
++++ b/drivers/bluetooth/btusb.c
+@@ -295,6 +295,8 @@ static const struct usb_device_id quirks_table[] = {
+ 						     BTUSB_WIDEBAND_SPEECH },
+ 	{ USB_DEVICE(0x13d3, 0x3501), .driver_info = BTUSB_QCA_ROME |
+ 						     BTUSB_WIDEBAND_SPEECH },
++	{ USB_DEVICE(0x0489, 0xe0fc), .driver_info = BTUSB_QCA_WCN6855 |
++						     BTUSB_WIDEBAND_SPEECH },
+ 
+ 	/* QCA WCN6855 chipset */
+ 	{ USB_DEVICE(0x0cf3, 0xe600), .driver_info = BTUSB_QCA_WCN6855 |
 diff --git a/drivers/char/ipmi/ipmi_dmi.c b/drivers/char/ipmi/ipmi_dmi.c
 index bbf7029e224b..cf7faa970dd6 100644
 --- a/drivers/char/ipmi/ipmi_dmi.c
@@ -1072,7 +444,7 @@ index a2d0009560d0..4f3486e6a84b 100644
  obj-$(CONFIG_EFI_RCI2_TABLE)		+= rci2-table.o
  obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
 diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index fdf07dd6f459..cfd2b58a3494 100644
+index 70490bf2697b..2973cce74abd 100644
 --- a/drivers/firmware/efi/efi.c
 +++ b/drivers/firmware/efi/efi.c
 @@ -33,6 +33,7 @@
@@ -1363,7 +735,7 @@ index d4af17fdba46..154f0403cbf4 100644
  	data->xport.ops = &hid_rmi_ops;
  
 diff --git a/drivers/hwtracing/coresight/coresight-etm4x-core.c b/drivers/hwtracing/coresight/coresight-etm4x-core.c
-index bf01f01964cf..703896981e8a 100644
+index 66d44a404ad0..d4383c2d7d1a 100644
 --- a/drivers/hwtracing/coresight/coresight-etm4x-core.c
 +++ b/drivers/hwtracing/coresight/coresight-etm4x-core.c
 @@ -10,6 +10,7 @@
@@ -1374,7 +746,7 @@ index bf01f01964cf..703896981e8a 100644
  #include <linux/io.h>
  #include <linux/err.h>
  #include <linux/fs.h>
-@@ -2344,6 +2345,16 @@ static const struct amba_id etm4_ids[] = {
+@@ -2345,6 +2346,16 @@ static const struct amba_id etm4_ids[] = {
  	{},
  };
  
@@ -1391,7 +763,7 @@ index bf01f01964cf..703896981e8a 100644
  MODULE_DEVICE_TABLE(amba, etm4_ids);
  
  static struct amba_driver etm4x_amba_driver = {
-@@ -2412,6 +2423,11 @@ static int __init etm4x_init(void)
+@@ -2413,6 +2424,11 @@ static int __init etm4x_init(void)
  {
  	int ret;
  
@@ -1403,7 +775,7 @@ index bf01f01964cf..703896981e8a 100644
  	ret = etm4_pm_setup();
  
  	/* etm4_pm_setup() does its own cleanup - exit on error */
-@@ -2438,6 +2454,9 @@ static int __init etm4x_init(void)
+@@ -2439,6 +2455,9 @@ static int __init etm4x_init(void)
  
  static void __exit etm4x_exit(void)
  {
@@ -1606,7 +978,7 @@ index 2168b6cd7167..5d7cda175a0c 100644
  	if (data->f01_container->dev.driver) {
  		/* Driver already bound, so enable ATTN now. */
 diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
-index ed6c5cb60c5a..70cb770b78bb 100644
+index 83c8e617a2c5..27f9b4517095 100644
 --- a/drivers/iommu/iommu.c
 +++ b/drivers/iommu/iommu.c
 @@ -8,6 +8,7 @@
@@ -1645,58 +1017,58 @@ index ed6c5cb60c5a..70cb770b78bb 100644
  /**
   * iommu_setup_default_domain - Set the default_domain for the group
   * @group: Group to change
-diff --git a/drivers/media/platform/qcom/camss/camss-video.c b/drivers/media/platform/qcom/camss/camss-video.c
-index cd72feca618c..3b8fc31d957c 100644
---- a/drivers/media/platform/qcom/camss/camss-video.c
-+++ b/drivers/media/platform/qcom/camss/camss-video.c
-@@ -297,12 +297,6 @@ static void video_stop_streaming(struct vb2_queue *q)
+diff --git a/drivers/pci/pci-driver.c b/drivers/pci/pci-driver.c
+index 35270172c833..5b44b5354513 100644
+--- a/drivers/pci/pci-driver.c
++++ b/drivers/pci/pci-driver.c
+@@ -19,6 +19,7 @@
+ #include <linux/kexec.h>
+ #include <linux/of_device.h>
+ #include <linux/acpi.h>
++#include <linux/kernel.h>
+ #include <linux/dma-map-ops.h>
+ #include <linux/iommu.h>
+ #include "pci.h"
+@@ -296,6 +297,34 @@ static struct attribute *pci_drv_attrs[] = {
+ };
+ ATTRIBUTE_GROUPS(pci_drv);
  
- 		ret = v4l2_subdev_call(subdev, video, s_stream, 0);
- 
--		if (entity->use_count > 1) {
--			/* Don't stop if other instances of the pipeline are still running */
--			dev_dbg(video->camss->dev, "Video pipeline still used, don't stop streaming.\n");
--			return;
--		}
--
- 		if (ret) {
- 			dev_err(video->camss->dev, "Video pipeline stop failed: %d\n", ret);
- 			return;
-diff --git a/drivers/media/platform/qcom/camss/camss.c b/drivers/media/platform/qcom/camss/camss.c
-index 51b1d3550421..d64985ca6e88 100644
---- a/drivers/media/platform/qcom/camss/camss.c
-+++ b/drivers/media/platform/qcom/camss/camss.c
-@@ -2283,6 +2283,8 @@ static int camss_probe(struct platform_device *pdev)
- 
- 	v4l2_async_nf_init(&camss->notifier, &camss->v4l2_dev);
- 
-+	pm_runtime_enable(dev);
++/**
++ * pci_hw_vendor_status - Tell if a PCI device is supported by the HW vendor
++ * @ids: array of PCI device id structures to search in
++ * @dev: the PCI device structure to match against
++ *
++ * Used by a driver to check whether this device is in its list of unsupported
++ * devices.  Returns the matching pci_device_id structure or %NULL if there is
++ * no match.
++ *
++ * Reserved for Internal Red Hat use only.
++ */
++const struct pci_device_id *pci_hw_vendor_status(
++						const struct pci_device_id *ids,
++						struct pci_dev *dev)
++{
++	char devinfo[64];
++	const struct pci_device_id *ret = pci_match_id(ids, dev);
 +
- 	num_subdevs = camss_of_parse_ports(camss);
- 	if (num_subdevs < 0) {
- 		ret = num_subdevs;
-@@ -2323,8 +2325,6 @@ static int camss_probe(struct platform_device *pdev)
- 		}
- 	}
- 
--	pm_runtime_enable(dev);
--
- 	return 0;
- 
- err_register_subdevs:
-@@ -2332,6 +2332,7 @@ static int camss_probe(struct platform_device *pdev)
- err_v4l2_device_unregister:
- 	v4l2_device_unregister(&camss->v4l2_dev);
- 	v4l2_async_nf_cleanup(&camss->notifier);
-+	pm_runtime_disable(dev);
- err_genpd_cleanup:
- 	camss_genpd_cleanup(camss);
- 
++	if (ret) {
++		snprintf(devinfo, sizeof(devinfo), "%s %s",
++			 dev_driver_string(&dev->dev), dev_name(&dev->dev));
++		mark_hardware_deprecated(devinfo);
++	}
++
++	return ret;
++}
++EXPORT_SYMBOL(pci_hw_vendor_status);
++
+ struct drv_dev_and_id {
+ 	struct pci_driver *drv;
+ 	struct pci_dev *dev;
 diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
-index 5d57ea27dbc4..304afc09fc11 100644
+index dccb60c1d9cc..c7ec62f076c3 100644
 --- a/drivers/pci/quirks.c
 +++ b/drivers/pci/quirks.c
-@@ -4446,6 +4446,30 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_BROADCOM, 0x9000,
+@@ -4452,6 +4452,30 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_BROADCOM, 0x9000,
  DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_BROADCOM, 0x9084,
  				quirk_bridge_cavm_thrx2_pcie_root);
  
@@ -1728,10 +1100,10 @@ index 5d57ea27dbc4..304afc09fc11 100644
   * Intersil/Techwell TW686[4589]-based video capture cards have an empty (zero)
   * class code.  Fix it.
 diff --git a/drivers/scsi/sd.c b/drivers/scsi/sd.c
-index 53896df7ec2b..98e08f10f60e 100644
+index ca4bc0ac76ad..8855e71076f4 100644
 --- a/drivers/scsi/sd.c
 +++ b/drivers/scsi/sd.c
-@@ -122,6 +122,14 @@ static const char *sd_cache_types[] = {
+@@ -121,6 +121,14 @@ static const char *sd_cache_types[] = {
  	"write back, no read (daft)"
  };
  
@@ -1746,7 +1118,7 @@ index 53896df7ec2b..98e08f10f60e 100644
  static void sd_set_flush_flag(struct scsi_disk *sdkp,
  		struct queue_limits *lim)
  {
-@@ -4349,6 +4357,8 @@ static int __init init_sd(void)
+@@ -4377,6 +4385,8 @@ static int __init init_sd(void)
  		goto err_out_class;
  	}
  
@@ -1773,21 +1145,8 @@ index 4b93c0bd1d4b..b98906237306 100644
  	/* Lock the device, then check to see if we were
  	 * disconnected while waiting for the lock to succeed. */
  	usb_lock_device(hdev);
-diff --git a/include/linux/crypto.h b/include/linux/crypto.h
-index b164da5e129e..72bfb79b491d 100644
---- a/include/linux/crypto.h
-+++ b/include/linux/crypto.h
-@@ -134,6 +134,8 @@
- #define CRYPTO_TFM_REQ_MAY_SLEEP	0x00000200
- #define CRYPTO_TFM_REQ_MAY_BACKLOG	0x00000400
- 
-+#define CRYPTO_TFM_FIPS_COMPLIANCE	0x80000000
-+
- /*
-  * Miscellaneous stuff.
-  */
 diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 6bf3c4fe8511..67e5400f7644 100644
+index e28d88066033..860227e20797 100644
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
 @@ -45,6 +45,8 @@ struct screen_info;
@@ -1799,7 +1158,7 @@ index 6bf3c4fe8511..67e5400f7644 100644
  typedef unsigned long efi_status_t;
  typedef u8 efi_bool_t;
  typedef u16 efi_char16_t;		/* UNICODE character */
-@@ -877,6 +879,14 @@ static inline int efi_range_is_wc(unsigned long start, unsigned long len)
+@@ -875,6 +877,14 @@ static inline int efi_range_is_wc(unsigned long start, unsigned long len)
  #define EFI_MEM_ATTR		10	/* Did firmware publish an EFI_MEMORY_ATTRIBUTES table? */
  #define EFI_MEM_NO_SOFT_RESERVE	11	/* Is the kernel configured to ignore soft reservations? */
  #define EFI_PRESERVE_BS_REGIONS	12	/* Are EFI boot-services memory segments available? */
@@ -1814,7 +1173,7 @@ index 6bf3c4fe8511..67e5400f7644 100644
  
  #ifdef CONFIG_EFI
  /*
-@@ -888,6 +898,8 @@ static inline bool efi_enabled(int feature)
+@@ -886,6 +896,8 @@ static inline bool efi_enabled(int feature)
  }
  extern void efi_reboot(enum reboot_mode reboot_mode, const char *__unused);
  
@@ -1823,7 +1182,7 @@ index 6bf3c4fe8511..67e5400f7644 100644
  bool __pure __efi_soft_reserve_enabled(void);
  
  static inline bool __pure efi_soft_reserve_enabled(void)
-@@ -909,6 +921,8 @@ static inline bool efi_enabled(int feature)
+@@ -907,6 +919,8 @@ static inline bool efi_enabled(int feature)
  static inline void
  efi_reboot(enum reboot_mode reboot_mode, const char *__unused) {}
  
@@ -1832,7 +1191,7 @@ index 6bf3c4fe8511..67e5400f7644 100644
  static inline bool efi_soft_reserve_enabled(void)
  {
  	return false;
-@@ -923,6 +937,7 @@ static inline void efi_find_mirror(void) {}
+@@ -921,6 +935,7 @@ static inline void efi_find_mirror(void) {}
  #endif
  
  extern int efi_status_to_err(efi_status_t status);
@@ -1840,7 +1199,7 @@ index 6bf3c4fe8511..67e5400f7644 100644
  
  /*
   * Variable Attributes
-@@ -1138,13 +1153,6 @@ static inline bool efi_runtime_disabled(void) { return true; }
+@@ -1136,13 +1151,6 @@ static inline bool efi_runtime_disabled(void) { return true; }
  extern void efi_call_virt_check_flags(unsigned long flags, const void *caller);
  extern unsigned long efi_call_virt_save_flags(void);
  
@@ -1855,10 +1214,10 @@ index 6bf3c4fe8511..67e5400f7644 100644
  enum efi_secureboot_mode efi_get_secureboot_mode(efi_get_variable_t *get_var)
  {
 diff --git a/include/linux/lsm_hook_defs.h b/include/linux/lsm_hook_defs.h
-index 19c333fafe11..db33ee7f55d5 100644
+index 9eca013aa5e1..6f25ce6867a2 100644
 --- a/include/linux/lsm_hook_defs.h
 +++ b/include/linux/lsm_hook_defs.h
-@@ -439,6 +439,8 @@ LSM_HOOK(int, 0, bpf_token_capable, const struct bpf_token *token, int cap)
+@@ -438,6 +438,8 @@ LSM_HOOK(int, 0, bpf_token_capable, const struct bpf_token *token, int cap)
  #endif /* CONFIG_BPF_SYSCALL */
  
  LSM_HOOK(int, 0, locked_down, enum lockdown_reason what)
@@ -1867,6 +1226,21 @@ index 19c333fafe11..db33ee7f55d5 100644
  
  #ifdef CONFIG_PERF_EVENTS
  LSM_HOOK(int, 0, perf_event_open, struct perf_event_attr *attr, int type)
+diff --git a/include/linux/pci.h b/include/linux/pci.h
+index 573b4c4c2be6..0fdeb0f8b48c 100644
+--- a/include/linux/pci.h
++++ b/include/linux/pci.h
+@@ -1618,6 +1618,10 @@ int pci_add_dynid(struct pci_driver *drv,
+ 		  unsigned long driver_data);
+ const struct pci_device_id *pci_match_id(const struct pci_device_id *ids,
+ 					 struct pci_dev *dev);
++/* Reserved for Internal Red Hat use only */
++const struct pci_device_id *pci_hw_vendor_status(
++						const struct pci_device_id *ids,
++						struct pci_dev *dev);
+ int pci_scan_bridge(struct pci_bus *bus, struct pci_dev *dev, int max,
+ 		    int pass);
+ 
 diff --git a/include/linux/rmi.h b/include/linux/rmi.h
 index ab7eea01ab42..fff7c5f737fc 100644
 --- a/include/linux/rmi.h
@@ -1880,18 +1254,18 @@ index ab7eea01ab42..fff7c5f737fc 100644
  
  int rmi_register_transport_device(struct rmi_transport_dev *xport);
 diff --git a/include/linux/security.h b/include/linux/security.h
-index 1390f1efb4f0..b9a8ccb1dbdc 100644
+index 2ec8f3014757..7273b2b8b23b 100644
 --- a/include/linux/security.h
 +++ b/include/linux/security.h
-@@ -507,6 +507,7 @@ int security_inode_notifysecctx(struct inode *inode, void *ctx, u32 ctxlen);
+@@ -522,6 +522,7 @@ int security_inode_notifysecctx(struct inode *inode, void *ctx, u32 ctxlen);
  int security_inode_setsecctx(struct dentry *dentry, void *ctx, u32 ctxlen);
  int security_inode_getsecctx(struct inode *inode, void **ctx, u32 *ctxlen);
  int security_locked_down(enum lockdown_reason what);
 +int security_lock_kernel_down(const char *where, enum lockdown_reason level);
  int lsm_fill_user_ctx(struct lsm_ctx __user *uctx, u32 *uctx_len,
  		      void *val, size_t val_len, u64 id, u64 flags);
- #else /* CONFIG_SECURITY */
-@@ -1477,6 +1478,10 @@ static inline int security_locked_down(enum lockdown_reason what)
+ int security_bdev_alloc(struct block_device *bdev);
+@@ -1504,6 +1505,10 @@ static inline int security_locked_down(enum lockdown_reason what)
  {
  	return 0;
  }
@@ -1925,60 +1299,6 @@ index a2ff4242e623..f0d2be1ee4f1 100644
  }
  
  int module_sig_check(struct load_info *info, int flags)
-diff --git a/scripts/sign-file.c b/scripts/sign-file.c
-index 3edb156ae52c..0114ae1dbf7f 100644
---- a/scripts/sign-file.c
-+++ b/scripts/sign-file.c
-@@ -27,7 +27,6 @@
- #include <openssl/evp.h>
- #include <openssl/pem.h>
- #include <openssl/err.h>
--#include <openssl/engine.h>
- 
- /*
-  * OpenSSL 3.0 deprecates the OpenSSL's ENGINE API.
-@@ -99,16 +98,6 @@ static void display_openssl_errors(int l)
- 	}
- }
- 
--static void drain_openssl_errors(void)
--{
--	const char *file;
--	int line;
--
--	if (ERR_peek_error() == 0)
--		return;
--	while (ERR_get_error_line(&file, &line)) {}
--}
--
- #define ERR(cond, fmt, ...)				\
- 	do {						\
- 		bool __cond = (cond);			\
-@@ -144,22 +133,8 @@ static EVP_PKEY *read_private_key(const char *private_key_name)
- 	EVP_PKEY *private_key;
- 
- 	if (!strncmp(private_key_name, "pkcs11:", 7)) {
--		ENGINE *e;
--
--		ENGINE_load_builtin_engines();
--		drain_openssl_errors();
--		e = ENGINE_by_id("pkcs11");
--		ERR(!e, "Load PKCS#11 ENGINE");
--		if (ENGINE_init(e))
--			drain_openssl_errors();
--		else
--			ERR(1, "ENGINE_init");
--		if (key_pass)
--			ERR(!ENGINE_ctrl_cmd_string(e, "PIN", key_pass, 0),
--			    "Set PKCS#11 PIN");
--		private_key = ENGINE_load_private_key(e, private_key_name,
--						      NULL, NULL);
--		ERR(!private_key, "%s", private_key_name);
-+		fprintf(stderr, "Error: pkcs11 not implemented\n");
-+		exit(1);
- 	} else {
- 		BIO *b;
- 
 diff --git a/scripts/tags.sh b/scripts/tags.sh
 index 191e0461d6d5..e6f418b3e948 100755
 --- a/scripts/tags.sh
@@ -2041,7 +1361,7 @@ index e84ddf484010..d0501353a4b9 100644
  	prompt "Kernel default lockdown mode"
  	default LOCK_DOWN_KERNEL_FORCE_NONE
 diff --git a/security/lockdown/lockdown.c b/security/lockdown/lockdown.c
-index cd84d8ea1dfb..e4c70a0312bc 100644
+index f2bdbd55aa2b..ddf496f7fca5 100644
 --- a/security/lockdown/lockdown.c
 +++ b/security/lockdown/lockdown.c
 @@ -74,6 +74,7 @@ static int lockdown_is_locked_down(enum lockdown_reason what)
@@ -2051,12 +1371,12 @@ index cd84d8ea1dfb..e4c70a0312bc 100644
 +	LSM_HOOK_INIT(lock_kernel_down, lock_kernel_down),
  };
  
- const struct lsm_id lockdown_lsmid = {
+ static const struct lsm_id lockdown_lsmid = {
 diff --git a/security/security.c b/security/security.c
-index 43166e341526..b8cf110aeb58 100644
+index c5981e558bc2..431202cd09c1 100644
 --- a/security/security.c
 +++ b/security/security.c
-@@ -5630,6 +5630,18 @@ int security_locked_down(enum lockdown_reason what)
+@@ -5769,6 +5769,18 @@ int security_locked_down(enum lockdown_reason what)
  }
  EXPORT_SYMBOL(security_locked_down);
  
@@ -2072,6 +1392,84 @@ index 43166e341526..b8cf110aeb58 100644
 +}
 +EXPORT_SYMBOL(security_lock_kernel_down);
 +
- #ifdef CONFIG_PERF_EVENTS
  /**
-  * security_perf_event_open() - Check if a perf event open is allowed
+  * security_bdev_alloc() - Allocate a block device LSM blob
+  * @bdev: block device
+diff --git a/tools/tracing/rtla/src/utils.c b/tools/tracing/rtla/src/utils.c
+index 9ac71a66840c..6fae234aaf36 100644
+--- a/tools/tracing/rtla/src/utils.c
++++ b/tools/tracing/rtla/src/utils.c
+@@ -211,29 +211,25 @@ long parse_ns_duration(char *val)
+ /*
+  * This is a set of helper functions to use SCHED_DEADLINE.
+  */
+-#ifdef __x86_64__
+-# define __NR_sched_setattr	314
+-# define __NR_sched_getattr	315
+-#elif __i386__
+-# define __NR_sched_setattr	351
+-# define __NR_sched_getattr	352
+-#elif __arm__
+-# define __NR_sched_setattr	380
+-# define __NR_sched_getattr	381
+-#elif __aarch64__ || __riscv
+-# define __NR_sched_setattr	274
+-# define __NR_sched_getattr	275
+-#elif __powerpc__
+-# define __NR_sched_setattr	355
+-# define __NR_sched_getattr	356
+-#elif __s390x__
+-# define __NR_sched_setattr	345
+-# define __NR_sched_getattr	346
++#ifndef __NR_sched_setattr
++# ifdef __x86_64__
++#  define __NR_sched_setattr	314
++# elif __i386__
++#  define __NR_sched_setattr	351
++# elif __arm__
++#  define __NR_sched_setattr	380
++# elif __aarch64__ || __riscv
++#  define __NR_sched_setattr	274
++# elif __powerpc__
++#  define __NR_sched_setattr	355
++# elif __s390x__
++#  define __NR_sched_setattr	345
++# endif
+ #endif
+ 
+ #define SCHED_DEADLINE		6
+ 
+-static inline int sched_setattr(pid_t pid, const struct sched_attr *attr,
++static inline int syscall_sched_setattr(pid_t pid, const struct sched_attr *attr,
+ 				unsigned int flags) {
+ 	return syscall(__NR_sched_setattr, pid, attr, flags);
+ }
+@@ -243,7 +239,7 @@ int __set_sched_attr(int pid, struct sched_attr *attr)
+ 	int flags = 0;
+ 	int retval;
+ 
+-	retval = sched_setattr(pid, attr, flags);
++	retval = syscall_sched_setattr(pid, attr, flags);
+ 	if (retval < 0) {
+ 		err_msg("Failed to set sched attributes to the pid %d: %s\n",
+ 			pid, strerror(errno));
+diff --git a/tools/tracing/rtla/src/utils.h b/tools/tracing/rtla/src/utils.h
+index d44513e6c66a..99c9cf81bcd0 100644
+--- a/tools/tracing/rtla/src/utils.h
++++ b/tools/tracing/rtla/src/utils.h
+@@ -46,6 +46,7 @@ update_sum(unsigned long long *a, unsigned long long *b)
+ 	*a += *b;
+ }
+ 
++#ifndef SCHED_ATTR_SIZE_VER0
+ struct sched_attr {
+ 	uint32_t size;
+ 	uint32_t sched_policy;
+@@ -56,6 +57,7 @@ struct sched_attr {
+ 	uint64_t sched_deadline;
+ 	uint64_t sched_period;
+ };
++#endif /* SCHED_ATTR_SIZE_VER0 */
+ 
+ int parse_prio(char *arg, struct sched_attr *sched_param);
+ int parse_cpu_set(char *cpu_list, cpu_set_t *set);
