@@ -20,13 +20,11 @@
  drivers/hwtracing/coresight/coresight-etm4x-core.c |  19 ++++
  drivers/input/rmi4/rmi_driver.c                    | 124 ++++++++++++---------
  drivers/iommu/iommu.c                              |  22 ++++
- drivers/pci/pci-driver.c                           |  29 +++++
  drivers/pci/quirks.c                               |  24 ++++
  drivers/scsi/sd.c                                  |  10 ++
  drivers/usb/core/hub.c                             |   7 ++
  include/linux/efi.h                                |  22 ++--
  include/linux/lsm_hook_defs.h                      |   2 +
- include/linux/pci.h                                |   4 +
  include/linux/rmi.h                                |   1 +
  include/linux/security.h                           |   5 +
  kernel/module/signing.c                            |   9 +-
@@ -37,7 +35,7 @@
  security/security.c                                |  12 ++
  tools/tracing/rtla/src/utils.c                     |  36 +++---
  tools/tracing/rtla/src/utils.h                     |   2 +
- 39 files changed, 554 insertions(+), 196 deletions(-)
+ 37 files changed, 521 insertions(+), 196 deletions(-)
 
 diff --git a/Makefile b/Makefile
 index 70070e64d267..bd0d495cf065 100644
@@ -1017,53 +1015,6 @@ index 83c8e617a2c5..27f9b4517095 100644
  /**
   * iommu_setup_default_domain - Set the default_domain for the group
   * @group: Group to change
-diff --git a/drivers/pci/pci-driver.c b/drivers/pci/pci-driver.c
-index 35270172c833..5b44b5354513 100644
---- a/drivers/pci/pci-driver.c
-+++ b/drivers/pci/pci-driver.c
-@@ -19,6 +19,7 @@
- #include <linux/kexec.h>
- #include <linux/of_device.h>
- #include <linux/acpi.h>
-+#include <linux/kernel.h>
- #include <linux/dma-map-ops.h>
- #include <linux/iommu.h>
- #include "pci.h"
-@@ -296,6 +297,34 @@ static struct attribute *pci_drv_attrs[] = {
- };
- ATTRIBUTE_GROUPS(pci_drv);
- 
-+/**
-+ * pci_hw_vendor_status - Tell if a PCI device is supported by the HW vendor
-+ * @ids: array of PCI device id structures to search in
-+ * @dev: the PCI device structure to match against
-+ *
-+ * Used by a driver to check whether this device is in its list of unsupported
-+ * devices.  Returns the matching pci_device_id structure or %NULL if there is
-+ * no match.
-+ *
-+ * Reserved for Internal Red Hat use only.
-+ */
-+const struct pci_device_id *pci_hw_vendor_status(
-+						const struct pci_device_id *ids,
-+						struct pci_dev *dev)
-+{
-+	char devinfo[64];
-+	const struct pci_device_id *ret = pci_match_id(ids, dev);
-+
-+	if (ret) {
-+		snprintf(devinfo, sizeof(devinfo), "%s %s",
-+			 dev_driver_string(&dev->dev), dev_name(&dev->dev));
-+		mark_hardware_deprecated(devinfo);
-+	}
-+
-+	return ret;
-+}
-+EXPORT_SYMBOL(pci_hw_vendor_status);
-+
- struct drv_dev_and_id {
- 	struct pci_driver *drv;
- 	struct pci_dev *dev;
 diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
 index dccb60c1d9cc..c7ec62f076c3 100644
 --- a/drivers/pci/quirks.c
@@ -1226,21 +1177,6 @@ index 9eca013aa5e1..6f25ce6867a2 100644
  
  #ifdef CONFIG_PERF_EVENTS
  LSM_HOOK(int, 0, perf_event_open, struct perf_event_attr *attr, int type)
-diff --git a/include/linux/pci.h b/include/linux/pci.h
-index 573b4c4c2be6..0fdeb0f8b48c 100644
---- a/include/linux/pci.h
-+++ b/include/linux/pci.h
-@@ -1618,6 +1618,10 @@ int pci_add_dynid(struct pci_driver *drv,
- 		  unsigned long driver_data);
- const struct pci_device_id *pci_match_id(const struct pci_device_id *ids,
- 					 struct pci_dev *dev);
-+/* Reserved for Internal Red Hat use only */
-+const struct pci_device_id *pci_hw_vendor_status(
-+						const struct pci_device_id *ids,
-+						struct pci_dev *dev);
- int pci_scan_bridge(struct pci_bus *bus, struct pci_dev *dev, int max,
- 		    int pass);
- 
 diff --git a/include/linux/rmi.h b/include/linux/rmi.h
 index ab7eea01ab42..fff7c5f737fc 100644
 --- a/include/linux/rmi.h

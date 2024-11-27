@@ -1,3 +1,6 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/c3b163af82c1924ba5d4088ee3ba95ba001fd880
+ c3b163af82c1924ba5d4088ee3ba95ba001fd880 Revert "add pci_hw_vendor_status()"
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/795e65957d256aac0d35ad0a991a05cc5cd29bbf
  795e65957d256aac0d35ad0a991a05cc5cd29bbf Bluetooth: btusb: add Foxconn 0xe0fc for Qualcomm WCN785x
 
