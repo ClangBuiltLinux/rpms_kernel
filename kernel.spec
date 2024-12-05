@@ -160,18 +160,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 6.11.10
-%define specversion 6.11.10
+%define specrpmversion 6.11.11
+%define specversion 6.11.11
 %define patchversion 6.11
 %define pkgrelease 200
 %define kversion 6
-%define tarfile_release 6.11.10
+%define tarfile_release 6.11.11
 # This is needed to do merge window version magic
 %define patchlevel 11
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 200%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 6.11.10
+%define kabiversion 6.11.11
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4128,6 +4128,10 @@ fi\
 #
 #
 %changelog
+* Thu Dec 05 2024 Augusto Caringi <acaringi@redhat.com> [6.11.11-0]
+- Bluetooth: btusb: add Foxconn 0xe0fc for Qualcomm WCN785x (Mark Pearson) [2329005]
+- Linux v6.11.11
+
 * Fri Nov 22 2024 Augusto Caringi <acaringi@redhat.com> [6.11.10-0]
 - Remove F39 from release_targets as we near EOL (Justin M. Forbes)
 - Linux v6.11.10
