@@ -1,3 +1,57 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/4f54f57e82bbc296b12d5990910b8a0d809f0f46
+ 4f54f57e82bbc296b12d5990910b8a0d809f0f46 Revert "udp: avoid calling sock_def_readable() if possible"
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/fd121c05a031cd461137c24cad70d8fb6be3ca21
+ fd121c05a031cd461137c24cad70d8fb6be3ca21 arm64: dts: rockchip: Enable HDMI on Hardkernel ODROID-M2
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/dadcc6e9fb2a872e7c0a6cafaf40aa46330061d7
+ dadcc6e9fb2a872e7c0a6cafaf40aa46330061d7 arm64: dts: rockchip: Enable HDMI0 on FriendlyElec CM3588 NAS
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/bcf260784fc66f27368ae198b23b2c33c99a0118
+ bcf260784fc66f27368ae198b23b2c33c99a0118 arm64: dts: rockchip: Enable HDMI0 on rock-5a
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/2f9c5077758ff51b2faedf3894b09890b7e432c3
+ 2f9c5077758ff51b2faedf3894b09890b7e432c3 arm64: dts: rockchip: Enable HDMI0 on rk3588-nanopc-t6
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/1e6c2b4b51e71a2083f491f22f971118c18392fb
+ 1e6c2b4b51e71a2083f491f22f971118c18392fb arm64: dts: rockchip: Enable HDMI0 on Orange Pi 5
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/c3d3ad6da109781119c487d9010ad84496c35961
+ c3d3ad6da109781119c487d9010ad84496c35961 arm64: dts: rockchip: add and enable gpu node for Radxa ROCK 5A
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/098940ad82fa5674834a5556b6ae40ccd42ee04b
+ 098940ad82fa5674834a5556b6ae40ccd42ee04b arm64: dts: rockchip: Enable HDMI0 on orangepi-5-plus
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/70143b76b38075f520d3b63da37d3e9c52c9d32e
+ 70143b76b38075f520d3b63da37d3e9c52c9d32e arm64: dts: rockchip: Enable HDMI0 on rk3588-evb1
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/98a08934c0652e433e280cbbae60fa27abcab3de
+ 98a08934c0652e433e280cbbae60fa27abcab3de arm64: dts: rockchip: Enable HDMI0 on rock-5b
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/d10846bd4bc4a2765dc650007e07dbc3f6faca15
+ d10846bd4bc4a2765dc650007e07dbc3f6faca15 arm64: dts: rockchip: Add HDMI0 node to rk3588
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/1b31ae029670eeb187c81fd84ceab5743a5e8a84
+ 1b31ae029670eeb187c81fd84ceab5743a5e8a84 drm/rockchip: Add basic RK3588 HDMI output support
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/02c8ddc09f439a33e2b69a52ef9410ad4ce7a150
+ 02c8ddc09f439a33e2b69a52ef9410ad4ce7a150 drm/rockchip: Load crtc devices in preferred order
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/6564c66341a1bbf8bb7fc68d0704c646555ad783
+ 6564c66341a1bbf8bb7fc68d0704c646555ad783 drm/rockchip: dw_hdmi: Enable 4K@60Hz mode on RK3399 and RK356x
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/5c1fd55dfeb28dcb5b2b09cbe6972ae58702a92e
+ 5c1fd55dfeb28dcb5b2b09cbe6972ae58702a92e drm/rockchip: dw_hdmi: Use auto-generated tables
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/fb10492b6330613c4cd757484155eecee87264d1
+ fb10492b6330613c4cd757484155eecee87264d1 drm/rockchip: dw_hdmi: Set cur_ctr to 0 always
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/4bf9e4d281c9cbee3d58c1addeea4b2780ea223e
+ 4bf9e4d281c9cbee3d58c1addeea4b2780ea223e drm/rockchip: dw_hdmi: Add phy_config for 594Mhz pixel clock
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/4c086ecb750ff65ff0ee207f6385dc0cf3dbb96d
+ 4c086ecb750ff65ff0ee207f6385dc0cf3dbb96d drm/bridge: synopsys: Add DW HDMI QP TX Controller support library
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/c3b163af82c1924ba5d4088ee3ba95ba001fd880
  c3b163af82c1924ba5d4088ee3ba95ba001fd880 Revert "add pci_hw_vendor_status()"
 

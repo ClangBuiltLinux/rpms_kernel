@@ -159,18 +159,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 6.12.1
-%define specversion 6.12.1
+%define specrpmversion 6.12.2
+%define specversion 6.12.2
 %define patchversion 6.12
 %define pkgrelease 200
 %define kversion 6
-%define tarfile_release 6.12.1
+%define tarfile_release 6.12.2
 # This is needed to do merge window version magic
 %define patchlevel 12
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 200%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 6.12.1
+%define kabiversion 6.12.2
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -230,8 +230,6 @@ Summary: The Linux kernel
 %define with_libperf   %{?_without_libperf:   0} %{?!_without_libperf:   1}
 # tools
 %define with_tools     %{?_without_tools:     0} %{?!_without_tools:     1}
-# bpf tool
-%define with_bpftool   %{?_without_bpftool:   0} %{?!_without_bpftool:   1}
 # kernel-debuginfo
 %define with_debuginfo %{?_without_debuginfo: 0} %{?!_without_debuginfo: 1}
 # kernel-abi-stablelists
@@ -393,7 +391,6 @@ Summary: The Linux kernel
 %define with_perf 0
 %define with_libperf 0
 %define with_tools 0
-%define with_bpftool 0
 %define with_kernel_abi_stablelists 0
 %define with_selftests 0
 %define with_ipaclones 0
@@ -406,7 +403,6 @@ Summary: The Linux kernel
 %define with_perf 0
 %define with_libperf 0
 %define with_tools 0
-%define with_bpftool 0
 %define with_kernel_abi_stablelists 0
 %define with_selftests 0
 %define with_ipaclones 0
@@ -423,7 +419,6 @@ Summary: The Linux kernel
 %define with_perf 0
 %define with_libperf 0
 %define with_tools 0
-%define with_bpftool 0
 %define with_kernel_abi_stablelists 0
 %define with_selftests 0
 %define with_ipaclones 0
@@ -442,7 +437,6 @@ Summary: The Linux kernel
 %define with_debug 0
 %define with_debuginfo 0
 %define with_vdso_install 0
-%define with_bpftool 1
 %define with_selftests 1
 %endif
 
@@ -491,16 +485,6 @@ Summary: The Linux kernel
 %define use_vdso 1
 %endif
 
-# selftests require bpftool to be built.  If bpftools is disabled, then disable selftests
-%if %{with_bpftool} == 0
-%define with_selftests 0
-%endif
-
-# bpftool needs debuginfo to work
-%if %{with_debuginfo} == 0
-%define with_bpftool 0
-%endif
-
 %ifnarch noarch
 %define with_kernel_abi_stablelists 0
 %endif
@@ -532,7 +516,6 @@ Summary: The Linux kernel
 %define with_tools 0
 %define with_perf 0
 %define with_libperf 0
-%define with_bpftool 0
 %define with_selftests 0
 %define with_debug 0
 %endif
@@ -634,7 +617,6 @@ Summary: The Linux kernel
 %define with_perf 0
 %define with_libperf 0
 %define with_tools 0
-%define with_bpftool 0
 %define with_selftests 0
 %define _enable_debug_packages 0
 %endif
@@ -782,12 +764,8 @@ BuildRequires: libnl3-devel
 %if %{with_tools} || %{signmodules} || %{signkernel}
 BuildRequires: openssl-devel
 %endif
-%if %{with_bpftool}
-BuildRequires: python3-docutils
-BuildRequires: zlib-devel binutils-devel llvm-devel
-%endif
 %if %{with_selftests}
-BuildRequires: clang llvm-devel fuse-devel
+BuildRequires: clang llvm-devel fuse-devel zlib-devel binutils-devel
 %ifarch x86_64 riscv64
 BuildRequires: lld
 %endif
@@ -1332,42 +1310,6 @@ The rv tool is the interface for a collection of monitors that aim
 analysing the logical and timing behavior of Linux.
 
 # with_tools
-%endif
-
-%if %{with_bpftool}
-
-%if 0%{?fedora}
-# bpftoolverion doesn't bump with stable updates so let's stick with
-# upstream kernel version for the package name. We still get correct
-# output with bpftool -V.
-%define bpftoolversion  %specrpmversion
-%else
-%define bpftoolversion 7.5.0
-%endif
-
-%package -n bpftool
-Summary: Inspection and simple manipulation of eBPF programs and maps
-Version: %{bpftoolversion}
-%description -n bpftool
-This package contains the bpftool, which allows inspection and simple
-manipulation of eBPF programs and maps.
-
-%package -n bpftool-debuginfo
-Summary: Debug information for package bpftool
-Version: %{bpftoolversion}
-Group: Development/Debug
-Requires: %{name}-debuginfo-common-%{_target_cpu} = %{specrpmversion}-%{release}
-AutoReqProv: no
-%description -n bpftool-debuginfo
-This package provides debug information for the bpftool package.
-
-%{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{_sbindir}/bpftool(\.debug)?|XXX' -o bpftool-debuginfo.list}
-
-# Setting "Version:" above overrides the internal {version} macro,
-# need to restore it here
-%define version %{specrpmversion}
-
-# with_bpftool
 %endif
 
 %if %{with_selftests}
@@ -3174,17 +3116,6 @@ if [ -f $DevelDir/vmlinux.h ]; then
 fi
 echo "${RPM_VMLINUX_H}" > ../vmlinux_h_path
 
-%if %{with_bpftool}
-%global bpftool_make \
-  %{__make} EXTRA_CFLAGS="${RPM_OPT_FLAGS}" EXTRA_CXXFLAGS="${RPM_OPT_FLAGS}" EXTRA_LDFLAGS="%{__global_ldflags}" DESTDIR=$RPM_BUILD_ROOT %{?make_opts} VMLINUX_H="${RPM_VMLINUX_H}" V=1
-%{log_msg "build bpftool"}
-pushd tools/bpf/bpftool
-%{bpftool_make}
-popd
-%else
-%{log_msg "bpftools disabled ... disabling selftests"}
-%endif
-
 %if %{with_selftests}
 %{log_msg "start build selftests"}
 # Unfortunately, samples/bpf/Makefile expects that the headers are installed
@@ -3203,9 +3134,6 @@ fi
 
 %{log_msg "build samples/bpf"}
 %{make} %{?_smp_mflags} ARCH=$Arch V=1 M=samples/bpf/ VMLINUX_H="${RPM_VMLINUX_H}" || true
-
-# Prevent bpf selftests to build bpftool repeatedly:
-export BPFTOOL=$(pwd)/tools/bpf/bpftool/bpftool
 
 pushd tools/testing/selftests
 # We need to install here because we need to call make with ARCH set which
@@ -3244,7 +3172,6 @@ done
 %buildroot_save_unstripped "usr/libexec/kselftests/bpf/test_progs"
 %buildroot_save_unstripped "usr/libexec/kselftests/bpf/test_progs-no_alu32"
 popd
-export -n BPFTOOL
 %{log_msg "end build selftests"}
 %endif
 
@@ -3494,14 +3421,6 @@ rm -f %{buildroot}%{_bindir}/timerlat
         ln -sf rtla ./%{_bindir}/timerlat
 )
 popd
-%endif
-
-%if !%{with_automotive}
-%if %{with_bpftool}
-pushd tools/bpf/bpftool
-%{bpftool_make} prefix=%{_prefix} bash_compdir=%{_sysconfdir}/bash_completion.d/ mandir=%{_mandir} install doc-install
-popd
-%endif
 %endif
 
 %if %{with_selftests}
@@ -4061,31 +3980,6 @@ fi\
 # with_tools
 %endif
 
-%if !%{with_automotive}
-%if %{with_bpftool}
-%files -n bpftool
-%{_sbindir}/bpftool
-%{_sysconfdir}/bash_completion.d/bpftool
-%{_mandir}/man8/bpftool-cgroup.8.gz
-%{_mandir}/man8/bpftool-gen.8.gz
-%{_mandir}/man8/bpftool-iter.8.gz
-%{_mandir}/man8/bpftool-link.8.gz
-%{_mandir}/man8/bpftool-map.8.gz
-%{_mandir}/man8/bpftool-prog.8.gz
-%{_mandir}/man8/bpftool-perf.8.gz
-%{_mandir}/man8/bpftool.8.gz
-%{_mandir}/man8/bpftool-net.8.gz
-%{_mandir}/man8/bpftool-feature.8.gz
-%{_mandir}/man8/bpftool-btf.8.gz
-%{_mandir}/man8/bpftool-struct_ops.8.gz
-
-%if %{with_debuginfo}
-%files -f bpftool-debuginfo.list -n bpftool-debuginfo
-%defattr(-,root,root)
-%endif
-%endif
-%endif
-
 %if %{with_selftests}
 %files selftests-internal
 %{_libexecdir}/ksamples
@@ -4270,6 +4164,31 @@ fi\
 #
 #
 %changelog
+* Thu Dec 05 2024 Justin M. Forbes <jforbes@fedoraproject.org> [6.12.2-0]
+- Add new config for 6.12.2 (Justin M. Forbes)
+- Revert "udp: avoid calling sock_def_readable() if possible" (Fernando Fernandez Mancera)
+- Fedora: arm64: Enable Rockchip QP HDMI driver (Peter Robinson)
+- arm64: dts: rockchip: Enable HDMI on Hardkernel ODROID-M2 (Jonas Karlman)
+- arm64: dts: rockchip: Enable HDMI0 on FriendlyElec CM3588 NAS (Jonas Karlman)
+- arm64: dts: rockchip: Enable HDMI0 on rock-5a (Cristian Ciocaltea)
+- arm64: dts: rockchip: Enable HDMI0 on rk3588-nanopc-t6 (Marcin Juszkiewicz)
+- arm64: dts: rockchip: Enable HDMI0 on Orange Pi 5 (Jimmy Hon)
+- arm64: dts: rockchip: add and enable gpu node for Radxa ROCK 5A (FUKAUMI Naoki)
+- arm64: dts: rockchip: Enable HDMI0 on orangepi-5-plus (Cristian Ciocaltea)
+- arm64: dts: rockchip: Enable HDMI0 on rk3588-evb1 (Cristian Ciocaltea)
+- arm64: dts: rockchip: Enable HDMI0 on rock-5b (Cristian Ciocaltea)
+- arm64: dts: rockchip: Add HDMI0 node to rk3588 (Cristian Ciocaltea)
+- drm/rockchip: Add basic RK3588 HDMI output support (Cristian Ciocaltea)
+- drm/rockchip: Load crtc devices in preferred order (Jonas Karlman)
+- drm/rockchip: dw_hdmi: Enable 4K@60Hz mode on RK3399 and RK356x (Jonas Karlman)
+- drm/rockchip: dw_hdmi: Use auto-generated tables (Douglas Anderson)
+- drm/rockchip: dw_hdmi: Set cur_ctr to 0 always (Douglas Anderson)
+- drm/rockchip: dw_hdmi: Add phy_config for 594Mhz pixel clock (Nickey Yang)
+- drm/bridge: synopsys: Add DW HDMI QP TX Controller support library (Cristian Ciocaltea)
+- redhat: Drop bpftool from kernel spec (Viktor Malik)
+- Revert "add pci_hw_vendor_status()" (Justin M. Forbes)
+- Linux v6.12.2
+
 * Tue Nov 26 2024 Justin M. Forbes <jforbes@fedoraproject.org> [6.12.1-0]
 - Bluetooth: btusb: add Foxconn 0xe0fc for Qualcomm WCN785x (Mark Pearson) [2329005]
 - Initial set up for stable Fedora branch (Justin M. Forbes)
