@@ -159,18 +159,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 6.12.2
-%define specversion 6.12.2
+%define specrpmversion 6.12.3
+%define specversion 6.12.3
 %define patchversion 6.12
 %define pkgrelease 200
 %define kversion 6
-%define tarfile_release 6.12.2
+%define tarfile_release 6.12.3
 # This is needed to do merge window version magic
 %define patchlevel 12
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 200%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 6.12.2
+%define kabiversion 6.12.3
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4164,6 +4164,9 @@ fi\
 #
 #
 %changelog
+* Fri Dec 06 2024 Justin M. Forbes <jforbes@fedoraproject.org> [6.12.3-0]
+- Linux v6.12.3
+
 * Thu Dec 05 2024 Justin M. Forbes <jforbes@fedoraproject.org> [6.12.2-0]
 - Add new config for 6.12.2 (Justin M. Forbes)
 - Revert "udp: avoid calling sock_def_readable() if possible" (Fernando Fernandez Mancera)

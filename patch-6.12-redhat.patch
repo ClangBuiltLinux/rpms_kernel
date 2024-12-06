@@ -59,7 +59,7 @@
  58 files changed, 2991 insertions(+), 275 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index da6e99309a4d..34b2f6d09705 100644
+index e81030ec6831..2f36f6150bbc 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -22,6 +22,18 @@ $(if $(filter __%, $(MAKECMDGOALS)), \
