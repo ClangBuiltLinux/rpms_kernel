@@ -159,18 +159,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 6.12.4
-%define specversion 6.12.4
+%define specrpmversion 6.12.5
+%define specversion 6.12.5
 %define patchversion 6.12
 %define pkgrelease 200
 %define kversion 6
-%define tarfile_release 6.12.4
+%define tarfile_release 6.12.5
 # This is needed to do merge window version magic
 %define patchlevel 12
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 200%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 6.12.4
+%define kabiversion 6.12.5
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4164,6 +4164,13 @@ fi\
 #
 #
 %changelog
+* Sun Dec 15 2024 Justin M. Forbes <jforbes@fedoraproject.org> [6.12.5-0]
+- New config item for 6.12.5 (Justin M. Forbes)
+- x86/cpu: Add Lunar Lake to list of CPUs with a broken MONITOR  implementation (Mark Pearson) [2332094]
+- Add a bug to BugsFixed (Justin M. Forbes)
+- Turn off libbpf dynamic for perf on f40 (Justin M. Forbes)
+- Linux v6.12.5
+
 * Mon Dec 09 2024 Justin M. Forbes <jforbes@fedoraproject.org> [6.12.4-0]
 - Fix up QCOM_EMAC config for Fedora (Justin M. Forbes)
 - wifi: rtl8xxxu: add more missing rtl8192cu USB IDs (Hans de Goede)

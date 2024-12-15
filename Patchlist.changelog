@@ -1,3 +1,6 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/a6f946b225152d6db15b0d632730b07edb03d7d5
+ a6f946b225152d6db15b0d632730b07edb03d7d5 x86/cpu: Add Lunar Lake to list of CPUs with a broken MONITOR  implementation
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/45dbf0ddf79ac2b6962834712c13533ba58b2465
  45dbf0ddf79ac2b6962834712c13533ba58b2465 wifi: rtl8xxxu: add more missing rtl8192cu USB IDs
 
