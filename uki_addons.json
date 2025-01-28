@@ -1,4 +1,21 @@
 {
+    "virt": {
+        "common": {
+            "fips-disable.addon": [
+                "fips=0\n"
+            ],
+            "fips-enable.addon": [
+                "fips=1\n"
+            ]
+        },
+        "rhel": {
+            "aarch64": {
+                "crashkernel-default.addon": [
+                    "crashkernel=1G-4G:256M,4G-64G:320M,64G-:576M\n"
+                ]
+            }
+        }
+    },
     "common": {
         "crashkernel-1536M.addon": [
             "crashkernel=1536M\n"
@@ -20,23 +37,9 @@
         ],
         "crashkernel-default.addon": [
             "crashkernel=1G-4G:192M,4G-64G:256M,64G-:512M\n"
+        ],
+        "debug.addon": [
+            "debug"
         ]
-    },
-    "virt": {
-        "common": {
-            "fips-disable.addon": [
-                "fips=0\n"
-            ],
-            "fips-enable.addon": [
-                "fips=1\n"
-            ]
-        },
-        "rhel": {
-            "aarch64": {
-                "crashkernel-default.addon": [
-                    "crashkernel=1G-4G:256M,4G-64G:320M,64G-:576M\n"
-                ]
-            }
-        }
     }
 }
