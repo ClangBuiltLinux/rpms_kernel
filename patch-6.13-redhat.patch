@@ -1,9 +1,10 @@
- Makefile                                           |  42 +-
+ Makefile                                           |  40 ++
  arch/arm/Kconfig                                   |   4 +-
  arch/s390/include/asm/ipl.h                        |   1 +
  arch/s390/kernel/ipl.c                             |   5 +
  arch/s390/kernel/setup.c                           |   4 +
  arch/x86/kernel/setup.c                            |  22 +-
+ arch/x86/tools/insn_decoder_test.c                 |   2 +-
  crypto/akcipher.c                                  |   3 +-
  crypto/dh.c                                        |  25 +
  crypto/seqiv.c                                     |  15 +-
@@ -40,10 +41,10 @@
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |   1 +
  security/security.c                                |  12 +
- 42 files changed, 1114 insertions(+), 195 deletions(-)
+ 43 files changed, 1114 insertions(+), 195 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index b9464c88ac72..cec5e9ee8442 100644
+index b9464c88ac72..b93ffbd69dbb 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -22,6 +22,18 @@ $(if $(filter __%, $(MAKECMDGOALS)), \
@@ -83,11 +84,10 @@ index b9464c88ac72..cec5e9ee8442 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1910,7 +1933,24 @@ endif
+@@ -1910,6 +1933,23 @@ endif
  
  ifdef CONFIG_MODULES
  
--modules.order: $(build-dir)
 +scripts_build:
 +	$(MAKE) $(build)=scripts/basic
 +	$(MAKE) $(build)=scripts/mod
@@ -105,10 +105,9 @@ index b9464c88ac72..cec5e9ee8442 100644
 +
 +PHONY += prepare_after_cross scripts_build
 +
-+$(MODORDER): $(build-dir)
+ modules.order: $(build-dir)
  	@:
  
- # KBUILD_MODPOST_NOFINAL can be set to skip the final link of modules.
 diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
 index 202397be76d8..3d4ba33d4305 100644
 --- a/arch/arm/Kconfig
@@ -219,6 +218,19 @@ index f1fea506e20f..6af50d80f54a 100644
  
  	reserve_initrd();
  
+diff --git a/arch/x86/tools/insn_decoder_test.c b/arch/x86/tools/insn_decoder_test.c
+index 472540aeabc2..366e07546344 100644
+--- a/arch/x86/tools/insn_decoder_test.c
++++ b/arch/x86/tools/insn_decoder_test.c
+@@ -106,7 +106,7 @@ static void parse_args(int argc, char **argv)
+ 	}
+ }
+ 
+-#define BUFSIZE 256
++#define BUFSIZE 4096
+ 
+ int main(int argc, char **argv)
+ {
 diff --git a/crypto/akcipher.c b/crypto/akcipher.c
 index 72c82d9aa077..da1ac5de8252 100644
 --- a/crypto/akcipher.c

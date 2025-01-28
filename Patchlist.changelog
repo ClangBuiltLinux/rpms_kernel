@@ -1,3 +1,9 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/d4db20ddda751ed932190658d4a8f878101ca1c4
+ d4db20ddda751ed932190658d4a8f878101ca1c4 redhat: fix modules.order target
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/8d4a52c3921d278f27241fc0c6949d8fdc13a7f5
+ 8d4a52c3921d278f27241fc0c6949d8fdc13a7f5 x86/insn_decoder_test: allow longer symbol-names
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/27459b2d67bbe701ce5ff6c7bc2d9dc2294bbc18
  27459b2d67bbe701ce5ff6c7bc2d9dc2294bbc18 crypto: sig - Disable signing
 
