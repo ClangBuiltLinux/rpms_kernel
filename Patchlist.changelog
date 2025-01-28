@@ -1,62 +1,53 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/0fbfaa4bcbaa005b6d690efd33e91681a7e871f1
- 0fbfaa4bcbaa005b6d690efd33e91681a7e871f1 crypto: sig - Disable signing
+https://gitlab.com/cki-project/kernel-ark/-/commit/7b535ef1a1571928569093248a0206a0ccbee24a
+ 7b535ef1a1571928569093248a0206a0ccbee24a crypto: sig - Disable signing
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/42f000b2abec9a672c8147d50367ee85f5ab7ac0
- 42f000b2abec9a672c8147d50367ee85f5ab7ac0 redhat: include resolve_btfids in kernel-devel
+https://gitlab.com/cki-project/kernel-ark/-/commit/d176b588d146fd49ad14e3cdfebeff9878e60caf
+ d176b588d146fd49ad14e3cdfebeff9878e60caf redhat: include resolve_btfids in kernel-devel
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/d58e106c8facaef0a01005e4387872c07ddbae56
- d58e106c8facaef0a01005e4387872c07ddbae56 redhat: workaround CKI cross compilation for scripts
+https://gitlab.com/cki-project/kernel-ark/-/commit/1e04d03ff7b7f4b0106a588bb9045272cafe2a3e
+ 1e04d03ff7b7f4b0106a588bb9045272cafe2a3e redhat: workaround CKI cross compilation for scripts
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/88cc6f3170935483519631f59cccc7efb2e8d85b
- 88cc6f3170935483519631f59cccc7efb2e8d85b crypto: akcipher - Disable signing and decryption
+https://gitlab.com/cki-project/kernel-ark/-/commit/74443e3c801450db386a2031eb0b602ab1df8ae4
+ 74443e3c801450db386a2031eb0b602ab1df8ae4 crypto: akcipher - Disable signing and decryption
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/6cd240c08e5c1a03a683f7e4266d0dd741b4127d
- 6cd240c08e5c1a03a683f7e4266d0dd741b4127d crypto: dh - implement FIPS PCT
+https://gitlab.com/cki-project/kernel-ark/-/commit/56aedd8875b8801a8d72822c7191fac2de67e24c
+ 56aedd8875b8801a8d72822c7191fac2de67e24c crypto: dh - implement FIPS PCT
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/37f33bc8a463b083864587c9e8c27f17073e450c
- 37f33bc8a463b083864587c9e8c27f17073e450c crypto: ecdh - disallow plain "ecdh" usage in FIPS mode
+https://gitlab.com/cki-project/kernel-ark/-/commit/88a1e982a7129a33950ca6e118ce838df3189d51
+ 88a1e982a7129a33950ca6e118ce838df3189d51 crypto: ecdh - disallow plain "ecdh" usage in FIPS mode
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/8802017604b5c541397aeb2f96b4aa2b8b5814c6
- 8802017604b5c541397aeb2f96b4aa2b8b5814c6 crypto: seqiv - flag instantiations as FIPS compliant
+https://gitlab.com/cki-project/kernel-ark/-/commit/7ead796848ec5df6d59e0de6fa8895fe1f258cf0
+ 7ead796848ec5df6d59e0de6fa8895fe1f258cf0 crypto: seqiv - flag instantiations as FIPS compliant
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/1d4b10429aa1991e845359e6e90362e102645f19
- 1d4b10429aa1991e845359e6e90362e102645f19 [kernel] bpf: set default value for bpf_jit_harden
+https://gitlab.com/cki-project/kernel-ark/-/commit/4bd6ef3b024df6c4d72aaa9b2e69e92a1bac1f2c
+ 4bd6ef3b024df6c4d72aaa9b2e69e92a1bac1f2c lsm: update security_lock_kernel_down
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/17367bb215d9cd78ed13c73a5ea995dd7d166ccf
- 17367bb215d9cd78ed13c73a5ea995dd7d166ccf lsm: update security_lock_kernel_down
+https://gitlab.com/cki-project/kernel-ark/-/commit/fed62da2b48261e2919830f89f37aef21da8e24c
+ fed62da2b48261e2919830f89f37aef21da8e24c redhat: rh_kabi: introduce RH_KABI_EXCLUDE_WITH_SIZE
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/96e1b76fc3229c43a60cc695545d04ab5d4f157f
- 96e1b76fc3229c43a60cc695545d04ab5d4f157f redhat: rh_kabi: introduce RH_KABI_EXCLUDE_WITH_SIZE
+https://gitlab.com/cki-project/kernel-ark/-/commit/8cc099ff33eacda3b941aa1ee0e5415cd72c7c34
+ 8cc099ff33eacda3b941aa1ee0e5415cd72c7c34 redhat: rh_kabi: move semicolon inside __RH_KABI_CHECK_SIZE
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/5e2df3ea4c99da628f51c27f792ae640bbd626a6
- 5e2df3ea4c99da628f51c27f792ae640bbd626a6 redhat: rh_kabi: move semicolon inside __RH_KABI_CHECK_SIZE
+https://gitlab.com/cki-project/kernel-ark/-/commit/4300beef91c1cfc22f9a26f90f29bbbdf2e24443
+ 4300beef91c1cfc22f9a26f90f29bbbdf2e24443 scsi: sd: Add "probe_type" module parameter to allow synchronous probing
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/a8694a35866b90c28c6c0f5df3b80da538a99b00
- a8694a35866b90c28c6c0f5df3b80da538a99b00 ext4: Mark mounting fs-verity filesystems as tech-preview
+https://gitlab.com/cki-project/kernel-ark/-/commit/6a9558736522e2888033d4ce9cd11d3aa7359e2b
+ 6a9558736522e2888033d4ce9cd11d3aa7359e2b Revert "Remove EXPERT from ARCH_FORCE_MAX_ORDER for aarch64"
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/ea7b22814ab24fe0ea491db1020bc1419368f31e
- ea7b22814ab24fe0ea491db1020bc1419368f31e erofs: Add tech preview markers at mount
+https://gitlab.com/cki-project/kernel-ark/-/commit/f7e28c843def5e4f04c4c3c3e75ed76fbcc14136
+ f7e28c843def5e4f04c4c3c3e75ed76fbcc14136 Enable IO_URING for RHEL
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/5727efccdbf913adadad565b66cda7f9d095bdda
- 5727efccdbf913adadad565b66cda7f9d095bdda scsi: sd: Add "probe_type" module parameter to allow synchronous probing
+https://gitlab.com/cki-project/kernel-ark/-/commit/1c2323a734c789f26b9126b3fcb00caeb7e28c69
+ 1c2323a734c789f26b9126b3fcb00caeb7e28c69 Remove EXPERT from ARCH_FORCE_MAX_ORDER for aarch64
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/5d9d3febc823d1a1c60ca7f0cb43bc75fc274c2a
- 5d9d3febc823d1a1c60ca7f0cb43bc75fc274c2a Revert "Remove EXPERT from ARCH_FORCE_MAX_ORDER for aarch64"
+https://gitlab.com/cki-project/kernel-ark/-/commit/55737a9090fc7d1e2495925b41d4b6bad47ba508
+ 55737a9090fc7d1e2495925b41d4b6bad47ba508 redhat: version two of Makefile.rhelver tweaks
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/19b9234e8e105f624fe5a30b6e938c4e4b082287
- 19b9234e8e105f624fe5a30b6e938c4e4b082287 Enable IO_URING for RHEL
+https://gitlab.com/cki-project/kernel-ark/-/commit/39d1c9bc9436ed681c8a73303915d683f22484a1
+ 39d1c9bc9436ed681c8a73303915d683f22484a1 redhat:  adapt to upstream Makefile change
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/254de718b3a997ac46a009b8ba782135866cc93e
- 254de718b3a997ac46a009b8ba782135866cc93e Remove EXPERT from ARCH_FORCE_MAX_ORDER for aarch64
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/288c9c3a85a1b794747445a380c915d34fc673a4
- 288c9c3a85a1b794747445a380c915d34fc673a4 redhat: version two of Makefile.rhelver tweaks
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/da4a5a8f6b463c3c390910d90b1f5eca8a8974b6
- da4a5a8f6b463c3c390910d90b1f5eca8a8974b6 redhat:  adapt to upstream Makefile change
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/7f1d62e21fb6e4f7c4393bde73a1cbfe6489a10d
- 7f1d62e21fb6e4f7c4393bde73a1cbfe6489a10d Change acpi_bus_get_acpi_device to acpi_get_acpi_dev
+https://gitlab.com/cki-project/kernel-ark/-/commit/94bf60ff0230e5a38b002dad5878ffd69e03f175
+ 94bf60ff0230e5a38b002dad5878ffd69e03f175 Change acpi_bus_get_acpi_device to acpi_get_acpi_dev
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/e8e7aea2e1b429d7311ad12f41263676f419548c
  e8e7aea2e1b429d7311ad12f41263676f419548c kabi: Add kABI macros for enum type

@@ -28,8 +28,6 @@
  drivers/pci/quirks.c                               |  24 +
  drivers/scsi/sd.c                                  |  10 +
  drivers/usb/core/hub.c                             |   7 +
- fs/erofs/super.c                                   |   9 +
- fs/ext4/super.c                                    |  11 +
  include/linux/crypto.h                             |   2 +
  include/linux/efi.h                                |  22 +-
  include/linux/lsm_hook_defs.h                      |   2 +
@@ -37,7 +35,6 @@
  include/linux/rh_kabi.h                            | 541 +++++++++++++++++++++
  include/linux/rmi.h                                |   1 +
  include/linux/security.h                           |   5 +
- kernel/bpf/core.c                                  |   5 +
  kernel/module/main.c                               |   2 +
  kernel/module/signing.c                            |   9 +-
  scripts/mod/modpost.c                              |   8 +
@@ -46,7 +43,7 @@
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |   1 +
  security/security.c                                |  12 +
- 48 files changed, 1150 insertions(+), 195 deletions(-)
+ 45 files changed, 1125 insertions(+), 195 deletions(-)
 
 diff --git a/Makefile b/Makefile
 index b9464c88ac72..cec5e9ee8442 100644
@@ -1341,55 +1338,6 @@ index 21ac9b464696..24a92295bd8d 100644
  	/* Lock the device, then check to see if we were
  	 * disconnected while waiting for the lock to succeed. */
  	usb_lock_device(hdev);
-diff --git a/fs/erofs/super.c b/fs/erofs/super.c
-index f5956474bfde..d8b90cf0948b 100644
---- a/fs/erofs/super.c
-+++ b/fs/erofs/super.c
-@@ -581,6 +581,9 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
- {
- 	struct inode *inode;
- 	struct erofs_sb_info *sbi = EROFS_SB(sb);
-+#ifdef CONFIG_RHEL_DIFFERENCES
-+	static bool printed = false;
-+#endif
- 	int err;
- 
- 	sb->s_magic = EROFS_SUPER_MAGIC;
-@@ -691,6 +694,12 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
- 		return err;
- 
- 	erofs_info(sb, "mounted with root inode @ nid %llu.", sbi->root_nid);
-+#ifdef CONFIG_RHEL_DIFFERENCES
-+	if (!printed) {
-+		mark_tech_preview("EROFS filesystem", NULL);
-+		printed = true;
-+       }
-+#endif
- 	return 0;
- }
- 
-diff --git a/fs/ext4/super.c b/fs/ext4/super.c
-index 785809f33ff4..bbb10ab8e7af 100644
---- a/fs/ext4/super.c
-+++ b/fs/ext4/super.c
-@@ -5638,6 +5638,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
- 	atomic_set(&sbi->s_warning_count, 0);
- 	atomic_set(&sbi->s_msg_count, 0);
- 
-+#ifdef CONFIG_RHEL_DIFFERENCES
-+	if (ext4_has_feature_verity(sb)) {
-+		static bool printed = false;
-+
-+		if (!printed) {
-+			mark_tech_preview("fs-verity on ext4", NULL);
-+			printed = true;
-+		}
-+	}
-+#endif
-+
- 	/* Register sysfs after all initializations are complete. */
- 	err = ext4_register_sysfs(sb);
- 	if (err)
 diff --git a/include/linux/crypto.h b/include/linux/crypto.h
 index b164da5e129e..72bfb79b491d 100644
 --- a/include/linux/crypto.h
@@ -2078,23 +2026,6 @@ index cbdba435b798..c5c300c4f90b 100644
  static inline int lsm_fill_user_ctx(struct lsm_ctx __user *uctx,
  				    u32 *uctx_len, void *val, size_t val_len,
  				    u64 id, u64 flags)
-diff --git a/kernel/bpf/core.c b/kernel/bpf/core.c
-index da729cbbaeb9..5c2d8301d4f3 100644
---- a/kernel/bpf/core.c
-+++ b/kernel/bpf/core.c
-@@ -571,7 +571,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
- /* All BPF JIT sysctl knobs here. */
- int bpf_jit_enable   __read_mostly = IS_BUILTIN(CONFIG_BPF_JIT_DEFAULT_ON);
- int bpf_jit_kallsyms __read_mostly = IS_BUILTIN(CONFIG_BPF_JIT_DEFAULT_ON);
-+#ifdef CONFIG_RHEL_DIFFERENCES
-+/* RHEL-only: set it to 1 by default */
-+int bpf_jit_harden   __read_mostly = 1;
-+#else
- int bpf_jit_harden   __read_mostly;
-+#endif /* CONFIG_RHEL_DIFFERENCES */
- long bpf_jit_limit   __read_mostly;
- long bpf_jit_limit_max __read_mostly;
- 
 diff --git a/kernel/module/main.c b/kernel/module/main.c
 index 5399c182b3cb..25aa8a966bd8 100644
 --- a/kernel/module/main.c
