@@ -31,19 +31,16 @@
  include/linux/crypto.h                             |   2 +
  include/linux/efi.h                                |  22 +-
  include/linux/lsm_hook_defs.h                      |   2 +
- include/linux/module.h                             |   1 +
  include/linux/rh_kabi.h                            | 541 +++++++++++++++++++++
  include/linux/rmi.h                                |   1 +
  include/linux/security.h                           |   5 +
- kernel/module/main.c                               |   2 +
  kernel/module/signing.c                            |   9 +-
- scripts/mod/modpost.c                              |   8 +
  scripts/tags.sh                                    |   2 +
  security/integrity/platform_certs/load_uefi.c      |   6 +-
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |   1 +
  security/security.c                                |  12 +
- 45 files changed, 1125 insertions(+), 195 deletions(-)
+ 42 files changed, 1114 insertions(+), 195 deletions(-)
 
 diff --git a/Makefile b/Makefile
 index b9464c88ac72..cec5e9ee8442 100644
@@ -1432,18 +1429,6 @@ index eb2937599cb0..7860721ef2f6 100644
  
  #ifdef CONFIG_PERF_EVENTS
  LSM_HOOK(int, 0, perf_event_open, struct perf_event_attr *attr, int type)
-diff --git a/include/linux/module.h b/include/linux/module.h
-index b3a643435357..6ed3dc5378a6 100644
---- a/include/linux/module.h
-+++ b/include/linux/module.h
-@@ -426,6 +426,7 @@ struct module {
- 	struct module_attribute *modinfo_attrs;
- 	const char *version;
- 	const char *srcversion;
-+	const char *rhelversion;
- 	struct kobject *holders_dir;
- 
- 	/* Exported symbols */
 diff --git a/include/linux/rh_kabi.h b/include/linux/rh_kabi.h
 new file mode 100644
 index 000000000000..5139cb2cabdc
@@ -2026,26 +2011,6 @@ index cbdba435b798..c5c300c4f90b 100644
  static inline int lsm_fill_user_ctx(struct lsm_ctx __user *uctx,
  				    u32 *uctx_len, void *val, size_t val_len,
  				    u64 id, u64 flags)
-diff --git a/kernel/module/main.c b/kernel/module/main.c
-index 5399c182b3cb..25aa8a966bd8 100644
---- a/kernel/module/main.c
-+++ b/kernel/module/main.c
-@@ -562,6 +562,7 @@ static struct module_attribute modinfo_##field = {                    \
- 
- MODINFO_ATTR(version);
- MODINFO_ATTR(srcversion);
-+MODINFO_ATTR(rhelversion);
- 
- static struct {
- 	char name[MODULE_NAME_LEN + 1];
-@@ -1014,6 +1015,7 @@ struct module_attribute *modinfo_attrs[] = {
- 	&module_uevent,
- 	&modinfo_version,
- 	&modinfo_srcversion,
-+	&modinfo_rhelversion,
- 	&modinfo_initstate,
- 	&modinfo_coresize,
- #ifdef CONFIG_ARCH_WANTS_MODULES_DATA_IN_VMALLOC
 diff --git a/kernel/module/signing.c b/kernel/module/signing.c
 index a2ff4242e623..f0d2be1ee4f1 100644
 --- a/kernel/module/signing.c
@@ -2069,39 +2034,6 @@ index a2ff4242e623..f0d2be1ee4f1 100644
  }
  
  int module_sig_check(struct load_info *info, int flags)
-diff --git a/scripts/mod/modpost.c b/scripts/mod/modpost.c
-index 7ea59dc4926b..1cea58bf300d 100644
---- a/scripts/mod/modpost.c
-+++ b/scripts/mod/modpost.c
-@@ -27,6 +27,7 @@
- #include <xalloc.h>
- #include "modpost.h"
- #include "../../include/linux/license.h"
-+#include "../../include/generated/uapi/linux/version.h"
- 
- static bool module_enabled;
- /* Are we using CONFIG_MODVERSIONS? */
-@@ -1903,6 +1904,12 @@ static void write_buf(struct buffer *b, const char *fname)
- 	}
- }
- 
-+static void add_rhelversion(struct buffer *b, struct module *mod)
-+{
-+	buf_printf(b, "MODULE_INFO(rhelversion, \"%d.%d\");\n", RHEL_MAJOR,
-+		   RHEL_MINOR);
-+}
-+
- static void write_if_changed(struct buffer *b, const char *fname)
- {
- 	char *tmp;
-@@ -1971,6 +1978,7 @@ static void write_mod_c_file(struct module *mod)
- 	}
- 
- 	add_srcversion(&buf, mod);
-+	add_rhelversion(&buf, mod);
- 
- 	ret = snprintf(fname, sizeof(fname), "%s.mod.c", mod->name);
- 	if (ret >= sizeof(fname)) {
 diff --git a/scripts/tags.sh b/scripts/tags.sh
 index b21236377998..f2f257bc1bfd 100755
 --- a/scripts/tags.sh
