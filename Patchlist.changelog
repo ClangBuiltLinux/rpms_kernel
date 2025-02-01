@@ -1,3 +1,108 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/13b9586f0e60d11d0a20aa3ffb18e5fff4dc3323
+ 13b9586f0e60d11d0a20aa3ffb18e5fff4dc3323 media: ov08x40: Don't log ov08x40_check_hwcfg() errors twice
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/dbfa4ad59c7cb977f2cb2b76fbb961eba65f8f43
+ dbfa4ad59c7cb977f2cb2b76fbb961eba65f8f43 media: ov08x40: Add missing '\n' to ov08x40_check_hwcfg() error messages
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/2a5be786e3e187f72d7724d7091b2ab56c6a0195
+ 2a5be786e3e187f72d7724d7091b2ab56c6a0195 media: ov08x40: Add missing ov08x40_identify_module() call on stream-start
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/ab945af1227c850f4b2e9240d988554747585686
+ ab945af1227c850f4b2e9240d988554747585686 media: ov08x40: Improve ov08x40_[read|write]_reg() error returns
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/ace9cc03f4afe2c81a80cd9f4117abf1e1f364d3
+ ace9cc03f4afe2c81a80cd9f4117abf1e1f364d3 media: ov08x40: Improve ov08x40_identify_module() error logging
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/75aa3556f447be59544c802ea5f0f51315412675
+ 75aa3556f447be59544c802ea5f0f51315412675 media: ov08x40: Move ov08x40_identify_module() function up
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/89231460ddd667262c5f49bb4e8d074999cd9f2c
+ 89231460ddd667262c5f49bb4e8d074999cd9f2c media: ov08x40: Get clock on ACPI platforms too
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/4895256ae3f8739afde45eb8674e4e0636d9d0e8
+ 4895256ae3f8739afde45eb8674e4e0636d9d0e8 media: ov08x40: Get reset GPIO and regulators on ACPI platforms too
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/af73696ea16f037dc57ca67691557d2602d2cf8d
+ af73696ea16f037dc57ca67691557d2602d2cf8d media: ov08x40: Move fwnode_graph_get_next_endpoint() call up
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/af27ddb15c3497c2673788eec7a0bc7d91bc1c44
+ af27ddb15c3497c2673788eec7a0bc7d91bc1c44 media: ov08x40: Properly turn sensor on/off when runtime-suspended
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/8132723c5b299df99a137bc2e90f57a9ad5c179a
+ 8132723c5b299df99a137bc2e90f57a9ad5c179a HID: intel-thc-hid: fix build errors in um mode
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/3b212d73edf19f0555d28a60573a267528d800ba
+ 3b212d73edf19f0555d28a60573a267528d800ba HID: intel-thc-hid: intel-quicki2c: fix potential memory corruption
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/5a048f6e2139552ff9da49c73c754d7968834550
+ 5a048f6e2139552ff9da49c73c754d7968834550 HID: intel-thc-hid: intel-thc: Fix error code in thc_i2c_subip_init()
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/35253c89d77e2d076d9b89dfdd1335eab020d4f7
+ 35253c89d77e2d076d9b89dfdd1335eab020d4f7 HID: intel-thc-hid: intel-quicki2c: Add PM implementation
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/11debd2532c45162ceed88f960d06254eac575e4
+ 11debd2532c45162ceed88f960d06254eac575e4 HID: intel-thc-hid: intel-quicki2c: Complete THC QuickI2C driver
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/b49df4f299806253bf80448ae9053b256406d1b9
+ b49df4f299806253bf80448ae9053b256406d1b9 HID: intel-thc-hid: intel-quicki2c: Add HIDI2C protocol implementation
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/0d2f7d14cc6043696f79a5ad0b867cf4169f8748
+ 0d2f7d14cc6043696f79a5ad0b867cf4169f8748 HID: intel-thc-hid: intel-quicki2c: Add THC QuickI2C ACPI interfaces
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/969a928238a7446718c1f434170be9e45bcc9914
+ 969a928238a7446718c1f434170be9e45bcc9914 HID: intel-thc-hid: intel-quicki2c: Add THC QuickI2C driver hid layer
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/7dd5bbfabda8d93ffc2e4f0d731c966c34c9864f
+ 7dd5bbfabda8d93ffc2e4f0d731c966c34c9864f HID: intel-thc-hid: intel-quicki2c: Add THC QuickI2C driver skeleton
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/b7188e8d34b3c1f3eb72eef0670583e0386fa3c6
+ b7188e8d34b3c1f3eb72eef0670583e0386fa3c6 HID: intel-thc-hid: intel-quickspi: Add PM implementation
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/b65732ec63959ec2c0fc2ba6c99227d1e0548a72
+ b65732ec63959ec2c0fc2ba6c99227d1e0548a72 HID: intel-thc-hid: intel-quickspi: Complete THC QuickSPI driver
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/54594e82acbd8fd2d1b24460dd1718bf80d1fda5
+ 54594e82acbd8fd2d1b24460dd1718bf80d1fda5 HID: intel-thc-hid: intel-quickspi: Add HIDSPI protocol implementation
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/d4541c673dae56bb659fed105076f3b49bbce41a
+ d4541c673dae56bb659fed105076f3b49bbce41a HID: intel-thc-hid: intel-quickspi: Add THC QuickSPI ACPI interfaces
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/7d985f106bd49c145ba8f2e98f41b2eec77ce183
+ 7d985f106bd49c145ba8f2e98f41b2eec77ce183 HID: intel-thc-hid: intel-quickspi: Add THC QuickSPI driver hid layer
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/19acc836647d5d22207be19c522cb2fb7f2b383c
+ 19acc836647d5d22207be19c522cb2fb7f2b383c HID: intel-thc-hid: intel-quickspi: Add THC QuickSPI driver skeleton
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/32eda46f432dd87aa1b9f3fb27576c31fffcc8b9
+ 32eda46f432dd87aa1b9f3fb27576c31fffcc8b9 HID: intel-thc-hid: intel-thc: Add THC I2C config interfaces
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/7a8647e7beedca8ba0315e340d5db968bbdb5b2e
+ 7a8647e7beedca8ba0315e340d5db968bbdb5b2e HID: intel-thc-hid: intel-thc: Add THC SPI config interfaces
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/b16da12583af39cb8743b3d20cfdaa26b6ae7f10
+ b16da12583af39cb8743b3d20cfdaa26b6ae7f10 HID: intel-thc-hid: intel-thc: Add THC interrupt handler
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/9958aadf89c5e6d6f53e0f52c479a821ea58584a
+ 9958aadf89c5e6d6f53e0f52c479a821ea58584a HID: intel-thc-hid: intel-thc: Add THC LTR interfaces
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/8efdcae46389b6226d4331d865f4524d2b946b81
+ 8efdcae46389b6226d4331d865f4524d2b946b81 HID: intel-thc-hid: intel-thc: Add THC DMA interfaces
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/32ba4702ce8dbfd0743e3796bf81ff19c3b95bf5
+ 32ba4702ce8dbfd0743e3796bf81ff19c3b95bf5 HID: intel-thc-hid: intel-thc: Add APIs for interrupt
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/d90c2831d5344b841320088feb933adf421a475d
+ d90c2831d5344b841320088feb933adf421a475d HID: intel-thc-hid: intel-thc: Add THC PIO operation APIs
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/e1e5b42e288f3df1a2b0217be466a99083704851
+ e1e5b42e288f3df1a2b0217be466a99083704851 HID: intel-thc-hid: intel-thc: Add THC registers definition
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/300ea37af85f3fc79246e29dc8df2d07e48a1702
+ 300ea37af85f3fc79246e29dc8df2d07e48a1702 HID: intel-thc-hid: Add basic THC driver skeleton
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/a4e91196acb06704307b1ea8db82f93180a2df19
+ a4e91196acb06704307b1ea8db82f93180a2df19 HID: THC: Add documentation
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/d4db20ddda751ed932190658d4a8f878101ca1c4
  d4db20ddda751ed932190658d4a8f878101ca1c4 redhat: fix modules.order target
 
