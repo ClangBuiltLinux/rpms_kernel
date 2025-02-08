@@ -159,18 +159,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 6.12.12
-%define specversion 6.12.12
+%define specrpmversion 6.12.13
+%define specversion 6.12.13
 %define patchversion 6.12
 %define pkgrelease 200
 %define kversion 6
-%define tarfile_release 6.12.12
+%define tarfile_release 6.12.13
 # This is needed to do merge window version magic
 %define patchlevel 12
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 200%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 6.12.12
+%define kabiversion 6.12.13
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4164,6 +4164,23 @@ fi\
 #
 #
 %changelog
+* Sat Feb 08 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.12.13-0]
+- Config update for 6.12.13 (Justin M. Forbes)
+- media: ov08x40: Don't log ov08x40_check_hwcfg() errors twice (Hans de Goede)
+- media: ov08x40: Add missing '\n' to ov08x40_check_hwcfg() error messages (Hans de Goede)
+- media: ov08x40: Add missing ov08x40_identify_module() call on stream-start (Hans de Goede)
+- media: ov08x40: Improve ov08x40_[read|write]_reg() error returns (Hans de Goede)
+- media: ov08x40: Improve ov08x40_identify_module() error logging (Hans de Goede)
+- media: ov08x40: Move ov08x40_identify_module() function up (Hans de Goede)
+- media: ov08x40: Get clock on ACPI platforms too (Hans de Goede)
+- media: ov08x40: Get reset GPIO and regulators on ACPI platforms too (Hans de Goede)
+- media: ov08x40: Move fwnode_graph_get_next_endpoint() call up (Hans de Goede)
+- media: ov08x40: Properly turn sensor on/off when runtime-suspended (Hans de Goede)
+- media: ov08x40: Add OF probe support (Bryan O'Donoghue)
+- media: ov08x40: Rename ext_clk to xvclk (Bryan O'Donoghue)
+- Reapply "init/main.c: Initialize early LSMs after arch code, static keys and calls." (Justin M. Forbes)
+- Linux v6.12.13
+
 * Sat Feb 01 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.12.12-0]
 - Revert "init/main.c: Initialize early LSMs after arch code, static keys and calls." (Justin M. Forbes)
 - Linux v6.12.12
