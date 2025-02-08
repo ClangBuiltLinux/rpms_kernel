@@ -1,3 +1,42 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/eab4e4a537c1ecea380079999716d24f5cc67aa5
+ eab4e4a537c1ecea380079999716d24f5cc67aa5 Reapply "init/main.c: Initialize early LSMs after arch code, static keys and calls."
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/afd7b1238ef1cd8d8478aa9d855ab0b447a9d4ad
+ afd7b1238ef1cd8d8478aa9d855ab0b447a9d4ad media: ov08x40: Don't log ov08x40_check_hwcfg() errors twice
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/85dd6dca65b39302dd3e40c474cc44f5a0bebfd5
+ 85dd6dca65b39302dd3e40c474cc44f5a0bebfd5 media: ov08x40: Add missing '\n' to ov08x40_check_hwcfg() error messages
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/d9a8a9706720c071ca5b6a1711dfabe5a3f86a57
+ d9a8a9706720c071ca5b6a1711dfabe5a3f86a57 media: ov08x40: Add missing ov08x40_identify_module() call on stream-start
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/5fb737e3b391b0f96372256e60af0b0ca1b8692c
+ 5fb737e3b391b0f96372256e60af0b0ca1b8692c media: ov08x40: Improve ov08x40_[read|write]_reg() error returns
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/17af9df680a647db4b1293bab7fca1ba5d603fc0
+ 17af9df680a647db4b1293bab7fca1ba5d603fc0 media: ov08x40: Improve ov08x40_identify_module() error logging
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/b79d5c494ad271bcc466daf23ba33dc084c1e776
+ b79d5c494ad271bcc466daf23ba33dc084c1e776 media: ov08x40: Move ov08x40_identify_module() function up
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/99e766920a7373b66006985837cf0977a21a464e
+ 99e766920a7373b66006985837cf0977a21a464e media: ov08x40: Get clock on ACPI platforms too
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/86a850bd23358ac0cf9d4adef67494ccf78e1ed0
+ 86a850bd23358ac0cf9d4adef67494ccf78e1ed0 media: ov08x40: Get reset GPIO and regulators on ACPI platforms too
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/b1f6394a5ee065c5c3dff2c0087ed047645e2fc8
+ b1f6394a5ee065c5c3dff2c0087ed047645e2fc8 media: ov08x40: Move fwnode_graph_get_next_endpoint() call up
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/fece7301f7798ba1b51583863ffee38d20bdbb71
+ fece7301f7798ba1b51583863ffee38d20bdbb71 media: ov08x40: Properly turn sensor on/off when runtime-suspended
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/c061d21a08e4996c7259b34d2dbb01f2537ed35c
+ c061d21a08e4996c7259b34d2dbb01f2537ed35c media: ov08x40: Add OF probe support
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/9743c6dce736d6d6029184bd41af3ff01c1d3560
+ 9743c6dce736d6d6029184bd41af3ff01c1d3560 media: ov08x40: Rename ext_clk to xvclk
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/32bcbd3a01f3693778efa32201859259cbac0161
  32bcbd3a01f3693778efa32201859259cbac0161 Revert "init/main.c: Initialize early LSMs after arch code, static keys and calls."
 

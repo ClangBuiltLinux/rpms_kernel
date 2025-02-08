@@ -39,6 +39,7 @@
  drivers/hwtracing/coresight/coresight-etm4x-core.c |  19 +
  drivers/input/rmi4/rmi_driver.c                    | 124 +--
  drivers/iommu/iommu.c                              |  22 +
+ drivers/media/i2c/ov08x40.c                        | 249 ++++--
  drivers/pci/quirks.c                               |  24 +
  drivers/scsi/sd.c                                  |  10 +
  drivers/usb/core/hub.c                             |   7 +
@@ -47,7 +48,6 @@
  include/linux/lsm_hook_defs.h                      |   2 +
  include/linux/rmi.h                                |   1 +
  include/linux/security.h                           |   5 +
- init/main.c                                        |   6 +-
  kernel/module/signing.c                            |   9 +-
  scripts/tags.sh                                    |   2 +
  security/integrity/platform_certs/load_uefi.c      |   6 +-
@@ -55,10 +55,10 @@
  security/lockdown/lockdown.c                       |   1 +
  security/security.c                                |  12 +
  tools/tracing/rtla/src/utils.c                     |  32 +-
- 57 files changed, 2986 insertions(+), 266 deletions(-)
+ 57 files changed, 3166 insertions(+), 329 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index 9e6246e733eb..d9fe5187333c 100644
+index 5442ff45f963..339e99dc5908 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -22,6 +22,18 @@ $(if $(filter __%, $(MAKECMDGOALS)), \
@@ -873,7 +873,7 @@ index 5fa203f4bc6b..80761c2b63fe 100644
 +	return !!ipl_secure_flag;
 +}
 diff --git a/arch/s390/kernel/setup.c b/arch/s390/kernel/setup.c
-index a3fea683b227..a3162d93f437 100644
+index 99f165726ca9..70b4ef0d86b8 100644
 --- a/arch/s390/kernel/setup.c
 +++ b/arch/s390/kernel/setup.c
 @@ -49,6 +49,7 @@
@@ -1053,7 +1053,7 @@ index fdfa7b266218..f5f8ba457c93 100644
  	tmp = ata_wait_register(ap, port_mmio + PORT_CMD,
  				PORT_CMD_LIST_ON, PORT_CMD_LIST_ON, 1, 500);
 diff --git a/drivers/bluetooth/btusb.c b/drivers/bluetooth/btusb.c
-index 0c85c981a833..5cd7310efaeb 100644
+index 258a5cb6f27a..e96c66c9de7a 100644
 --- a/drivers/bluetooth/btusb.c
 +++ b/drivers/bluetooth/btusb.c
 @@ -295,6 +295,8 @@ static const struct usb_device_id quirks_table[] = {
@@ -3959,6 +3959,433 @@ index 83c8e617a2c5..27f9b4517095 100644
  /**
   * iommu_setup_default_domain - Set the default_domain for the group
   * @group: Group to change
+diff --git a/drivers/media/i2c/ov08x40.c b/drivers/media/i2c/ov08x40.c
+index 67b86dabc67e..c2a399e3bb41 100644
+--- a/drivers/media/i2c/ov08x40.c
++++ b/drivers/media/i2c/ov08x40.c
+@@ -3,10 +3,13 @@
+ 
+ #include <linux/unaligned.h>
+ #include <linux/acpi.h>
++#include <linux/clk.h>
+ #include <linux/i2c.h>
++#include <linux/gpio/consumer.h>
+ #include <linux/module.h>
+ #include <linux/delay.h>
+ #include <linux/pm_runtime.h>
++#include <linux/regulator/consumer.h>
+ #include <media/v4l2-ctrls.h>
+ #include <media/v4l2-device.h>
+ #include <media/v4l2-fwnode.h>
+@@ -1215,7 +1218,7 @@ static const char * const ov08x40_test_pattern_menu[] = {
+ /* Configurations for supported link frequencies */
+ #define OV08X40_LINK_FREQ_400MHZ	400000000ULL
+ #define OV08X40_SCLK_96MHZ		96000000ULL
+-#define OV08X40_EXT_CLK			19200000
++#define OV08X40_XVCLK			19200000
+ #define OV08X40_DATA_LANES		4
+ 
+ /*
+@@ -1279,6 +1282,12 @@ static const struct ov08x40_mode supported_modes[] = {
+ 	},
+ };
+ 
++static const char * const ov08x40_supply_names[] = {
++	"dovdd",	/* Digital I/O power */
++	"avdd",		/* Analog power */
++	"dvdd",		/* Digital core power */
++};
++
+ struct ov08x40 {
+ 	struct v4l2_subdev sd;
+ 	struct media_pad pad;
+@@ -1291,6 +1300,10 @@ struct ov08x40 {
+ 	struct v4l2_ctrl *hblank;
+ 	struct v4l2_ctrl *exposure;
+ 
++	struct clk		*xvclk;
++	struct gpio_desc	*reset_gpio;
++	struct regulator_bulk_data supplies[ARRAY_SIZE(ov08x40_supply_names)];
++
+ 	/* Current mode */
+ 	const struct ov08x40_mode *cur_mode;
+ 
+@@ -1303,6 +1316,55 @@ struct ov08x40 {
+ 
+ #define to_ov08x40(_sd)	container_of(_sd, struct ov08x40, sd)
+ 
++static int ov08x40_power_on(struct device *dev)
++{
++	struct v4l2_subdev *sd = dev_get_drvdata(dev);
++	struct ov08x40 *ov08x = to_ov08x40(sd);
++	int ret;
++
++	ret = clk_prepare_enable(ov08x->xvclk);
++	if (ret < 0) {
++		dev_err(dev, "failed to enable xvclk\n");
++		return ret;
++	}
++
++	if (ov08x->reset_gpio) {
++		gpiod_set_value_cansleep(ov08x->reset_gpio, 1);
++		usleep_range(1000, 2000);
++	}
++
++	ret = regulator_bulk_enable(ARRAY_SIZE(ov08x40_supply_names),
++				    ov08x->supplies);
++	if (ret < 0) {
++		dev_err(dev, "failed to enable regulators\n");
++		goto disable_clk;
++	}
++
++	gpiod_set_value_cansleep(ov08x->reset_gpio, 0);
++	usleep_range(1500, 1800);
++
++	return 0;
++
++disable_clk:
++	gpiod_set_value_cansleep(ov08x->reset_gpio, 1);
++	clk_disable_unprepare(ov08x->xvclk);
++
++	return ret;
++}
++
++static int ov08x40_power_off(struct device *dev)
++{
++	struct v4l2_subdev *sd = dev_get_drvdata(dev);
++	struct ov08x40 *ov08x = to_ov08x40(sd);
++
++	gpiod_set_value_cansleep(ov08x->reset_gpio, 1);
++	regulator_bulk_disable(ARRAY_SIZE(ov08x40_supply_names),
++			       ov08x->supplies);
++	clk_disable_unprepare(ov08x->xvclk);
++
++	return 0;
++}
++
+ /* Read registers up to 4 at a time */
+ static int ov08x40_read_reg(struct ov08x40 *ov08x,
+ 			    u16 reg, u32 len, u32 *val)
+@@ -1332,7 +1394,7 @@ static int ov08x40_read_reg(struct ov08x40 *ov08x,
+ 
+ 	ret = i2c_transfer(client->adapter, msgs, ARRAY_SIZE(msgs));
+ 	if (ret != ARRAY_SIZE(msgs))
+-		return -EIO;
++		return ret < 0 ? ret : -EIO;
+ 
+ 	*val = be32_to_cpu(data_be);
+ 
+@@ -1401,7 +1463,7 @@ static int ov08x40_write_reg(struct ov08x40 *ov08x,
+ 			     u16 reg, u32 len, u32 __val)
+ {
+ 	struct i2c_client *client = v4l2_get_subdevdata(&ov08x->sd);
+-	int buf_i, val_i;
++	int buf_i, val_i, ret;
+ 	u8 buf[6], *val_p;
+ 	__be32 val;
+ 
+@@ -1419,8 +1481,9 @@ static int ov08x40_write_reg(struct ov08x40 *ov08x,
+ 	while (val_i < 4)
+ 		buf[buf_i++] = val_p[val_i++];
+ 
+-	if (i2c_master_send(client, buf, len + 2) != len + 2)
+-		return -EIO;
++	ret = i2c_master_send(client, buf, len + 2);
++	if (ret != len + 2)
++		return ret < 0 ? ret : -EIO;
+ 
+ 	return 0;
+ }
+@@ -1869,6 +1932,34 @@ static int ov08x40_stop_streaming(struct ov08x40 *ov08x)
+ 				 OV08X40_REG_VALUE_08BIT, OV08X40_MODE_STANDBY);
+ }
+ 
++/* Verify chip ID */
++static int ov08x40_identify_module(struct ov08x40 *ov08x)
++{
++	struct i2c_client *client = v4l2_get_subdevdata(&ov08x->sd);
++	int ret;
++	u32 val;
++
++	if (ov08x->identified)
++		return 0;
++
++	ret = ov08x40_read_reg(ov08x, OV08X40_REG_CHIP_ID,
++			       OV08X40_REG_VALUE_24BIT, &val);
++	if (ret) {
++		dev_err(&client->dev, "error reading chip-id register: %d\n", ret);
++		return ret;
++	}
++
++	if (val != OV08X40_CHIP_ID) {
++		dev_err(&client->dev, "chip id mismatch: %x!=%x\n",
++			OV08X40_CHIP_ID, val);
++		return -ENXIO;
++	}
++
++	ov08x->identified = true;
++
++	return 0;
++}
++
+ static int ov08x40_set_stream(struct v4l2_subdev *sd, int enable)
+ {
+ 	struct ov08x40 *ov08x = to_ov08x40(sd);
+@@ -1882,6 +1973,10 @@ static int ov08x40_set_stream(struct v4l2_subdev *sd, int enable)
+ 		if (ret < 0)
+ 			goto err_unlock;
+ 
++		ret = ov08x40_identify_module(ov08x);
++		if (ret)
++			goto err_rpm_put;
++
+ 		/*
+ 		 * Apply default & customized values
+ 		 * and then start streaming.
+@@ -1906,32 +2001,6 @@ static int ov08x40_set_stream(struct v4l2_subdev *sd, int enable)
+ 	return ret;
+ }
+ 
+-/* Verify chip ID */
+-static int ov08x40_identify_module(struct ov08x40 *ov08x)
+-{
+-	struct i2c_client *client = v4l2_get_subdevdata(&ov08x->sd);
+-	int ret;
+-	u32 val;
+-
+-	if (ov08x->identified)
+-		return 0;
+-
+-	ret = ov08x40_read_reg(ov08x, OV08X40_REG_CHIP_ID,
+-			       OV08X40_REG_VALUE_24BIT, &val);
+-	if (ret)
+-		return ret;
+-
+-	if (val != OV08X40_CHIP_ID) {
+-		dev_err(&client->dev, "chip id mismatch: %x!=%x\n",
+-			OV08X40_CHIP_ID, val);
+-		return -ENXIO;
+-	}
+-
+-	ov08x->identified = true;
+-
+-	return 0;
+-}
+-
+ static const struct v4l2_subdev_video_ops ov08x40_video_ops = {
+ 	.s_stream = ov08x40_set_stream,
+ };
+@@ -2072,7 +2141,7 @@ static void ov08x40_free_controls(struct ov08x40 *ov08x)
+ 	mutex_destroy(&ov08x->mutex);
+ }
+ 
+-static int ov08x40_check_hwcfg(struct device *dev)
++static int ov08x40_check_hwcfg(struct ov08x40 *ov08x, struct device *dev)
+ {
+ 	struct v4l2_fwnode_endpoint bus_cfg = {
+ 		.bus_type = V4L2_MBUS_CSI2_DPHY
+@@ -2081,42 +2150,71 @@ static int ov08x40_check_hwcfg(struct device *dev)
+ 	struct fwnode_handle *fwnode = dev_fwnode(dev);
+ 	unsigned int i, j;
+ 	int ret;
+-	u32 ext_clk;
+-
+-	if (!fwnode)
+-		return -ENXIO;
+-
+-	ret = fwnode_property_read_u32(dev_fwnode(dev), "clock-frequency",
+-				       &ext_clk);
+-	if (ret) {
+-		dev_err(dev, "can't get clock frequency");
+-		return ret;
+-	}
+-
+-	if (ext_clk != OV08X40_EXT_CLK) {
+-		dev_err(dev, "external clock %d is not supported",
+-			ext_clk);
+-		return -EINVAL;
+-	}
++	u32 xvclk_rate;
+ 
++	/*
++	 * Sometimes the fwnode graph is initialized by the bridge driver.
++	 * Bridge drivers doing this also add sensor properties, wait for this.
++	 */
+ 	ep = fwnode_graph_get_next_endpoint(fwnode, NULL);
+ 	if (!ep)
+-		return -ENXIO;
++		return dev_err_probe(dev, -EPROBE_DEFER,
++				     "waiting for fwnode graph endpoint\n");
+ 
+ 	ret = v4l2_fwnode_endpoint_alloc_parse(ep, &bus_cfg);
+ 	fwnode_handle_put(ep);
+ 	if (ret)
+-		return ret;
++		return dev_err_probe(dev, ret, "parsing endpoint failed\n");
++
++	ov08x->reset_gpio = devm_gpiod_get_optional(dev, "reset",
++						    GPIOD_OUT_LOW);
++	if (IS_ERR(ov08x->reset_gpio)) {
++		ret = dev_err_probe(dev, PTR_ERR(ov08x->reset_gpio),
++				    "getting reset GPIO\n");
++		goto out_err;
++	}
++
++	for (i = 0; i < ARRAY_SIZE(ov08x40_supply_names); i++)
++		ov08x->supplies[i].supply = ov08x40_supply_names[i];
++
++	ret = devm_regulator_bulk_get(dev, ARRAY_SIZE(ov08x40_supply_names),
++				      ov08x->supplies);
++	if (ret)
++		goto out_err;
++
++	ov08x->xvclk = devm_clk_get_optional(dev, NULL);
++	if (IS_ERR(ov08x->xvclk)) {
++		ret = dev_err_probe(dev, PTR_ERR(ov08x->xvclk),
++				    "getting xvclk\n");
++		goto out_err;
++	}
++	if (ov08x->xvclk) {
++		xvclk_rate = clk_get_rate(ov08x->xvclk);
++	} else {
++		ret = fwnode_property_read_u32(dev_fwnode(dev), "clock-frequency",
++					       &xvclk_rate);
++		if (ret) {
++			dev_err(dev, "can't get clock frequency\n");
++			goto out_err;
++		}
++	}
++
++	if (xvclk_rate != OV08X40_XVCLK) {
++		dev_err(dev, "external clock %d is not supported\n",
++			xvclk_rate);
++		ret = -EINVAL;
++		goto out_err;
++	}
+ 
+ 	if (bus_cfg.bus.mipi_csi2.num_data_lanes != OV08X40_DATA_LANES) {
+-		dev_err(dev, "number of CSI2 data lanes %d is not supported",
++		dev_err(dev, "number of CSI2 data lanes %d is not supported\n",
+ 			bus_cfg.bus.mipi_csi2.num_data_lanes);
+ 		ret = -EINVAL;
+ 		goto out_err;
+ 	}
+ 
+ 	if (!bus_cfg.nr_of_link_frequencies) {
+-		dev_err(dev, "no link frequencies defined");
++		dev_err(dev, "no link frequencies defined\n");
+ 		ret = -EINVAL;
+ 		goto out_err;
+ 	}
+@@ -2129,7 +2227,7 @@ static int ov08x40_check_hwcfg(struct device *dev)
+ 		}
+ 
+ 		if (j == bus_cfg.nr_of_link_frequencies) {
+-			dev_err(dev, "no link frequency %lld supported",
++			dev_err(dev, "no link frequency %lld supported\n",
+ 				link_freq_menu_items[i]);
+ 			ret = -EINVAL;
+ 			goto out_err;
+@@ -2143,33 +2241,34 @@ static int ov08x40_check_hwcfg(struct device *dev)
+ }
+ 
+ static int ov08x40_probe(struct i2c_client *client)
+-{
+-	struct ov08x40 *ov08x;
++{	struct ov08x40 *ov08x;
+ 	int ret;
+ 	bool full_power;
+ 
+-	/* Check HW config */
+-	ret = ov08x40_check_hwcfg(&client->dev);
+-	if (ret) {
+-		dev_err(&client->dev, "failed to check hwcfg: %d", ret);
+-		return ret;
+-	}
+-
+ 	ov08x = devm_kzalloc(&client->dev, sizeof(*ov08x), GFP_KERNEL);
+ 	if (!ov08x)
+ 		return -ENOMEM;
+ 
++	/* Check HW config */
++	ret = ov08x40_check_hwcfg(ov08x, &client->dev);
++	if (ret)
++		return ret;
++
+ 	/* Initialize subdev */
+ 	v4l2_i2c_subdev_init(&ov08x->sd, client, &ov08x40_subdev_ops);
+ 
+ 	full_power = acpi_dev_state_d0(&client->dev);
+ 	if (full_power) {
+-		/* Check module identity */
+-		ret = ov08x40_identify_module(ov08x);
++		ret = ov08x40_power_on(&client->dev);
+ 		if (ret) {
+-			dev_err(&client->dev, "failed to find sensor: %d\n", ret);
++			dev_err(&client->dev, "failed to power on\n");
+ 			return ret;
+ 		}
++
++		/* Check module identity */
++		ret = ov08x40_identify_module(ov08x);
++		if (ret)
++			goto probe_power_off;
+ 	}
+ 
+ 	/* Set default mode to max resolution */
+@@ -2177,7 +2276,7 @@ static int ov08x40_probe(struct i2c_client *client)
+ 
+ 	ret = ov08x40_init_controls(ov08x);
+ 	if (ret)
+-		return ret;
++		goto probe_power_off;
+ 
+ 	/* Initialize subdev */
+ 	ov08x->sd.internal_ops = &ov08x40_internal_ops;
+@@ -2210,6 +2309,9 @@ static int ov08x40_probe(struct i2c_client *client)
+ error_handler_free:
+ 	ov08x40_free_controls(ov08x);
+ 
++probe_power_off:
++	ov08x40_power_off(&client->dev);
++
+ 	return ret;
+ }
+ 
+@@ -2223,9 +2325,14 @@ static void ov08x40_remove(struct i2c_client *client)
+ 	ov08x40_free_controls(ov08x);
+ 
+ 	pm_runtime_disable(&client->dev);
++	if (!pm_runtime_status_suspended(&client->dev))
++		ov08x40_power_off(&client->dev);
+ 	pm_runtime_set_suspended(&client->dev);
+ }
+ 
++static DEFINE_RUNTIME_DEV_PM_OPS(ov08x40_pm_ops, ov08x40_power_off,
++				 ov08x40_power_on, NULL);
++
+ #ifdef CONFIG_ACPI
+ static const struct acpi_device_id ov08x40_acpi_ids[] = {
+ 	{"OVTI08F4"},
+@@ -2235,10 +2342,18 @@ static const struct acpi_device_id ov08x40_acpi_ids[] = {
+ MODULE_DEVICE_TABLE(acpi, ov08x40_acpi_ids);
+ #endif
+ 
++static const struct of_device_id ov08x40_of_match[] = {
++	{ .compatible = "ovti,ov08x40" },
++	{ /* sentinel */ }
++};
++MODULE_DEVICE_TABLE(of, ov08x40_of_match);
++
+ static struct i2c_driver ov08x40_i2c_driver = {
+ 	.driver = {
+ 		.name = "ov08x40",
+ 		.acpi_match_table = ACPI_PTR(ov08x40_acpi_ids),
++		.of_match_table = ov08x40_of_match,
++		.pm = pm_sleep_ptr(&ov08x40_pm_ops),
+ 	},
+ 	.probe = ov08x40_probe,
+ 	.remove = ov08x40_remove,
 diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
 index 8103bc24a54e..ea629c78fa7c 100644
 --- a/drivers/pci/quirks.c
@@ -4194,31 +4621,6 @@ index 2ec8f3014757..7273b2b8b23b 100644
  static inline int lsm_fill_user_ctx(struct lsm_ctx __user *uctx,
  				    u32 *uctx_len, void *val, size_t val_len,
  				    u64 id, u64 flags)
-diff --git a/init/main.c b/init/main.c
-index c4778edae797..206acdde51f5 100644
---- a/init/main.c
-+++ b/init/main.c
-@@ -922,11 +922,8 @@ void start_kernel(void)
- 	boot_cpu_init();
- 	page_address_init();
- 	pr_notice("%s", linux_banner);
--	setup_arch(&command_line);
--	/* Static keys and static calls are needed by LSMs */
--	jump_label_init();
--	static_call_init();
- 	early_security_init();
-+	setup_arch(&command_line);
- 	setup_boot_config();
- 	setup_command_line(command_line);
- 	setup_nr_cpu_ids();
-@@ -937,6 +934,7 @@ void start_kernel(void)
- 
- 	pr_notice("Kernel command line: %s\n", saved_command_line);
- 	/* parameters may set static keys */
-+	jump_label_init();
- 	parse_early_param();
- 	after_dashes = parse_args("Booting kernel",
- 				  static_command_line, __start___param,
 diff --git a/kernel/module/signing.c b/kernel/module/signing.c
 index a2ff4242e623..f0d2be1ee4f1 100644
 --- a/kernel/module/signing.c
