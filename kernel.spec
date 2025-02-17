@@ -159,18 +159,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 6.12.13
-%define specversion 6.12.13
+%define specrpmversion 6.12.14
+%define specversion 6.12.14
 %define patchversion 6.12
 %define pkgrelease 100
 %define kversion 6
-%define tarfile_release 6.12.13
+%define tarfile_release 6.12.14
 # This is needed to do merge window version magic
 %define patchlevel 12
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 100%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 6.12.13
+%define kabiversion 6.12.14
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4164,8 +4164,15 @@ fi\
 #
 #
 %changelog
-* Sat Feb 08 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.12.13-100]
+* Mon Feb 17 2025 Augusto Caringi <acaringi@redhat.com> [6.12.14-100]
 - Turn off libbpf dynamic for perf (Justin M. Forbes)
+
+* Mon Feb 17 2025 Augusto Caringi <acaringi@redhat.com> [6.12.14-0]
+- redhat/configs: automotive: Set CONFIG_FSCACHE=y (Augusto Caringi)
+- CONFIG_CPUFREQ_DT_PLATDEV is bool now (Justin M. Forbes)
+- Add some bugs to BugsFixed for the 6.12.14 update (Justin M. Forbes)
+- efi,lockdown: fix kernel lockdown on Secure Boot (Ondrej Mosnacek) {CVE-2025-1272}
+- Linux v6.12.14
 
 * Sat Feb 08 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.12.13-0]
 - Config update for 6.12.13 (Justin M. Forbes)

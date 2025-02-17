@@ -1,3 +1,6 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/7a0ae6259dd710721dcdc1896cb1a0194f55f3ff
+ 7a0ae6259dd710721dcdc1896cb1a0194f55f3ff efi,lockdown: fix kernel lockdown on Secure Boot
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/eab4e4a537c1ecea380079999716d24f5cc67aa5
  eab4e4a537c1ecea380079999716d24f5cc67aa5 Reapply "init/main.c: Initialize early LSMs after arch code, static keys and calls."
 
