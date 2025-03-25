@@ -34,7 +34,7 @@
  drivers/iommu/iommu.c                              |  22 +
  drivers/media/i2c/ov08x40.c                        | 170 +++----
  drivers/message/fusion/mptsas.c                    |   5 +
- drivers/message/fusion/mptspi.c                    |   6 +
+ drivers/message/fusion/mptspi.c                    |   5 +
  drivers/misc/mei/vsc-tp.c                          |  26 +-
  drivers/net/wireguard/main.c                       |   6 +
  drivers/pci/pci-driver.c                           |   9 +
@@ -61,9 +61,6 @@
  include/linux/rh_waived.h                          |  19 +
  include/linux/rmi.h                                |   1 +
  include/linux/security.h                           |   9 +
- include/linux/stdarg.h                             |  10 +
- include/linux/stddef.h                             |   2 +
- include/linux/types.h                              |   2 +
  init/main.c                                        |   5 +
  kernel/Makefile                                    |   1 +
  kernel/bpf/core.c                                  |   5 +
@@ -81,13 +78,13 @@
  security/integrity/platform_certs/load_uefi.c      |   6 +-
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |  11 +
- 83 files changed, 2849 insertions(+), 301 deletions(-)
+ 80 files changed, 2834 insertions(+), 301 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index fb8752b42ec8..4e22c8f2f90e 100644
+index 866427da6add..cfcd39b84939 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -6181,6 +6181,17 @@
+@@ -6184,6 +6184,17 @@
  		2	The "airplane mode" button toggles between everything
  			blocked and everything unblocked.
  
@@ -105,7 +102,7 @@ index fb8752b42ec8..4e22c8f2f90e 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -7480,6 +7491,15 @@
+@@ -7483,6 +7494,15 @@
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -196,7 +193,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 8b6764d44a61..e0a9b8056f8e 100644
+index d138b17b8840..6daff4572877 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -22,6 +22,18 @@ $(if $(filter __%, $(MAKECMDGOALS)), \
@@ -236,7 +233,7 @@ index 8b6764d44a61..e0a9b8056f8e 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1317,7 +1340,13 @@ define filechk_version.h
+@@ -1320,7 +1343,13 @@ define filechk_version.h
  	((c) > 255 ? 255 : (c)))';                                       \
  	echo \#define LINUX_VERSION_MAJOR $(VERSION);                    \
  	echo \#define LINUX_VERSION_PATCHLEVEL $(PATCHLEVEL);            \
@@ -251,7 +248,7 @@ index 8b6764d44a61..e0a9b8056f8e 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -1915,6 +1944,23 @@ endif
+@@ -1918,6 +1947,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -352,10 +349,10 @@ index d78bcfe707b5..f3a71214a211 100644
  	/* boot_command_line has been already set up in early.c */
  	*cmdline_p = boot_command_line;
 diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
-index 7cce91b19fb2..82bfcf5c2092 100644
+index 73565168fc19..00f59c12b16d 100644
 --- a/arch/x86/kernel/cpu/common.c
 +++ b/arch/x86/kernel/cpu/common.c
-@@ -1599,6 +1599,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
+@@ -1637,6 +1637,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
  		get_cpu_vendor(c);
  		intel_unlock_cpuid_leafs(c);
  		get_cpu_cap(c);
@@ -364,7 +361,7 @@ index 7cce91b19fb2..82bfcf5c2092 100644
  		get_cpu_address_sizes(c);
  		cpu_parse_early_param();
 diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index cebee310e200..70a656b9988b 100644
+index c7164a8de983..015ae684bad0 100644
 --- a/arch/x86/kernel/setup.c
 +++ b/arch/x86/kernel/setup.c
 @@ -21,6 +21,7 @@
@@ -380,10 +377,10 @@ index cebee310e200..70a656b9988b 100644
  #include <asm/vsyscall.h>
  #include <linux/vmalloc.h>
 +#include <asm/intel-family.h>
- 
- /*
-  * max_low_pfn_mapped: highest directly mapped pfn < 4 GB
-@@ -673,6 +675,79 @@ static void __init early_reserve_memory(void)
+ #if defined(CONFIG_X86_LOCAL_APIC)
+ #include <asm/nmi.h>
+ #endif
+@@ -796,6 +798,79 @@ static void __init early_reserve_memory(void)
  	trim_snb_memory();
  }
  
@@ -463,7 +460,7 @@ index cebee310e200..70a656b9988b 100644
  /*
   * Dump out kernel offset information on panic.
   */
-@@ -907,6 +982,13 @@ void __init setup_arch(char **cmdline_p)
+@@ -966,6 +1041,13 @@ void __init setup_arch(char **cmdline_p)
  	if (efi_enabled(EFI_BOOT))
  		efi_init();
  
@@ -477,7 +474,7 @@ index cebee310e200..70a656b9988b 100644
  	reserve_ibft_region();
  	x86_init.resources.dmi_setup();
  
-@@ -1073,19 +1155,7 @@ void __init setup_arch(char **cmdline_p)
+@@ -1131,19 +1213,7 @@ void __init setup_arch(char **cmdline_p)
  	/* Allocate bigger log buffer */
  	setup_log_buf(1);
  
@@ -498,7 +495,7 @@ index cebee310e200..70a656b9988b 100644
  
  	reserve_initrd();
  
-@@ -1195,6 +1265,8 @@ void __init setup_arch(char **cmdline_p)
+@@ -1253,6 +1323,8 @@ void __init setup_arch(char **cmdline_p)
  		efi_apply_memmap_quirks();
  #endif
  
@@ -2215,7 +2212,7 @@ index b9682264e2f5..54575eea3c49 100644
  	.probe = ov08x40_probe,
  	.remove = ov08x40_remove,
 diff --git a/drivers/message/fusion/mptsas.c b/drivers/message/fusion/mptsas.c
-index 7e79da9684ed..7129a8906734 100644
+index 185c08eab4ca..215a68b1d863 100644
 --- a/drivers/message/fusion/mptsas.c
 +++ b/drivers/message/fusion/mptsas.c
 @@ -5378,6 +5378,10 @@ static void mptsas_remove(struct pci_dev *pdev)
@@ -2238,7 +2235,7 @@ index 7e79da9684ed..7129a8906734 100644
  };
  MODULE_DEVICE_TABLE(pci, mptsas_pci_table);
 diff --git a/drivers/message/fusion/mptspi.c b/drivers/message/fusion/mptspi.c
-index a3901fbfac4f..9dab0279bdff 100644
+index a3901fbfac4f..83add1994d2c 100644
 --- a/drivers/message/fusion/mptspi.c
 +++ b/drivers/message/fusion/mptspi.c
 @@ -1240,12 +1240,17 @@ static struct spi_function_template mptspi_transport_functions = {
@@ -2259,14 +2256,6 @@ index a3901fbfac4f..9dab0279bdff 100644
  	{0}	/* Terminating entry */
  };
  MODULE_DEVICE_TABLE(pci, mptspi_pci_table);
-@@ -1536,6 +1541,7 @@ mptspi_probe(struct pci_dev *pdev, const struct pci_device_id *id)
- 		    0, 0, 0, 0, 5);
- 
- 	scsi_scan_host(sh);
-+
- 	return 0;
- 
- out_mptspi_probe:
 diff --git a/drivers/misc/mei/vsc-tp.c b/drivers/misc/mei/vsc-tp.c
 index 7be1649b1972..fa553d4914b6 100644
 --- a/drivers/misc/mei/vsc-tp.c
@@ -2620,10 +2609,10 @@ index dcba4281ea48..bb82bf5148b0 100644
  	 * disconnected while waiting for the lock to succeed. */
  	usb_lock_device(hdev);
 diff --git a/fs/afs/main.c b/fs/afs/main.c
-index 1ae0067f772d..e93f47237a91 100644
+index c845c5daaeba..00e14194265f 100644
 --- a/fs/afs/main.c
 +++ b/fs/afs/main.c
-@@ -199,6 +199,9 @@ static int __init afs_init(void)
+@@ -193,6 +193,9 @@ static int __init afs_init(void)
  		goto error_proc;
  	}
  
@@ -2802,10 +2791,10 @@ index e2f1ce37c41e..3fe30fcc506c 100644
  LSM_HOOK(int, 0, perf_event_open, struct perf_event_attr *attr, int type)
  LSM_HOOK(int, 0, perf_event_alloc, struct perf_event *event)
 diff --git a/include/linux/module.h b/include/linux/module.h
-index 30e5b19bafa9..e18f45c86adb 100644
+index 9937e71a3b5b..f319f9d8d0f9 100644
 --- a/include/linux/module.h
 +++ b/include/linux/module.h
-@@ -429,6 +429,7 @@ struct module {
+@@ -428,6 +428,7 @@ struct module {
  	struct module_attribute *modinfo_attrs;
  	const char *version;
  	const char *srcversion;
@@ -2813,7 +2802,7 @@ index 30e5b19bafa9..e18f45c86adb 100644
  	struct kobject *holders_dir;
  
  	/* Exported symbols */
-@@ -1027,4 +1028,8 @@ static inline unsigned long find_kallsyms_symbol_value(struct module *mod,
+@@ -1011,4 +1012,8 @@ static inline unsigned long find_kallsyms_symbol_value(struct module *mod,
  
  #endif  /* CONFIG_MODULES && CONFIG_KALLSYMS */
  
@@ -3544,61 +3533,8 @@ index 980b6c207cad..a0f0b41d7dcc 100644
 +#endif /* CONFIG_SECURITY_LOCKDOWN_LSM */
 +
  #endif /* ! __LINUX_SECURITY_H */
-diff --git a/include/linux/stdarg.h b/include/linux/stdarg.h
-index c8dc7f4f390c..af7eb0ed138e 100644
---- a/include/linux/stdarg.h
-+++ b/include/linux/stdarg.h
-@@ -3,7 +3,17 @@
- #define _LINUX_STDARG_H
- 
- typedef __builtin_va_list va_list;
-+#if defined(__STDC_VERSION__) && __STDC_VERSION__ > 201710L
-+#define va_start(v, ...) __builtin_va_start(v, 0)
-+#ifdef __has_builtin
-+#if __has_builtin(__builtin_c23_va_start)
-+#undef va_start
-+#define va_start(...)	__builtin_c23_va_start(__VA_ARGS__)
-+#endif
-+#endif
-+#else
- #define va_start(v, l)	__builtin_va_start(v, l)
-+#endif
- #define va_end(v)	__builtin_va_end(v)
- #define va_arg(v, T)	__builtin_va_arg(v, T)
- #define va_copy(d, s)	__builtin_va_copy(d, s)
-diff --git a/include/linux/stddef.h b/include/linux/stddef.h
-index 929d67710cc5..16508c74fca9 100644
---- a/include/linux/stddef.h
-+++ b/include/linux/stddef.h
-@@ -7,10 +7,12 @@
- #undef NULL
- #define NULL ((void *)0)
- 
-+#if !defined(__STDC_VERSION__) || __STDC_VERSION__ < 202311L
- enum {
- 	false	= 0,
- 	true	= 1
- };
-+#endif
- 
- #undef offsetof
- #define offsetof(TYPE, MEMBER)	__builtin_offsetof(TYPE, MEMBER)
-diff --git a/include/linux/types.h b/include/linux/types.h
-index 1c509ce8f7f6..4e08ce851059 100644
---- a/include/linux/types.h
-+++ b/include/linux/types.h
-@@ -32,7 +32,9 @@ typedef __kernel_timer_t	timer_t;
- typedef __kernel_clockid_t	clockid_t;
- typedef __kernel_mqd_t		mqd_t;
- 
-+#if !defined(__STDC_VERSION__) || __STDC_VERSION__ < 202311L
- typedef _Bool			bool;
-+#endif
- 
- typedef __kernel_uid32_t	uid_t;
- typedef __kernel_gid32_t	gid_t;
 diff --git a/init/main.c b/init/main.c
-index 2a1757826397..7bd174445f1b 100644
+index 7f0a2a3dbd29..9b9398febe87 100644
 --- a/init/main.c
 +++ b/init/main.c
 @@ -1160,8 +1160,10 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
@@ -3623,7 +3559,7 @@ index 2a1757826397..7bd174445f1b 100644
  		if (!strcmp(fn_name, entry->buf)) {
  			pr_debug("initcall %s blacklisted\n", fn_name);
 diff --git a/kernel/Makefile b/kernel/Makefile
-index 87866b037fbe..2cec0dc5f15a 100644
+index 434929de17ef..25028f21e684 100644
 --- a/kernel/Makefile
 +++ b/kernel/Makefile
 @@ -12,6 +12,7 @@ obj-y     = fork.o exec_domain.o panic.o \
@@ -3700,7 +3636,7 @@ index e1e42e918ba7..9142e8a9c0ba 100644
  	}
  
 diff --git a/kernel/module/main.c b/kernel/module/main.c
-index 1fb9ad289a6f..d3451705aac4 100644
+index a256cc919ad7..57652803d9f0 100644
 --- a/kernel/module/main.c
 +++ b/kernel/module/main.c
 @@ -65,6 +65,8 @@
@@ -3728,7 +3664,7 @@ index 1fb9ad289a6f..d3451705aac4 100644
  	&modinfo_initstate,
  	&modinfo_coresize,
  #ifdef CONFIG_ARCH_WANTS_MODULES_DATA_IN_VMALLOC
-@@ -3277,6 +3281,11 @@ static int early_mod_check(struct load_info *info, int flags)
+@@ -3241,6 +3245,11 @@ static int early_mod_check(struct load_info *info, int flags)
  		return -EPERM;
  	}
  
@@ -3740,7 +3676,7 @@ index 1fb9ad289a6f..d3451705aac4 100644
  	err = rewrite_section_headers(info, flags);
  	if (err)
  		return err;
-@@ -3849,6 +3858,10 @@ void print_modules(void)
+@@ -3814,6 +3823,10 @@ void print_modules(void)
  		pr_cont(" [last unloaded: %s%s]", last_unloaded_module.name,
  			last_unloaded_module.taints);
  	pr_cont("\n");
