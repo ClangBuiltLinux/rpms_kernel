@@ -10,7 +10,6 @@
  arch/s390/kernel/setup.c                           |   4 +
  arch/x86/kernel/cpu/common.c                       |   1 +
  arch/x86/kernel/setup.c                            |  98 +++-
- arch/x86/tools/insn_decoder_test.c                 |   2 +-
  crypto/akcipher.c                                  |   3 +-
  crypto/dh.c                                        |  25 +
  crypto/drbg.c                                      |  18 +-
@@ -78,13 +77,13 @@
  security/integrity/platform_certs/load_uefi.c      |   6 +-
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |  11 +
- 80 files changed, 2747 insertions(+), 220 deletions(-)
+ 79 files changed, 2746 insertions(+), 219 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 637c933c5478..10ad9932e650 100644
+index 5e351ac52cca..96db30a31ee0 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -6189,6 +6189,17 @@
+@@ -6197,6 +6197,17 @@
  		2	The "airplane mode" button toggles between everything
  			blocked and everything unblocked.
  
@@ -102,7 +101,7 @@ index 637c933c5478..10ad9932e650 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -7490,6 +7501,15 @@
+@@ -7507,6 +7518,15 @@
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -289,10 +288,10 @@ index 835b5f100e92..179ad4af54a7 100644
  	  The VM uses one page of physical memory for each page table.
  	  For systems with a lot of processes, this can use a lot of
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index f2d724c1dfd2..7cb460242c53 100644
+index 62dc903ecc7f..c26e0aa3891f 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -1411,7 +1411,7 @@ endchoice
+@@ -1412,7 +1412,7 @@ endchoice
  
  config ARM64_FORCE_52BIT
  	bool "Force 52-bit virtual addresses for userspace"
@@ -504,19 +503,6 @@ index c7164a8de983..015ae684bad0 100644
  	unwind_init();
  }
  
-diff --git a/arch/x86/tools/insn_decoder_test.c b/arch/x86/tools/insn_decoder_test.c
-index 472540aeabc2..366e07546344 100644
---- a/arch/x86/tools/insn_decoder_test.c
-+++ b/arch/x86/tools/insn_decoder_test.c
-@@ -106,7 +106,7 @@ static void parse_args(int argc, char **argv)
- 	}
- }
- 
--#define BUFSIZE 256
-+#define BUFSIZE 4096
- 
- int main(int argc, char **argv)
- {
 diff --git a/crypto/akcipher.c b/crypto/akcipher.c
 index 72c82d9aa077..da1ac5de8252 100644
 --- a/crypto/akcipher.c
@@ -2329,10 +2315,10 @@ index c845c5daaeba..00e14194265f 100644
  
  error_proc:
 diff --git a/fs/erofs/super.c b/fs/erofs/super.c
-index 827b62665649..2cd464770b28 100644
+index cadec6b1b554..e35b381d9717 100644
 --- a/fs/erofs/super.c
 +++ b/fs/erofs/super.c
-@@ -571,6 +571,9 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
+@@ -570,6 +570,9 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
  {
  	struct inode *inode;
  	struct erofs_sb_info *sbi = EROFS_SB(sb);
@@ -2342,7 +2328,7 @@ index 827b62665649..2cd464770b28 100644
  	int err;
  
  	sb->s_magic = EROFS_SUPER_MAGIC;
-@@ -681,6 +684,12 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
+@@ -674,6 +677,12 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
  		return err;
  
  	erofs_info(sb, "mounted with root inode @ nid %llu.", sbi->root_nid);
@@ -2356,10 +2342,10 @@ index 827b62665649..2cd464770b28 100644
  }
  
 diff --git a/fs/ext4/super.c b/fs/ext4/super.c
-index a50e5c31b937..afddbfa816f9 100644
+index 8122d4ffb3b5..623264b723dc 100644
 --- a/fs/ext4/super.c
 +++ b/fs/ext4/super.c
-@@ -5630,6 +5630,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
+@@ -5637,6 +5637,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
  	atomic_set(&sbi->s_warning_count, 0);
  	atomic_set(&sbi->s_msg_count, 0);
  
