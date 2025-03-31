@@ -52,7 +52,7 @@
  include/linux/kernel.h                             |  16 +
  include/linux/lsm_hook_defs.h                      |   1 +
  include/linux/module.h                             |   5 +
- include/linux/panic.h                              |  18 +-
+ include/linux/panic.h                              |  17 +-
  include/linux/pci.h                                |   5 +
  include/linux/random.h                             |  10 +
  include/linux/rh_flags.h                           |  34 ++
@@ -66,7 +66,7 @@
  kernel/bpf/syscall.c                               |  23 +
  kernel/module/main.c                               |  13 +
  kernel/module/signing.c                            |   9 +-
- kernel/panic.c                                     |  13 +
+ kernel/panic.c                                     |  12 +
  kernel/rh_flags.c                                  | 115 +++++
  kernel/rh_messages.c                               | 414 ++++++++++++++++
  kernel/rh_messages.h                               | 326 +++++++++++++
@@ -77,13 +77,13 @@
  security/integrity/platform_certs/load_uefi.c      |   6 +-
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |  11 +
- 79 files changed, 2746 insertions(+), 219 deletions(-)
+ 79 files changed, 2744 insertions(+), 219 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 5e351ac52cca..96db30a31ee0 100644
+index 3435a062a208..30e993a9a145 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -6197,6 +6197,17 @@
+@@ -6204,6 +6204,17 @@
  		2	The "airplane mode" button toggles between everything
  			blocked and everything unblocked.
  
@@ -101,7 +101,7 @@ index 5e351ac52cca..96db30a31ee0 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -7507,6 +7518,15 @@
+@@ -7514,6 +7525,15 @@
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -145,13 +145,13 @@ index 000000000000..45caec7fbae6
 +===============================
 +
 diff --git a/Kconfig b/Kconfig
-index 745bc773f567..f57ff40109d7 100644
+index 307e581144de..11e93e479ce4 100644
 --- a/Kconfig
 +++ b/Kconfig
-@@ -30,3 +30,5 @@ source "lib/Kconfig"
- source "lib/Kconfig.debug"
- 
+@@ -32,3 +32,5 @@ source "lib/Kconfig.debug"
  source "Documentation/Kconfig"
+ 
+ source "io_uring/Kconfig"
 +
 +source "Kconfig.redhat"
 diff --git a/Kconfig.redhat b/Kconfig.redhat
@@ -313,10 +313,10 @@ index b0d00032479d..afb9544fb007 100644
  /*
   * DIAG 308 support
 diff --git a/arch/s390/kernel/ipl.c b/arch/s390/kernel/ipl.c
-index 69be2309cde0..1d85c99be81b 100644
+index 3b9d9ccfad63..648ac8c7e1fd 100644
 --- a/arch/s390/kernel/ipl.c
 +++ b/arch/s390/kernel/ipl.c
-@@ -2497,3 +2497,8 @@ int ipl_report_free(struct ipl_report *report)
+@@ -2498,3 +2498,8 @@ int ipl_report_free(struct ipl_report *report)
  }
  
  #endif
@@ -326,7 +326,7 @@ index 69be2309cde0..1d85c99be81b 100644
 +	return !!ipl_secure_flag;
 +}
 diff --git a/arch/s390/kernel/setup.c b/arch/s390/kernel/setup.c
-index d78bcfe707b5..f3a71214a211 100644
+index b6686d63b754..e5c8047570ab 100644
 --- a/arch/s390/kernel/setup.c
 +++ b/arch/s390/kernel/setup.c
 @@ -49,6 +49,7 @@
@@ -337,7 +337,7 @@ index d78bcfe707b5..f3a71214a211 100644
  #include <linux/hugetlb.h>
  #include <linux/kmemleak.h>
  
-@@ -916,6 +917,9 @@ void __init setup_arch(char **cmdline_p)
+@@ -915,6 +916,9 @@ void __init setup_arch(char **cmdline_p)
  
  	log_component_list();
  
@@ -885,10 +885,10 @@ index dfc7cae90802..2a58d726149d 100644
  		alg->verify = sig_default_verify;
  	if (!alg->set_priv_key)
 diff --git a/crypto/testmgr.c b/crypto/testmgr.c
-index 1e42582bc7f1..96f8d59b9346 100644
+index d294c5948b67..0255cbeaaef1 100644
 --- a/crypto/testmgr.c
 +++ b/crypto/testmgr.c
-@@ -4189,7 +4189,7 @@ static int test_akcipher_one(struct crypto_akcipher *tfm,
+@@ -4162,7 +4162,7 @@ static int test_akcipher_one(struct crypto_akcipher *tfm,
  	 * Don't invoke decrypt test which requires a private key
  	 * for vectors with only a public key.
  	 */
@@ -897,7 +897,7 @@ index 1e42582bc7f1..96f8d59b9346 100644
  		err = 0;
  		goto free_all;
  	}
-@@ -4325,7 +4325,7 @@ static int test_sig_one(struct crypto_sig *tfm, const struct sig_testvec *vecs)
+@@ -4298,7 +4298,7 @@ static int test_sig_one(struct crypto_sig *tfm, const struct sig_testvec *vecs)
  	 * Don't invoke sign test (which requires a private key)
  	 * for vectors with only a public key.
  	 */
@@ -905,8 +905,8 @@ index 1e42582bc7f1..96f8d59b9346 100644
 +	if (1 || vecs->public_key_vec)
  		return 0;
  
- 	sig_size = crypto_sig_keysize(tfm);
-@@ -5155,14 +5155,12 @@ static const struct alg_test_desc alg_test_descs[] = {
+ 	sig_size = crypto_sig_maxsize(tfm);
+@@ -5138,14 +5138,12 @@ static const struct alg_test_desc alg_test_descs[] = {
  	}, {
  		.alg = "ecdh-nist-p256",
  		.test = alg_test_kpp,
@@ -2065,7 +2065,7 @@ index c8bd71a739f7..909e20634dae 100644
  		return rc;
  	if (rc < 0) {
 diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
-index 82b21e34c545..0cf24ba613a2 100644
+index 8d610c17e0f2..ecd4afdcc539 100644
 --- a/drivers/pci/quirks.c
 +++ b/drivers/pci/quirks.c
 @@ -4452,6 +4452,30 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_BROADCOM, 0x9000,
@@ -2364,13 +2364,13 @@ index 8122d4ffb3b5..623264b723dc 100644
  	err = ext4_register_sysfs(sb);
  	if (err)
 diff --git a/include/linux/crypto.h b/include/linux/crypto.h
-index b164da5e129e..cd78d16ee5d6 100644
+index 1e3809d28abd..46ca14e581a0 100644
 --- a/include/linux/crypto.h
 +++ b/include/linux/crypto.h
-@@ -133,6 +133,9 @@
- #define CRYPTO_TFM_REQ_FORBID_WEAK_KEYS	0x00000100
+@@ -138,6 +138,9 @@
  #define CRYPTO_TFM_REQ_MAY_SLEEP	0x00000200
  #define CRYPTO_TFM_REQ_MAY_BACKLOG	0x00000400
+ #define CRYPTO_TFM_REQ_ON_STACK		0x00000800
 +#define CRYPTO_TFM_REQ_NEED_RESEED	0x00000800
 +
 +#define CRYPTO_TFM_FIPS_COMPLIANCE	0x80000000
@@ -2471,7 +2471,7 @@ index be2e8c0a187e..114e213c89e2 100644
 +
  #endif
 diff --git a/include/linux/lsm_hook_defs.h b/include/linux/lsm_hook_defs.h
-index 2bf909fa3394..f2d9ef4a2746 100644
+index bf3bbac4e02a..b9840b1a43fe 100644
 --- a/include/linux/lsm_hook_defs.h
 +++ b/include/linux/lsm_hook_defs.h
 @@ -444,6 +444,7 @@ LSM_HOOK(int, 0, bpf_token_capable, const struct bpf_token *token, int cap)
@@ -2483,7 +2483,7 @@ index 2bf909fa3394..f2d9ef4a2746 100644
  LSM_HOOK(int, 0, perf_event_open, int type)
  LSM_HOOK(int, 0, perf_event_alloc, struct perf_event *event)
 diff --git a/include/linux/module.h b/include/linux/module.h
-index 9937e71a3b5b..f319f9d8d0f9 100644
+index d9a5183a9fe7..7f27cb46ee1a 100644
 --- a/include/linux/module.h
 +++ b/include/linux/module.h
 @@ -428,6 +428,7 @@ struct module {
@@ -2504,16 +2504,15 @@ index 9937e71a3b5b..f319f9d8d0f9 100644
 +
  #endif /* _LINUX_MODULE_H */
 diff --git a/include/linux/panic.h b/include/linux/panic.h
-index 54d90b6c5f47..cc5def6f2b2e 100644
+index 2494d51707ef..b9d91c56c6ea 100644
 --- a/include/linux/panic.h
 +++ b/include/linux/panic.h
-@@ -74,7 +74,23 @@ static inline void set_arch_panic_timeout(int timeout, int arch_default_timeout)
- #define TAINT_AUX			16
+@@ -75,7 +75,22 @@ static inline void set_arch_panic_timeout(int timeout, int arch_default_timeout)
  #define TAINT_RANDSTRUCT		17
  #define TAINT_TEST			18
--#define TAINT_FLAGS_COUNT		19
+ #define TAINT_FWCTL			19
+-#define TAINT_FLAGS_COUNT		20
 +/* Start of Red Hat-specific taint flags */
-+#define TAINT_19			19
 +#define TAINT_20			20
 +#define TAINT_21			21
 +#define TAINT_22			22
@@ -2533,7 +2532,7 @@ index 54d90b6c5f47..cc5def6f2b2e 100644
  
  struct taint_flag {
 diff --git a/include/linux/pci.h b/include/linux/pci.h
-index 47b31ad724fa..4d49bb0b4421 100644
+index 0e8e3fd77e96..e4f2bb3a16e3 100644
 --- a/include/linux/pci.h
 +++ b/include/linux/pci.h
 @@ -1630,6 +1630,7 @@ int pci_add_dynid(struct pci_driver *drv,
@@ -2544,7 +2543,7 @@ index 47b31ad724fa..4d49bb0b4421 100644
  int pci_scan_bridge(struct pci_bus *bus, struct pci_dev *dev, int max,
  		    int pass);
  
-@@ -2696,6 +2697,10 @@ static inline bool pci_is_thunderbolt_attached(struct pci_dev *pdev)
+@@ -2688,6 +2689,10 @@ static inline bool pci_is_thunderbolt_attached(struct pci_dev *pdev)
  	return false;
  }
  
@@ -3208,7 +3207,7 @@ index ab7eea01ab42..fff7c5f737fc 100644
  
  int rmi_register_transport_device(struct rmi_transport_dev *xport);
 diff --git a/include/linux/security.h b/include/linux/security.h
-index 1545d515a66b..e0db710ed7b6 100644
+index cc9b54d95d22..fce0e3457cf7 100644
 --- a/include/linux/security.h
 +++ b/include/linux/security.h
 @@ -2390,4 +2390,13 @@ static inline void security_initramfs_populated(void)
@@ -3263,7 +3262,7 @@ index 434929de17ef..25028f21e684 100644
  obj-$(CONFIG_MULTIUSER) += groups.o
  obj-$(CONFIG_VHOST_TASK) += vhost_task.o
 diff --git a/kernel/bpf/core.c b/kernel/bpf/core.c
-index da729cbbaeb9..5c2d8301d4f3 100644
+index ba6b6118cf50..76f8fd7c7ee1 100644
 --- a/kernel/bpf/core.c
 +++ b/kernel/bpf/core.c
 @@ -571,7 +571,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
@@ -3280,7 +3279,7 @@ index da729cbbaeb9..5c2d8301d4f3 100644
  long bpf_jit_limit_max __read_mostly;
  
 diff --git a/kernel/bpf/syscall.c b/kernel/bpf/syscall.c
-index e1e42e918ba7..9142e8a9c0ba 100644
+index 9794446bc8c6..48ad59d23531 100644
 --- a/kernel/bpf/syscall.c
 +++ b/kernel/bpf/syscall.c
 @@ -26,6 +26,7 @@
@@ -3315,7 +3314,7 @@ index e1e42e918ba7..9142e8a9c0ba 100644
  int sysctl_unprivileged_bpf_disabled __read_mostly =
  	IS_BUILTIN(CONFIG_BPF_UNPRIV_DEFAULT_OFF) ? 2 : 0;
  
-@@ -6120,6 +6138,11 @@ static int bpf_unpriv_handler(const struct ctl_table *table, int write,
+@@ -6159,6 +6177,11 @@ static int bpf_unpriv_handler(const struct ctl_table *table, int write,
  	if (write && !ret) {
  		if (locked_state && unpriv_enable != 1)
  			return -EPERM;
@@ -3328,7 +3327,7 @@ index e1e42e918ba7..9142e8a9c0ba 100644
  	}
  
 diff --git a/kernel/module/main.c b/kernel/module/main.c
-index a256cc919ad7..57652803d9f0 100644
+index debeb0eb15d7..b46c60abfaca 100644
 --- a/kernel/module/main.c
 +++ b/kernel/module/main.c
 @@ -65,6 +65,8 @@
@@ -3339,8 +3338,8 @@ index a256cc919ad7..57652803d9f0 100644
 +
  /*
   * Mutex protects:
-  * 1) List of modules (also safely readable with preempt_disable),
-@@ -562,6 +564,7 @@ static const struct module_attribute modinfo_##field = {              \
+  * 1) List of modules (also safely readable within RCU read section),
+@@ -554,6 +556,7 @@ static const struct module_attribute modinfo_##field = {              \
  
  MODINFO_ATTR(version);
  MODINFO_ATTR(srcversion);
@@ -3348,7 +3347,7 @@ index a256cc919ad7..57652803d9f0 100644
  
  static struct {
  	char name[MODULE_NAME_LEN + 1];
-@@ -1014,6 +1017,7 @@ const struct module_attribute *const modinfo_attrs[] = {
+@@ -1004,6 +1007,7 @@ const struct module_attribute *const modinfo_attrs[] = {
  	&module_uevent,
  	&modinfo_version,
  	&modinfo_srcversion,
@@ -3356,7 +3355,7 @@ index a256cc919ad7..57652803d9f0 100644
  	&modinfo_initstate,
  	&modinfo_coresize,
  #ifdef CONFIG_ARCH_WANTS_MODULES_DATA_IN_VMALLOC
-@@ -3241,6 +3245,11 @@ static int early_mod_check(struct load_info *info, int flags)
+@@ -3228,6 +3232,11 @@ static int early_mod_check(struct load_info *info, int flags)
  		return -EPERM;
  	}
  
@@ -3368,7 +3367,7 @@ index a256cc919ad7..57652803d9f0 100644
  	err = rewrite_section_headers(info, flags);
  	if (err)
  		return err;
-@@ -3814,6 +3823,10 @@ void print_modules(void)
+@@ -3783,6 +3792,10 @@ void print_modules(void)
  		pr_cont(" [last unloaded: %s%s]", last_unloaded_module.name,
  			last_unloaded_module.taints);
  	pr_cont("\n");
@@ -3403,14 +3402,13 @@ index a2ff4242e623..f0d2be1ee4f1 100644
  
  int module_sig_check(struct load_info *info, int flags)
 diff --git a/kernel/panic.c b/kernel/panic.c
-index d8635d5cecb2..293960754b9d 100644
+index 0c55eec9e874..d4c40cbd8c89 100644
 --- a/kernel/panic.c
 +++ b/kernel/panic.c
-@@ -511,6 +511,19 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
- 	TAINT_FLAG(AUX,				'X', ' ', true),
+@@ -512,6 +512,18 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
  	TAINT_FLAG(RANDSTRUCT,			'T', ' ', true),
  	TAINT_FLAG(TEST,			'N', ' ', true),
-+	TAINT_FLAG(19,				'?', '-', false ),
+ 	TAINT_FLAG(FWCTL,			'J', ' ', true),
 +	TAINT_FLAG(20,				'?', '-', false ),
 +	TAINT_FLAG(21,				'?', '-', false ),
 +	TAINT_FLAG(22,				'?', '-', false ),
