@@ -2483,7 +2483,7 @@ index bf3bbac4e02a..b9840b1a43fe 100644
  LSM_HOOK(int, 0, perf_event_open, int type)
  LSM_HOOK(int, 0, perf_event_alloc, struct perf_event *event)
 diff --git a/include/linux/module.h b/include/linux/module.h
-index d9a5183a9fe7..7f27cb46ee1a 100644
+index d94b196d5a34..ead452836a9f 100644
 --- a/include/linux/module.h
 +++ b/include/linux/module.h
 @@ -428,6 +428,7 @@ struct module {
@@ -2494,7 +2494,7 @@ index d9a5183a9fe7..7f27cb46ee1a 100644
  	struct kobject *holders_dir;
  
  	/* Exported symbols */
-@@ -1011,4 +1012,8 @@ static inline unsigned long find_kallsyms_symbol_value(struct module *mod,
+@@ -1017,4 +1018,8 @@ static inline unsigned long find_kallsyms_symbol_value(struct module *mod,
  
  #endif  /* CONFIG_MODULES && CONFIG_KALLSYMS */
  
@@ -3327,7 +3327,7 @@ index 9794446bc8c6..48ad59d23531 100644
  	}
  
 diff --git a/kernel/module/main.c b/kernel/module/main.c
-index debeb0eb15d7..b46c60abfaca 100644
+index a2859dc3eea6..dda7d7026bbb 100644
 --- a/kernel/module/main.c
 +++ b/kernel/module/main.c
 @@ -65,6 +65,8 @@
@@ -3367,7 +3367,7 @@ index debeb0eb15d7..b46c60abfaca 100644
  	err = rewrite_section_headers(info, flags);
  	if (err)
  		return err;
-@@ -3783,6 +3792,10 @@ void print_modules(void)
+@@ -3796,6 +3805,10 @@ void print_modules(void)
  		pr_cont(" [last unloaded: %s%s]", last_unloaded_module.name,
  			last_unloaded_module.taints);
  	pr_cont("\n");
