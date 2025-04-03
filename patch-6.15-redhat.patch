@@ -80,10 +80,10 @@
  79 files changed, 2744 insertions(+), 219 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 3435a062a208..30e993a9a145 100644
+index 3f35d5b8c296..026c85d9da91 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -6204,6 +6204,17 @@
+@@ -6226,6 +6226,17 @@
  		2	The "airplane mode" button toggles between everything
  			blocked and everything unblocked.
  
@@ -101,7 +101,7 @@ index 3435a062a208..30e993a9a145 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -7514,6 +7525,15 @@
+@@ -7536,6 +7547,15 @@
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -288,7 +288,7 @@ index 835b5f100e92..179ad4af54a7 100644
  	  The VM uses one page of physical memory for each page table.
  	  For systems with a lot of processes, this can use a lot of
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 62dc903ecc7f..c26e0aa3891f 100644
+index 748c34dc953c..6c87ba2ba965 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
 @@ -1412,7 +1412,7 @@ endchoice
@@ -360,7 +360,7 @@ index 12126adbc3a9..9bb1ebe65aa7 100644
  		get_cpu_address_sizes(c);
  		cpu_parse_early_param();
 diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index c7164a8de983..015ae684bad0 100644
+index 9d2a13b37833..6287becaadd7 100644
 --- a/arch/x86/kernel/setup.c
 +++ b/arch/x86/kernel/setup.c
 @@ -21,6 +21,7 @@
@@ -379,7 +379,7 @@ index c7164a8de983..015ae684bad0 100644
  #if defined(CONFIG_X86_LOCAL_APIC)
  #include <asm/nmi.h>
  #endif
-@@ -796,6 +798,79 @@ static void __init early_reserve_memory(void)
+@@ -794,6 +796,79 @@ static void __init early_reserve_memory(void)
  	trim_snb_memory();
  }
  
@@ -459,7 +459,7 @@ index c7164a8de983..015ae684bad0 100644
  /*
   * Dump out kernel offset information on panic.
   */
-@@ -966,6 +1041,13 @@ void __init setup_arch(char **cmdline_p)
+@@ -964,6 +1039,13 @@ void __init setup_arch(char **cmdline_p)
  	if (efi_enabled(EFI_BOOT))
  		efi_init();
  
@@ -473,7 +473,7 @@ index c7164a8de983..015ae684bad0 100644
  	reserve_ibft_region();
  	x86_init.resources.dmi_setup();
  
-@@ -1131,19 +1213,7 @@ void __init setup_arch(char **cmdline_p)
+@@ -1127,19 +1209,7 @@ void __init setup_arch(char **cmdline_p)
  	/* Allocate bigger log buffer */
  	setup_log_buf(1);
  
@@ -494,7 +494,7 @@ index c7164a8de983..015ae684bad0 100644
  
  	reserve_initrd();
  
-@@ -1253,6 +1323,8 @@ void __init setup_arch(char **cmdline_p)
+@@ -1251,6 +1321,8 @@ void __init setup_arch(char **cmdline_p)
  		efi_apply_memmap_quirks();
  #endif
  
@@ -885,10 +885,10 @@ index dfc7cae90802..2a58d726149d 100644
  		alg->verify = sig_default_verify;
  	if (!alg->set_priv_key)
 diff --git a/crypto/testmgr.c b/crypto/testmgr.c
-index d294c5948b67..0255cbeaaef1 100644
+index abd609d4c8ef..35e56cef44f1 100644
 --- a/crypto/testmgr.c
 +++ b/crypto/testmgr.c
-@@ -4162,7 +4162,7 @@ static int test_akcipher_one(struct crypto_akcipher *tfm,
+@@ -4053,7 +4053,7 @@ static int test_akcipher_one(struct crypto_akcipher *tfm,
  	 * Don't invoke decrypt test which requires a private key
  	 * for vectors with only a public key.
  	 */
@@ -897,7 +897,7 @@ index d294c5948b67..0255cbeaaef1 100644
  		err = 0;
  		goto free_all;
  	}
-@@ -4298,7 +4298,7 @@ static int test_sig_one(struct crypto_sig *tfm, const struct sig_testvec *vecs)
+@@ -4189,7 +4189,7 @@ static int test_sig_one(struct crypto_sig *tfm, const struct sig_testvec *vecs)
  	 * Don't invoke sign test (which requires a private key)
  	 * for vectors with only a public key.
  	 */
@@ -906,7 +906,7 @@ index d294c5948b67..0255cbeaaef1 100644
  		return 0;
  
  	sig_size = crypto_sig_maxsize(tfm);
-@@ -5138,14 +5138,12 @@ static const struct alg_test_desc alg_test_descs[] = {
+@@ -5029,14 +5029,12 @@ static const struct alg_test_desc alg_test_descs[] = {
  	}, {
  		.alg = "ecdh-nist-p256",
  		.test = alg_test_kpp,
@@ -1608,7 +1608,7 @@ index d4af17fdba46..154f0403cbf4 100644
  	data->xport.ops = &hid_rmi_ops;
  
 diff --git a/drivers/hwtracing/coresight/coresight-etm4x-core.c b/drivers/hwtracing/coresight/coresight-etm4x-core.c
-index 3d98e3371fff..a13998533fa0 100644
+index 2b8f10463840..b2c08e0bf594 100644
 --- a/drivers/hwtracing/coresight/coresight-etm4x-core.c
 +++ b/drivers/hwtracing/coresight/coresight-etm4x-core.c
 @@ -11,6 +11,7 @@
@@ -1851,7 +1851,7 @@ index 2168b6cd7167..5d7cda175a0c 100644
  	if (data->f01_container->dev.driver) {
  		/* Driver already bound, so enable ATTN now. */
 diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
-index 9e1b444246f8..b341d2b8c824 100644
+index c8033ca66377..d843b47d0716 100644
 --- a/drivers/iommu/iommu.c
 +++ b/drivers/iommu/iommu.c
 @@ -8,6 +8,7 @@
@@ -1862,7 +1862,7 @@ index 9e1b444246f8..b341d2b8c824 100644
  #include <linux/kernel.h>
  #include <linux/bits.h>
  #include <linux/bug.h>
-@@ -2916,6 +2917,27 @@ int iommu_dev_disable_feature(struct device *dev, enum iommu_dev_features feat)
+@@ -2936,6 +2937,27 @@ int iommu_dev_disable_feature(struct device *dev, enum iommu_dev_features feat)
  }
  EXPORT_SYMBOL_GPL(iommu_dev_disable_feature);
  
@@ -2283,10 +2283,10 @@ index 950d8c9fb884..be7b84fb780b 100644
  	if (err)
  		goto err_out_driver;
 diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
-index dcba4281ea48..bb82bf5148b0 100644
+index 8c7f9cc785bb..cb8a5f51e42d 100644
 --- a/drivers/usb/core/hub.c
 +++ b/drivers/usb/core/hub.c
-@@ -5856,6 +5856,13 @@ static void hub_event(struct work_struct *work)
+@@ -5854,6 +5854,13 @@ static void hub_event(struct work_struct *work)
  			(u16) hub->change_bits[0],
  			(u16) hub->event_bits[0]);
  
@@ -3402,7 +3402,7 @@ index a2ff4242e623..f0d2be1ee4f1 100644
  
  int module_sig_check(struct load_info *info, int flags)
 diff --git a/kernel/panic.c b/kernel/panic.c
-index 0c55eec9e874..d4c40cbd8c89 100644
+index a3889f38153d..0e79932d65e5 100644
 --- a/kernel/panic.c
 +++ b/kernel/panic.c
 @@ -512,6 +512,18 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
@@ -4456,7 +4456,7 @@ index c35d22607978..08e338a4d082 100644
  	ret = snprintf(fname, sizeof(fname), "%s.mod.c", mod->name);
  	if (ret >= sizeof(fname)) {
 diff --git a/scripts/tags.sh b/scripts/tags.sh
-index 45eaf35f5bff..8cd9b8bbadc0 100755
+index 98680e9cd7be..0880675cf517 100755
 --- a/scripts/tags.sh
 +++ b/scripts/tags.sh
 @@ -16,6 +16,8 @@ fi
