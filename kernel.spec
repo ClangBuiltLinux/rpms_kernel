@@ -766,6 +766,7 @@ BuildRequires: libnl3-devel
 
 %if %{with_tools} && %{with_ynl}
 BuildRequires: python3-pyyaml python3-jsonschema python3-pip python3-setuptools >= 61
+BuildRequires: (python3-wheel if python3-setuptools < 70)
 %endif
 
 %if %{with_tools} || %{signmodules} || %{signkernel}
@@ -4204,7 +4205,8 @@ fi\
 #
 #
 %changelog
-* Thu Apr 03 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.14.0-200]
+* Fri Apr 04 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.14.0-200]
+- redhat/kernel.spec: list python3-wheel explicitly for Fedora<42 (Jan Stancek)
 - serial: 8250_dma: terminate correct DMA in tx_dma_flush() (John Keeping)
 - serial: stm32: do not deassert RS485 RTS GPIO prematurely (Cheick Traore)
 - perf tools: Fix up some comments and code to properly use the event_source bus (Greg Kroah-Hartman)
