@@ -80,7 +80,7 @@
  79 files changed, 2744 insertions(+), 219 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 3f35d5b8c296..026c85d9da91 100644
+index f5af86b3c4a2..53fc660e8923 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
 @@ -6226,6 +6226,17 @@
@@ -101,7 +101,7 @@ index 3f35d5b8c296..026c85d9da91 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -7536,6 +7547,15 @@
+@@ -7538,6 +7549,15 @@
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -272,10 +272,10 @@ index d138b17b8840..6daff4572877 100644
  	@:
  
 diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index 835b5f100e92..179ad4af54a7 100644
+index 25ed6f1a7c7a..d19fc6d6c134 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
-@@ -1231,9 +1231,9 @@ config HIGHMEM
+@@ -1232,9 +1232,9 @@ config HIGHMEM
  	  If unsure, say n.
  
  config HIGHPTE
@@ -288,10 +288,10 @@ index 835b5f100e92..179ad4af54a7 100644
  	  The VM uses one page of physical memory for each page table.
  	  For systems with a lot of processes, this can use a lot of
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 748c34dc953c..6c87ba2ba965 100644
+index a182295e6f08..a3cfce882d26 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -1412,7 +1412,7 @@ endchoice
+@@ -1413,7 +1413,7 @@ endchoice
  
  config ARM64_FORCE_52BIT
  	bool "Force 52-bit virtual addresses for userspace"
