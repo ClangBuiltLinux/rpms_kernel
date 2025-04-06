@@ -80,7 +80,7 @@
  79 files changed, 2744 insertions(+), 219 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index f5af86b3c4a2..53fc660e8923 100644
+index 76e538c77e31..24a9106a38c4 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
 @@ -6226,6 +6226,17 @@
@@ -101,7 +101,7 @@ index f5af86b3c4a2..53fc660e8923 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -7538,6 +7549,15 @@
+@@ -7554,6 +7565,15 @@
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -192,7 +192,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index d138b17b8840..6daff4572877 100644
+index e55726a71d95..6dd4447b6d37 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -22,6 +22,18 @@ $(if $(filter __%, $(MAKECMDGOALS)), \
@@ -214,7 +214,7 @@ index d138b17b8840..6daff4572877 100644
  # We are using a recursive build, so we need to do a little thinking
  # to get the ordering right.
  #
-@@ -358,6 +370,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
+@@ -355,6 +367,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
      endif
  endif
  
@@ -232,7 +232,7 @@ index d138b17b8840..6daff4572877 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1320,7 +1343,13 @@ define filechk_version.h
+@@ -1325,7 +1348,13 @@ define filechk_version.h
  	((c) > 255 ? 255 : (c)))';                                       \
  	echo \#define LINUX_VERSION_MAJOR $(VERSION);                    \
  	echo \#define LINUX_VERSION_PATCHLEVEL $(PATCHLEVEL);            \
@@ -247,7 +247,7 @@ index d138b17b8840..6daff4572877 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -1918,6 +1947,23 @@ endif
+@@ -1927,6 +1956,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -326,7 +326,7 @@ index 3b9d9ccfad63..648ac8c7e1fd 100644
 +	return !!ipl_secure_flag;
 +}
 diff --git a/arch/s390/kernel/setup.c b/arch/s390/kernel/setup.c
-index b6686d63b754..e5c8047570ab 100644
+index f244c5560e7f..464f915011b8 100644
 --- a/arch/s390/kernel/setup.c
 +++ b/arch/s390/kernel/setup.c
 @@ -49,6 +49,7 @@
@@ -337,7 +337,7 @@ index b6686d63b754..e5c8047570ab 100644
  #include <linux/hugetlb.h>
  #include <linux/kmemleak.h>
  
-@@ -915,6 +916,9 @@ void __init setup_arch(char **cmdline_p)
+@@ -914,6 +915,9 @@ void __init setup_arch(char **cmdline_p)
  
  	log_component_list();
  
@@ -4408,7 +4408,7 @@ index 000000000000..84e22b1730cc
 +}
 +late_initcall(__add_rh_flag);
 diff --git a/scripts/Makefile.extrawarn b/scripts/Makefile.extrawarn
-index dc081cf46d21..25fe35170155 100644
+index d75897559d18..08226fdd309d 100644
 --- a/scripts/Makefile.extrawarn
 +++ b/scripts/Makefile.extrawarn
 @@ -20,6 +20,10 @@ KBUILD_CFLAGS += $(call cc-disable-warning, address-of-packed-member)
@@ -4423,7 +4423,7 @@ index dc081cf46d21..25fe35170155 100644
  KBUILD_CFLAGS += -Wframe-larger-than=$(CONFIG_FRAME_WARN)
  endif
 diff --git a/scripts/mod/modpost.c b/scripts/mod/modpost.c
-index c35d22607978..08e338a4d082 100644
+index 92627e8d0e16..cdf4e4c14d0b 100644
 --- a/scripts/mod/modpost.c
 +++ b/scripts/mod/modpost.c
 @@ -27,6 +27,7 @@
@@ -4434,7 +4434,7 @@ index c35d22607978..08e338a4d082 100644
  
  static bool module_enabled;
  /* Are we using CONFIG_MODVERSIONS? */
-@@ -1988,6 +1989,12 @@ static void write_buf(struct buffer *b, const char *fname)
+@@ -1983,6 +1984,12 @@ static void write_buf(struct buffer *b, const char *fname)
  	}
  }
  
@@ -4447,7 +4447,7 @@ index c35d22607978..08e338a4d082 100644
  static void write_if_changed(struct buffer *b, const char *fname)
  {
  	char *tmp;
-@@ -2057,6 +2064,7 @@ static void write_mod_c_file(struct module *mod)
+@@ -2052,6 +2059,7 @@ static void write_mod_c_file(struct module *mod)
  	}
  
  	add_srcversion(&buf, mod);
