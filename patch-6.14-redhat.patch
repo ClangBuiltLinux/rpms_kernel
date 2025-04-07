@@ -23,56 +23,33 @@
  drivers/ata/libahci.c                              |  18 +++
  drivers/char/ipmi/ipmi_dmi.c                       |  15 ++
  drivers/char/ipmi/ipmi_msghandler.c                |  16 +-
- drivers/counter/microchip-tcb-capture.c            |  19 +++
- drivers/counter/stm32-lptimer-cnt.c                |  24 +--
  drivers/firmware/efi/Makefile                      |   1 +
  drivers/firmware/efi/efi.c                         | 124 +++++++++++----
  drivers/firmware/efi/secureboot.c                  |  38 +++++
- drivers/hid/hid-plantronics.c                      | 144 ++++++++---------
  drivers/hid/hid-rmi.c                              |  66 --------
  drivers/hwtracing/coresight/coresight-etm4x-core.c |  19 +++
  drivers/input/rmi4/rmi_driver.c                    | 124 +++++++++------
  drivers/iommu/iommu.c                              |  22 +++
  drivers/media/i2c/ov08x40.c                        | 170 +++++++++++----------
- drivers/memstick/host/rtsx_usb_ms.c                |   1 +
  drivers/misc/mei/vsc-tp.c                          |  26 ++--
- drivers/net/usb/qmi_wwan.c                         |   2 +
- drivers/net/usb/usbnet.c                           |  21 ++-
  drivers/pci/quirks.c                               |  24 +++
  drivers/scsi/sd.c                                  |  10 ++
- drivers/tty/serial/8250/8250_dma.c                 |   2 +-
- drivers/tty/serial/8250/8250_pci.c                 |  46 ++++++
- drivers/tty/serial/fsl_lpuart.c                    |  17 +++
- drivers/tty/serial/stm32-usart.c                   |   4 +-
  drivers/usb/core/hub.c                             |   7 +
- drivers/usb/host/xhci-ring.c                       |   4 +
- drivers/usb/host/xhci.h                            |  13 +-
  include/linux/crypto.h                             |   2 +
  include/linux/efi.h                                |  22 ++-
  include/linux/lsm_hook_defs.h                      |   1 +
  include/linux/rmi.h                                |   1 +
  include/linux/security.h                           |   9 ++
- kernel/cgroup/rstat.c                              |  29 ++--
  kernel/module/signing.c                            |   9 +-
- net/atm/mpc.c                                      |   2 +
- net/ipv6/netfilter/nf_socket_ipv6.c                |  23 +++
  scripts/Makefile.extrawarn                         |   4 +
  scripts/tags.sh                                    |   2 +
  security/integrity/platform_certs/load_uefi.c      |   6 +-
  security/lockdown/Kconfig                          |  13 ++
  security/lockdown/lockdown.c                       |  11 ++
- sound/pci/hda/patch_realtek.c                      |   2 +
- sound/usb/mixer_quirks.c                           |  51 +++++++
- tools/perf/Documentation/intel-hybrid.txt          |  12 +-
- tools/perf/Documentation/perf-list.txt             |   2 +-
- tools/perf/arch/x86/util/iostat.c                  |   2 +-
- tools/perf/builtin-stat.c                          |   2 +-
- tools/perf/util/mem-events.c                       |   2 +-
- tools/perf/util/pmu.c                              |   4 +-
- 71 files changed, 987 insertions(+), 421 deletions(-)
+ 48 files changed, 685 insertions(+), 295 deletions(-)
 
 diff --git a/Documentation/ABI/testing/sysfs-kernel-fadump b/Documentation/ABI/testing/sysfs-kernel-fadump
-index 2f9daa7ca55b..b64b7622e6fc 100644
+index 2f9daa7ca55be..b64b7622e6fc0 100644
 --- a/Documentation/ABI/testing/sysfs-kernel-fadump
 +++ b/Documentation/ABI/testing/sysfs-kernel-fadump
 @@ -55,4 +55,5 @@ Date:		May 2024
@@ -83,7 +60,7 @@ index 2f9daa7ca55b..b64b7622e6fc 100644
 +		parameters to be passed to capture kernel. For HASH MMU it
 +		is exported only if RMA size higher than 768MB.
 diff --git a/Documentation/arch/powerpc/firmware-assisted-dump.rst b/Documentation/arch/powerpc/firmware-assisted-dump.rst
-index 7e37aadd1f77..7e266e749cd5 100644
+index 7e37aadd1f772..7e266e749cd53 100644
 --- a/Documentation/arch/powerpc/firmware-assisted-dump.rst
 +++ b/Documentation/arch/powerpc/firmware-assisted-dump.rst
 @@ -120,6 +120,28 @@ to ensure that crash data is preserved to process later.
@@ -116,7 +93,7 @@ index 7e37aadd1f77..7e266e749cd5 100644
  -----------------------
  
 diff --git a/Makefile b/Makefile
-index 8b6764d44a61..c580d2af3d49 100644
+index 3ede59c1146cb..3e407caf92e54 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -22,6 +22,18 @@ $(if $(filter __%, $(MAKECMDGOALS)), \
@@ -181,7 +158,7 @@ index 8b6764d44a61..c580d2af3d49 100644
  	@:
  
 diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index 835b5f100e92..179ad4af54a7 100644
+index 835b5f100e926..179ad4af54a7a 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
 @@ -1231,9 +1231,9 @@ config HIGHMEM
@@ -197,7 +174,7 @@ index 835b5f100e92..179ad4af54a7 100644
  	  The VM uses one page of physical memory for each page table.
  	  For systems with a lot of processes, this can use a lot of
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 940343beb3d4..003bf6492519 100644
+index 940343beb3d4c..003bf64925196 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
 @@ -1400,7 +1400,7 @@ endchoice
@@ -210,7 +187,7 @@ index 940343beb3d4..003bf6492519 100644
  	  For systems with 52-bit userspace VAs enabled, the kernel will attempt
  	  to maintain compatibility with older software by providing 48-bit VAs
 diff --git a/arch/powerpc/include/asm/prom.h b/arch/powerpc/include/asm/prom.h
-index c0107d8ddd8c..f679a11a7e7f 100644
+index c0107d8ddd8c8..f679a11a7e7f0 100644
 --- a/arch/powerpc/include/asm/prom.h
 +++ b/arch/powerpc/include/asm/prom.h
 @@ -17,6 +17,8 @@
@@ -223,7 +200,7 @@ index c0107d8ddd8c..f679a11a7e7f 100644
  #define OF_DT_END_NODE		0x2		/* End node */
  #define OF_DT_PROP		0x3		/* Property: name off, size,
 diff --git a/arch/powerpc/kernel/fadump.c b/arch/powerpc/kernel/fadump.c
-index 4b371c738213..26e3d151e048 100644
+index 4b371c738213c..26e3d151e0483 100644
 --- a/arch/powerpc/kernel/fadump.c
 +++ b/arch/powerpc/kernel/fadump.c
 @@ -33,6 +33,7 @@
@@ -265,7 +242,7 @@ index 4b371c738213..26e3d151e048 100644
  
  	fw_dump.param_area = memblock_phys_alloc_range(COMMAND_LINE_SIZE,
 diff --git a/arch/powerpc/kernel/module_64.c b/arch/powerpc/kernel/module_64.c
-index 34a5aec4908f..126bf3b06ab7 100644
+index 34a5aec4908fb..126bf3b06ab7e 100644
 --- a/arch/powerpc/kernel/module_64.c
 +++ b/arch/powerpc/kernel/module_64.c
 @@ -258,10 +258,6 @@ static unsigned long get_stubs_size(const Elf64_Ehdr *hdr,
@@ -280,7 +257,7 @@ index 34a5aec4908f..126bf3b06ab7 100644
  
  	pr_debug("Looks like a total of %lu stubs, max\n", relocs);
 diff --git a/arch/powerpc/kernel/prom_init.c b/arch/powerpc/kernel/prom_init.c
-index 57082fac4668..fce32b162ef3 100644
+index 57082fac46687..fce32b162ef3a 100644
 --- a/arch/powerpc/kernel/prom_init.c
 +++ b/arch/powerpc/kernel/prom_init.c
 @@ -1061,7 +1061,7 @@ static const struct ibm_arch_vec ibm_architecture_vec_template __initconst = {
@@ -293,7 +270,7 @@ index 57082fac4668..fce32b162ef3 100644
  		.min_rma_percent = 0,	/* min RMA percentage of total RAM */
  		.max_pft_size = 48,	/* max log_2(hash table size) */
 diff --git a/arch/s390/include/asm/ipl.h b/arch/s390/include/asm/ipl.h
-index b0d00032479d..afb9544fb007 100644
+index b0d00032479d6..afb9544fb0074 100644
 --- a/arch/s390/include/asm/ipl.h
 +++ b/arch/s390/include/asm/ipl.h
 @@ -139,6 +139,7 @@ int ipl_report_add_component(struct ipl_report *report, struct kexec_buf *kbuf,
@@ -305,7 +282,7 @@ index b0d00032479d..afb9544fb007 100644
  /*
   * DIAG 308 support
 diff --git a/arch/s390/kernel/ipl.c b/arch/s390/kernel/ipl.c
-index 69be2309cde0..1d85c99be81b 100644
+index 69be2309cde00..1d85c99be81be 100644
 --- a/arch/s390/kernel/ipl.c
 +++ b/arch/s390/kernel/ipl.c
 @@ -2497,3 +2497,8 @@ int ipl_report_free(struct ipl_report *report)
@@ -318,7 +295,7 @@ index 69be2309cde0..1d85c99be81b 100644
 +	return !!ipl_secure_flag;
 +}
 diff --git a/arch/s390/kernel/setup.c b/arch/s390/kernel/setup.c
-index d78bcfe707b5..f3a71214a211 100644
+index d78bcfe707b51..f3a71214a2118 100644
 --- a/arch/s390/kernel/setup.c
 +++ b/arch/s390/kernel/setup.c
 @@ -49,6 +49,7 @@
@@ -340,7 +317,7 @@ index d78bcfe707b5..f3a71214a211 100644
  	/* boot_command_line has been already set up in early.c */
  	*cmdline_p = boot_command_line;
 diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index cebee310e200..8d015c5faf59 100644
+index cebee310e2009..8d015c5faf59a 100644
 --- a/arch/x86/kernel/setup.c
 +++ b/arch/x86/kernel/setup.c
 @@ -21,6 +21,7 @@
@@ -387,7 +364,7 @@ index cebee310e200..8d015c5faf59 100644
  	reserve_initrd();
  
 diff --git a/arch/x86/tools/insn_decoder_test.c b/arch/x86/tools/insn_decoder_test.c
-index 472540aeabc2..366e07546344 100644
+index 472540aeabc23..366e07546344b 100644
 --- a/arch/x86/tools/insn_decoder_test.c
 +++ b/arch/x86/tools/insn_decoder_test.c
 @@ -106,7 +106,7 @@ static void parse_args(int argc, char **argv)
@@ -400,7 +377,7 @@ index 472540aeabc2..366e07546344 100644
  int main(int argc, char **argv)
  {
 diff --git a/crypto/akcipher.c b/crypto/akcipher.c
-index 72c82d9aa077..da1ac5de8252 100644
+index 72c82d9aa0778..da1ac5de8252d 100644
 --- a/crypto/akcipher.c
 +++ b/crypto/akcipher.c
 @@ -141,8 +141,7 @@ int crypto_register_akcipher(struct akcipher_alg *alg)
@@ -414,7 +391,7 @@ index 72c82d9aa077..da1ac5de8252 100644
  		alg->set_priv_key = akcipher_default_set_key;
  
 diff --git a/crypto/dh.c b/crypto/dh.c
-index afc0fd847761..e13258c3d1d1 100644
+index afc0fd8477613..e13258c3d1d1a 100644
 --- a/crypto/dh.c
 +++ b/crypto/dh.c
 @@ -227,10 +227,35 @@ static int dh_compute_value(struct kpp_request *req)
@@ -454,7 +431,7 @@ index afc0fd847761..e13258c3d1d1 100644
  	}
  
 diff --git a/crypto/seqiv.c b/crypto/seqiv.c
-index 17e11d51ddc3..9c136a3b6267 100644
+index 17e11d51ddc36..9c136a3b62679 100644
 --- a/crypto/seqiv.c
 +++ b/crypto/seqiv.c
 @@ -132,6 +132,19 @@ static int seqiv_aead_decrypt(struct aead_request *req)
@@ -487,7 +464,7 @@ index 17e11d51ddc3..9c136a3b6267 100644
  
  	inst->alg.base.cra_ctxsize = sizeof(struct aead_geniv_ctx);
 diff --git a/crypto/sig.c b/crypto/sig.c
-index dfc7cae90802..2a58d726149d 100644
+index dfc7cae908028..2a58d726149db 100644
 --- a/crypto/sig.c
 +++ b/crypto/sig.c
 @@ -106,8 +106,7 @@ static int sig_prepare_alg(struct sig_alg *alg)
@@ -501,7 +478,7 @@ index dfc7cae90802..2a58d726149d 100644
  		alg->verify = sig_default_verify;
  	if (!alg->set_priv_key)
 diff --git a/crypto/testmgr.c b/crypto/testmgr.c
-index e61490ba4095..d24a50804349 100644
+index e61490ba40958..d24a508043490 100644
 --- a/crypto/testmgr.c
 +++ b/crypto/testmgr.c
 @@ -4189,7 +4189,7 @@ static int test_akcipher_one(struct crypto_akcipher *tfm,
@@ -538,7 +515,7 @@ index e61490ba4095..d24a50804349 100644
  			.kpp = __VECS(ecdh_p384_tv_template)
  		}
 diff --git a/drivers/acpi/apei/hest.c b/drivers/acpi/apei/hest.c
-index 20d757687e3d..90a13f20f052 100644
+index 20d757687e3d9..90a13f20f052b 100644
 --- a/drivers/acpi/apei/hest.c
 +++ b/drivers/acpi/apei/hest.c
 @@ -142,6 +142,14 @@ static int apei_hest_parse(apei_hest_func_t func, void *data)
@@ -557,7 +534,7 @@ index 20d757687e3d..90a13f20f052 100644
  	for (i = 0; i < hest_tab->error_source_count; i++) {
  		len = hest_esrc_len(hest_hdr);
 diff --git a/drivers/acpi/irq.c b/drivers/acpi/irq.c
-index 1687483ff319..390b67f19181 100644
+index 1687483ff319e..390b67f19181a 100644
 --- a/drivers/acpi/irq.c
 +++ b/drivers/acpi/irq.c
 @@ -143,6 +143,7 @@ struct acpi_irq_parse_one_ctx {
@@ -600,7 +577,7 @@ index 1687483ff319..390b67f19181 100644
  	return ctx.rc;
  }
 diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index 9f4efa8f75a6..b7d9f1e31c8f 100644
+index 9f4efa8f75a61..b7d9f1e31c8f6 100644
 --- a/drivers/acpi/scan.c
 +++ b/drivers/acpi/scan.c
 @@ -1801,6 +1801,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
@@ -620,7 +597,7 @@ index 9f4efa8f75a6..b7d9f1e31c8f 100644
  	acpi_dev_get_resources(device, &resource_list,
  			       acpi_check_serial_bus_slave,
 diff --git a/drivers/ata/libahci.c b/drivers/ata/libahci.c
-index e7ace4b10f15..fbb2bbfd026d 100644
+index e7ace4b10f15b..fbb2bbfd026da 100644
 --- a/drivers/ata/libahci.c
 +++ b/drivers/ata/libahci.c
 @@ -730,6 +730,24 @@ int ahci_stop_engine(struct ata_port *ap)
@@ -649,7 +626,7 @@ index e7ace4b10f15..fbb2bbfd026d 100644
  	tmp = ata_wait_register(ap, port_mmio + PORT_CMD,
  				PORT_CMD_LIST_ON, PORT_CMD_LIST_ON, 1, 500);
 diff --git a/drivers/char/ipmi/ipmi_dmi.c b/drivers/char/ipmi/ipmi_dmi.c
-index bbf7029e224b..cf7faa970dd6 100644
+index bbf7029e224be..cf7faa970dd65 100644
 --- a/drivers/char/ipmi/ipmi_dmi.c
 +++ b/drivers/char/ipmi/ipmi_dmi.c
 @@ -215,6 +215,21 @@ static int __init scan_for_dmi_ipmi(void)
@@ -675,7 +652,7 @@ index bbf7029e224b..cf7faa970dd6 100644
  		dmi_decode_ipmi((const struct dmi_header *) dev->device_data);
  
 diff --git a/drivers/char/ipmi/ipmi_msghandler.c b/drivers/char/ipmi/ipmi_msghandler.c
-index 1e5313748f8b..f2a56c624f54 100644
+index 1e5313748f8b5..f2a56c624f541 100644
 --- a/drivers/char/ipmi/ipmi_msghandler.c
 +++ b/drivers/char/ipmi/ipmi_msghandler.c
 @@ -35,6 +35,7 @@
@@ -709,95 +686,8 @@ index 1e5313748f8b..f2a56c624f54 100644
  	mutex_lock(&ipmi_interfaces_mutex);
  	rv = ipmi_register_driver();
  	mutex_unlock(&ipmi_interfaces_mutex);
-diff --git a/drivers/counter/microchip-tcb-capture.c b/drivers/counter/microchip-tcb-capture.c
-index 2f096a5b973d..c391ac38b990 100644
---- a/drivers/counter/microchip-tcb-capture.c
-+++ b/drivers/counter/microchip-tcb-capture.c
-@@ -368,6 +368,25 @@ static int mchp_tc_probe(struct platform_device *pdev)
- 			channel);
- 	}
- 
-+	/* Disable Quadrature Decoder and position measure */
-+	ret = regmap_update_bits(regmap, ATMEL_TC_BMR, ATMEL_TC_QDEN | ATMEL_TC_POSEN, 0);
-+	if (ret)
-+		return ret;
-+
-+	/* Setup the period capture mode */
-+	ret = regmap_update_bits(regmap, ATMEL_TC_REG(priv->channel[0], CMR),
-+				 ATMEL_TC_WAVE | ATMEL_TC_ABETRG | ATMEL_TC_CMR_MASK |
-+				 ATMEL_TC_TCCLKS,
-+				 ATMEL_TC_CMR_MASK);
-+	if (ret)
-+		return ret;
-+
-+	/* Enable clock and trigger counter */
-+	ret = regmap_write(regmap, ATMEL_TC_REG(priv->channel[0], CCR),
-+			   ATMEL_TC_CLKEN | ATMEL_TC_SWTRG);
-+	if (ret)
-+		return ret;
-+
- 	priv->tc_cfg = tcb_config;
- 	priv->regmap = regmap;
- 	counter->name = dev_name(&pdev->dev);
-diff --git a/drivers/counter/stm32-lptimer-cnt.c b/drivers/counter/stm32-lptimer-cnt.c
-index cf73f65baf60..b249c8647639 100644
---- a/drivers/counter/stm32-lptimer-cnt.c
-+++ b/drivers/counter/stm32-lptimer-cnt.c
-@@ -58,37 +58,43 @@ static int stm32_lptim_set_enable_state(struct stm32_lptim_cnt *priv,
- 		return 0;
- 	}
- 
-+	ret = clk_enable(priv->clk);
-+	if (ret)
-+		goto disable_cnt;
-+
- 	/* LP timer must be enabled before writing CMP & ARR */
- 	ret = regmap_write(priv->regmap, STM32_LPTIM_ARR, priv->ceiling);
- 	if (ret)
--		return ret;
-+		goto disable_clk;
- 
- 	ret = regmap_write(priv->regmap, STM32_LPTIM_CMP, 0);
- 	if (ret)
--		return ret;
-+		goto disable_clk;
- 
- 	/* ensure CMP & ARR registers are properly written */
- 	ret = regmap_read_poll_timeout(priv->regmap, STM32_LPTIM_ISR, val,
- 				       (val & STM32_LPTIM_CMPOK_ARROK) == STM32_LPTIM_CMPOK_ARROK,
- 				       100, 1000);
- 	if (ret)
--		return ret;
-+		goto disable_clk;
- 
- 	ret = regmap_write(priv->regmap, STM32_LPTIM_ICR,
- 			   STM32_LPTIM_CMPOKCF_ARROKCF);
- 	if (ret)
--		return ret;
-+		goto disable_clk;
- 
--	ret = clk_enable(priv->clk);
--	if (ret) {
--		regmap_write(priv->regmap, STM32_LPTIM_CR, 0);
--		return ret;
--	}
- 	priv->enabled = true;
- 
- 	/* Start LP timer in continuous mode */
- 	return regmap_update_bits(priv->regmap, STM32_LPTIM_CR,
- 				  STM32_LPTIM_CNTSTRT, STM32_LPTIM_CNTSTRT);
-+
-+disable_clk:
-+	clk_disable(priv->clk);
-+disable_cnt:
-+	regmap_write(priv->regmap, STM32_LPTIM_CR, 0);
-+
-+	return ret;
- }
- 
- static int stm32_lptim_setup(struct stm32_lptim_cnt *priv, int enable)
 diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-index a2d0009560d0..4f3486e6a84b 100644
+index a2d0009560d0f..4f3486e6a84b2 100644
 --- a/drivers/firmware/efi/Makefile
 +++ b/drivers/firmware/efi/Makefile
 @@ -25,6 +25,7 @@ subdir-$(CONFIG_EFI_STUB)		+= libstub
@@ -809,7 +699,7 @@ index a2d0009560d0..4f3486e6a84b 100644
  obj-$(CONFIG_EFI_RCI2_TABLE)		+= rci2-table.o
  obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
 diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 7309394b8fc9..d9f7cbba5769 100644
+index 7309394b8fc98..d9f7cbba5769d 100644
 --- a/drivers/firmware/efi/efi.c
 +++ b/drivers/firmware/efi/efi.c
 @@ -33,6 +33,7 @@
@@ -955,7 +845,7 @@ index 7309394b8fc9..d9f7cbba5769 100644
  
 diff --git a/drivers/firmware/efi/secureboot.c b/drivers/firmware/efi/secureboot.c
 new file mode 100644
-index 000000000000..de0a3714a5d4
+index 0000000000000..de0a3714a5d44
 --- /dev/null
 +++ b/drivers/firmware/efi/secureboot.c
 @@ -0,0 +1,38 @@
@@ -997,260 +887,8 @@ index 000000000000..de0a3714a5d4
 +		}
 +	}
 +}
-diff --git a/drivers/hid/hid-plantronics.c b/drivers/hid/hid-plantronics.c
-index 25cfd964dc25..acb9eb18f7cc 100644
---- a/drivers/hid/hid-plantronics.c
-+++ b/drivers/hid/hid-plantronics.c
-@@ -6,9 +6,6 @@
-  *  Copyright (c) 2015-2018 Terry Junge <terry.junge@plantronics.com>
-  */
- 
--/*
-- */
--
- #include "hid-ids.h"
- 
- #include <linux/hid.h>
-@@ -23,30 +20,28 @@
- 
- #define PLT_VOL_UP		0x00b1
- #define PLT_VOL_DOWN		0x00b2
-+#define PLT_MIC_MUTE		0x00b5
- 
- #define PLT1_VOL_UP		(PLT_HID_1_0_PAGE | PLT_VOL_UP)
- #define PLT1_VOL_DOWN		(PLT_HID_1_0_PAGE | PLT_VOL_DOWN)
-+#define PLT1_MIC_MUTE		(PLT_HID_1_0_PAGE | PLT_MIC_MUTE)
- #define PLT2_VOL_UP		(PLT_HID_2_0_PAGE | PLT_VOL_UP)
- #define PLT2_VOL_DOWN		(PLT_HID_2_0_PAGE | PLT_VOL_DOWN)
-+#define PLT2_MIC_MUTE		(PLT_HID_2_0_PAGE | PLT_MIC_MUTE)
-+#define HID_TELEPHONY_MUTE	(HID_UP_TELEPHONY | 0x2f)
-+#define HID_CONSUMER_MUTE	(HID_UP_CONSUMER | 0xe2)
- 
- #define PLT_DA60		0xda60
- #define PLT_BT300_MIN		0x0413
- #define PLT_BT300_MAX		0x0418
- 
--
--#define PLT_ALLOW_CONSUMER (field->application == HID_CP_CONSUMERCONTROL && \
--			    (usage->hid & HID_USAGE_PAGE) == HID_UP_CONSUMER)
--
--#define PLT_QUIRK_DOUBLE_VOLUME_KEYS BIT(0)
--#define PLT_QUIRK_FOLLOWED_OPPOSITE_VOLUME_KEYS BIT(1)
--
- #define PLT_DOUBLE_KEY_TIMEOUT 5 /* ms */
--#define PLT_FOLLOWED_OPPOSITE_KEY_TIMEOUT 220 /* ms */
- 
- struct plt_drv_data {
- 	unsigned long device_type;
--	unsigned long last_volume_key_ts;
--	u32 quirks;
-+	unsigned long last_key_ts;
-+	unsigned long double_key_to;
-+	__u16 last_key;
- };
- 
- static int plantronics_input_mapping(struct hid_device *hdev,
-@@ -58,34 +53,43 @@ static int plantronics_input_mapping(struct hid_device *hdev,
- 	unsigned short mapped_key;
- 	struct plt_drv_data *drv_data = hid_get_drvdata(hdev);
- 	unsigned long plt_type = drv_data->device_type;
-+	int allow_mute = usage->hid == HID_TELEPHONY_MUTE;
-+	int allow_consumer = field->application == HID_CP_CONSUMERCONTROL &&
-+			(usage->hid & HID_USAGE_PAGE) == HID_UP_CONSUMER &&
-+			usage->hid != HID_CONSUMER_MUTE;
- 
- 	/* special case for PTT products */
- 	if (field->application == HID_GD_JOYSTICK)
- 		goto defaulted;
- 
--	/* handle volume up/down mapping */
- 	/* non-standard types or multi-HID interfaces - plt_type is PID */
- 	if (!(plt_type & HID_USAGE_PAGE)) {
- 		switch (plt_type) {
- 		case PLT_DA60:
--			if (PLT_ALLOW_CONSUMER)
-+			if (allow_consumer)
- 				goto defaulted;
--			goto ignored;
-+			if (usage->hid == HID_CONSUMER_MUTE) {
-+				mapped_key = KEY_MICMUTE;
-+				goto mapped;
-+			}
-+			break;
- 		default:
--			if (PLT_ALLOW_CONSUMER)
-+			if (allow_consumer || allow_mute)
- 				goto defaulted;
- 		}
-+		goto ignored;
- 	}
--	/* handle standard types - plt_type is 0xffa0uuuu or 0xffa2uuuu */
--	/* 'basic telephony compliant' - allow default consumer page map */
--	else if ((plt_type & HID_USAGE) >= PLT_BASIC_TELEPHONY &&
--		 (plt_type & HID_USAGE) != PLT_BASIC_EXCEPTION) {
--		if (PLT_ALLOW_CONSUMER)
--			goto defaulted;
--	}
--	/* not 'basic telephony' - apply legacy mapping */
--	/* only map if the field is in the device's primary vendor page */
--	else if (!((field->application ^ plt_type) & HID_USAGE_PAGE)) {
-+
-+	/* handle standard consumer control mapping */
-+	/* and standard telephony mic mute mapping */
-+	if (allow_consumer || allow_mute)
-+		goto defaulted;
-+
-+	/* handle vendor unique types - plt_type is 0xffa0uuuu or 0xffa2uuuu */
-+	/* if not 'basic telephony compliant' - map vendor unique controls */
-+	if (!((plt_type & HID_USAGE) >= PLT_BASIC_TELEPHONY &&
-+	      (plt_type & HID_USAGE) != PLT_BASIC_EXCEPTION) &&
-+	      !((field->application ^ plt_type) & HID_USAGE_PAGE))
- 		switch (usage->hid) {
- 		case PLT1_VOL_UP:
- 		case PLT2_VOL_UP:
-@@ -95,8 +99,11 @@ static int plantronics_input_mapping(struct hid_device *hdev,
- 		case PLT2_VOL_DOWN:
- 			mapped_key = KEY_VOLUMEDOWN;
- 			goto mapped;
-+		case PLT1_MIC_MUTE:
-+		case PLT2_MIC_MUTE:
-+			mapped_key = KEY_MICMUTE;
-+			goto mapped;
- 		}
--	}
- 
- /*
-  * Future mapping of call control or other usages,
-@@ -105,6 +112,8 @@ static int plantronics_input_mapping(struct hid_device *hdev,
-  */
- 
- ignored:
-+	hid_dbg(hdev, "usage: %08x (appl: %08x) - ignored\n",
-+		usage->hid, field->application);
- 	return -1;
- 
- defaulted:
-@@ -123,38 +132,26 @@ static int plantronics_event(struct hid_device *hdev, struct hid_field *field,
- 			     struct hid_usage *usage, __s32 value)
- {
- 	struct plt_drv_data *drv_data = hid_get_drvdata(hdev);
-+	unsigned long prev_tsto, cur_ts;
-+	__u16 prev_key, cur_key;
- 
--	if (drv_data->quirks & PLT_QUIRK_DOUBLE_VOLUME_KEYS) {
--		unsigned long prev_ts, cur_ts;
-+	/* Usages are filtered in plantronics_usages. */
- 
--		/* Usages are filtered in plantronics_usages. */
-+	/* HZ too low for ms resolution - double key detection disabled */
-+	/* or it is a key release - handle key presses only. */
-+	if (!drv_data->double_key_to || !value)
-+		return 0;
- 
--		if (!value) /* Handle key presses only. */
--			return 0;
-+	prev_tsto = drv_data->last_key_ts + drv_data->double_key_to;
-+	cur_ts = drv_data->last_key_ts = jiffies;
-+	prev_key = drv_data->last_key;
-+	cur_key = drv_data->last_key = usage->code;
- 
--		prev_ts = drv_data->last_volume_key_ts;
--		cur_ts = jiffies;
--		if (jiffies_to_msecs(cur_ts - prev_ts) <= PLT_DOUBLE_KEY_TIMEOUT)
--			return 1; /* Ignore the repeated key. */
--
--		drv_data->last_volume_key_ts = cur_ts;
-+	/* If the same key occurs in <= double_key_to -- ignore it */
-+	if (prev_key == cur_key && time_before_eq(cur_ts, prev_tsto)) {
-+		hid_dbg(hdev, "double key %d ignored\n", cur_key);
-+		return 1; /* Ignore the repeated key. */
- 	}
--	if (drv_data->quirks & PLT_QUIRK_FOLLOWED_OPPOSITE_VOLUME_KEYS) {
--		unsigned long prev_ts, cur_ts;
--
--		/* Usages are filtered in plantronics_usages. */
--
--		if (!value) /* Handle key presses only. */
--			return 0;
--
--		prev_ts = drv_data->last_volume_key_ts;
--		cur_ts = jiffies;
--		if (jiffies_to_msecs(cur_ts - prev_ts) <= PLT_FOLLOWED_OPPOSITE_KEY_TIMEOUT)
--			return 1; /* Ignore the followed opposite volume key. */
--
--		drv_data->last_volume_key_ts = cur_ts;
--	}
--
- 	return 0;
- }
- 
-@@ -196,12 +193,16 @@ static int plantronics_probe(struct hid_device *hdev,
- 	ret = hid_parse(hdev);
- 	if (ret) {
- 		hid_err(hdev, "parse failed\n");
--		goto err;
-+		return ret;
- 	}
- 
- 	drv_data->device_type = plantronics_device_type(hdev);
--	drv_data->quirks = id->driver_data;
--	drv_data->last_volume_key_ts = jiffies - msecs_to_jiffies(PLT_DOUBLE_KEY_TIMEOUT);
-+	drv_data->double_key_to = msecs_to_jiffies(PLT_DOUBLE_KEY_TIMEOUT);
-+	drv_data->last_key_ts = jiffies - drv_data->double_key_to;
-+
-+	/* if HZ does not allow ms resolution - disable double key detection */
-+	if (drv_data->double_key_to < PLT_DOUBLE_KEY_TIMEOUT)
-+		drv_data->double_key_to = 0;
- 
- 	hid_set_drvdata(hdev, drv_data);
- 
-@@ -210,29 +211,10 @@ static int plantronics_probe(struct hid_device *hdev,
- 	if (ret)
- 		hid_err(hdev, "hw start failed\n");
- 
--err:
- 	return ret;
- }
- 
- static const struct hid_device_id plantronics_devices[] = {
--	{ HID_USB_DEVICE(USB_VENDOR_ID_PLANTRONICS,
--					 USB_DEVICE_ID_PLANTRONICS_BLACKWIRE_3210_SERIES),
--		.driver_data = PLT_QUIRK_DOUBLE_VOLUME_KEYS },
--	{ HID_USB_DEVICE(USB_VENDOR_ID_PLANTRONICS,
--					 USB_DEVICE_ID_PLANTRONICS_BLACKWIRE_3220_SERIES),
--		.driver_data = PLT_QUIRK_DOUBLE_VOLUME_KEYS },
--	{ HID_USB_DEVICE(USB_VENDOR_ID_PLANTRONICS,
--					 USB_DEVICE_ID_PLANTRONICS_BLACKWIRE_3215_SERIES),
--		.driver_data = PLT_QUIRK_DOUBLE_VOLUME_KEYS },
--	{ HID_USB_DEVICE(USB_VENDOR_ID_PLANTRONICS,
--					 USB_DEVICE_ID_PLANTRONICS_BLACKWIRE_3225_SERIES),
--		.driver_data = PLT_QUIRK_DOUBLE_VOLUME_KEYS },
--	{ HID_USB_DEVICE(USB_VENDOR_ID_PLANTRONICS,
--					 USB_DEVICE_ID_PLANTRONICS_BLACKWIRE_3325_SERIES),
--		.driver_data = PLT_QUIRK_FOLLOWED_OPPOSITE_VOLUME_KEYS },
--	{ HID_USB_DEVICE(USB_VENDOR_ID_PLANTRONICS,
--					 USB_DEVICE_ID_PLANTRONICS_ENCOREPRO_500_SERIES),
--		.driver_data = PLT_QUIRK_FOLLOWED_OPPOSITE_VOLUME_KEYS },
- 	{ HID_USB_DEVICE(USB_VENDOR_ID_PLANTRONICS, HID_ANY_ID) },
- 	{ }
- };
-@@ -241,6 +223,14 @@ MODULE_DEVICE_TABLE(hid, plantronics_devices);
- static const struct hid_usage_id plantronics_usages[] = {
- 	{ HID_CP_VOLUMEUP, EV_KEY, HID_ANY_ID },
- 	{ HID_CP_VOLUMEDOWN, EV_KEY, HID_ANY_ID },
-+	{ HID_TELEPHONY_MUTE, EV_KEY, HID_ANY_ID },
-+	{ HID_CONSUMER_MUTE, EV_KEY, HID_ANY_ID },
-+	{ PLT2_VOL_UP, EV_KEY, HID_ANY_ID },
-+	{ PLT2_VOL_DOWN, EV_KEY, HID_ANY_ID },
-+	{ PLT2_MIC_MUTE, EV_KEY, HID_ANY_ID },
-+	{ PLT1_VOL_UP, EV_KEY, HID_ANY_ID },
-+	{ PLT1_VOL_DOWN, EV_KEY, HID_ANY_ID },
-+	{ PLT1_MIC_MUTE, EV_KEY, HID_ANY_ID },
- 	{ HID_TERMINATOR, HID_TERMINATOR, HID_TERMINATOR }
- };
- 
 diff --git a/drivers/hid/hid-rmi.c b/drivers/hid/hid-rmi.c
-index d4af17fdba46..154f0403cbf4 100644
+index d4af17fdba467..154f0403cbf4c 100644
 --- a/drivers/hid/hid-rmi.c
 +++ b/drivers/hid/hid-rmi.c
 @@ -321,21 +321,12 @@ static int rmi_input_event(struct hid_device *hdev, u8 *data, int size)
@@ -1352,7 +990,7 @@ index d4af17fdba46..154f0403cbf4 100644
  	data->xport.ops = &hid_rmi_ops;
  
 diff --git a/drivers/hwtracing/coresight/coresight-etm4x-core.c b/drivers/hwtracing/coresight/coresight-etm4x-core.c
-index 2c1a60577728..06b06d0e7b4a 100644
+index 2c1a60577728e..06b06d0e7b4ae 100644
 --- a/drivers/hwtracing/coresight/coresight-etm4x-core.c
 +++ b/drivers/hwtracing/coresight/coresight-etm4x-core.c
 @@ -11,6 +11,7 @@
@@ -1403,7 +1041,7 @@ index 2c1a60577728..06b06d0e7b4a 100644
  	platform_driver_unregister(&etm4_platform_driver);
  	etm4_pm_clear();
 diff --git a/drivers/input/rmi4/rmi_driver.c b/drivers/input/rmi4/rmi_driver.c
-index 2168b6cd7167..5d7cda175a0c 100644
+index 2168b6cd71673..5d7cda175a0ce 100644
 --- a/drivers/input/rmi4/rmi_driver.c
 +++ b/drivers/input/rmi4/rmi_driver.c
 @@ -182,34 +182,47 @@ void rmi_set_attn_data(struct rmi_device *rmi_dev, unsigned long irq_status,
@@ -1595,7 +1233,7 @@ index 2168b6cd7167..5d7cda175a0c 100644
  	if (data->f01_container->dev.driver) {
  		/* Driver already bound, so enable ATTN now. */
 diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
-index 60aed01e54f2..64758cca794b 100644
+index 60aed01e54f27..64758cca794b2 100644
 --- a/drivers/iommu/iommu.c
 +++ b/drivers/iommu/iommu.c
 @@ -8,6 +8,7 @@
@@ -1635,7 +1273,7 @@ index 60aed01e54f2..64758cca794b 100644
   * iommu_setup_default_domain - Set the default_domain for the group
   * @group: Group to change
 diff --git a/drivers/media/i2c/ov08x40.c b/drivers/media/i2c/ov08x40.c
-index b9682264e2f5..54575eea3c49 100644
+index b9682264e2f53..54575eea3c490 100644
 --- a/drivers/media/i2c/ov08x40.c
 +++ b/drivers/media/i2c/ov08x40.c
 @@ -1322,9 +1322,6 @@ static int ov08x40_power_on(struct device *dev)
@@ -1941,20 +1579,8 @@ index b9682264e2f5..54575eea3c49 100644
  	},
  	.probe = ov08x40_probe,
  	.remove = ov08x40_remove,
-diff --git a/drivers/memstick/host/rtsx_usb_ms.c b/drivers/memstick/host/rtsx_usb_ms.c
-index 6eb892fd4d34..3878136227e4 100644
---- a/drivers/memstick/host/rtsx_usb_ms.c
-+++ b/drivers/memstick/host/rtsx_usb_ms.c
-@@ -813,6 +813,7 @@ static void rtsx_usb_ms_drv_remove(struct platform_device *pdev)
- 
- 	host->eject = true;
- 	cancel_work_sync(&host->handle_req);
-+	cancel_delayed_work_sync(&host->poll_card);
- 
- 	mutex_lock(&host->host_mutex);
- 	if (host->req) {
 diff --git a/drivers/misc/mei/vsc-tp.c b/drivers/misc/mei/vsc-tp.c
-index 7be1649b1972..fa553d4914b6 100644
+index 7be1649b19725..fa553d4914b6e 100644
 --- a/drivers/misc/mei/vsc-tp.c
 +++ b/drivers/misc/mei/vsc-tp.c
 @@ -36,20 +36,24 @@
@@ -2017,64 +1643,8 @@ index 7be1649b1972..fa553d4914b6 100644
  	memcpy(pkt->buf, obuf, olen);
  
  	crc = ~crc32(~0, (u8 *)pkt, sizeof(pkt) + olen);
-diff --git a/drivers/net/usb/qmi_wwan.c b/drivers/net/usb/qmi_wwan.c
-index e9208a8d2bfa..a5a4252ea19f 100644
---- a/drivers/net/usb/qmi_wwan.c
-+++ b/drivers/net/usb/qmi_wwan.c
-@@ -1365,9 +1365,11 @@ static const struct usb_device_id products[] = {
- 	{QMI_QUIRK_SET_DTR(0x1bc7, 0x10a0, 0)}, /* Telit FN920C04 */
- 	{QMI_QUIRK_SET_DTR(0x1bc7, 0x10a4, 0)}, /* Telit FN920C04 */
- 	{QMI_QUIRK_SET_DTR(0x1bc7, 0x10a9, 0)}, /* Telit FN920C04 */
-+	{QMI_QUIRK_SET_DTR(0x1bc7, 0x10b0, 0)}, /* Telit FE990B */
- 	{QMI_QUIRK_SET_DTR(0x1bc7, 0x10c0, 0)}, /* Telit FE910C04 */
- 	{QMI_QUIRK_SET_DTR(0x1bc7, 0x10c4, 0)}, /* Telit FE910C04 */
- 	{QMI_QUIRK_SET_DTR(0x1bc7, 0x10c8, 0)}, /* Telit FE910C04 */
-+	{QMI_QUIRK_SET_DTR(0x1bc7, 0x10d0, 0)}, /* Telit FN990B */
- 	{QMI_FIXED_INTF(0x1bc7, 0x1100, 3)},	/* Telit ME910 */
- 	{QMI_FIXED_INTF(0x1bc7, 0x1101, 3)},	/* Telit ME910 dual modem */
- 	{QMI_FIXED_INTF(0x1bc7, 0x1200, 5)},	/* Telit LE920 */
-diff --git a/drivers/net/usb/usbnet.c b/drivers/net/usb/usbnet.c
-index 44179f4e807f..aeab2308b150 100644
---- a/drivers/net/usb/usbnet.c
-+++ b/drivers/net/usb/usbnet.c
-@@ -178,6 +178,17 @@ int usbnet_get_ethernet_addr(struct usbnet *dev, int iMACAddress)
- }
- EXPORT_SYMBOL_GPL(usbnet_get_ethernet_addr);
- 
-+static bool usbnet_needs_usb_name_format(struct usbnet *dev, struct net_device *net)
-+{
-+	/* Point to point devices which don't have a real MAC address
-+	 * (or report a fake local one) have historically used the usb%d
-+	 * naming. Preserve this..
-+	 */
-+	return (dev->driver_info->flags & FLAG_POINTTOPOINT) != 0 &&
-+		(is_zero_ether_addr(net->dev_addr) ||
-+		 is_local_ether_addr(net->dev_addr));
-+}
-+
- static void intr_complete (struct urb *urb)
- {
- 	struct usbnet	*dev = urb->context;
-@@ -1762,13 +1773,11 @@ usbnet_probe (struct usb_interface *udev, const struct usb_device_id *prod)
- 		if (status < 0)
- 			goto out1;
- 
--		// heuristic:  "usb%d" for links we know are two-host,
--		// else "eth%d" when there's reasonable doubt.  userspace
--		// can rename the link if it knows better.
-+		/* heuristic: rename to "eth%d" if we are not sure this link
-+		 * is two-host (these links keep "usb%d")
-+		 */
- 		if ((dev->driver_info->flags & FLAG_ETHER) != 0 &&
--		    ((dev->driver_info->flags & FLAG_POINTTOPOINT) == 0 ||
--		     /* somebody touched it*/
--		     !is_zero_ether_addr(net->dev_addr)))
-+		    !usbnet_needs_usb_name_format(dev, net))
- 			strscpy(net->name, "eth%d", sizeof(net->name));
- 		/* WLAN devices should always be named "wlan%d" */
- 		if ((dev->driver_info->flags & FLAG_WLAN) != 0)
 diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
-index 82b21e34c545..0cf24ba613a2 100644
+index 82b21e34c545e..0cf24ba613a21 100644
 --- a/drivers/pci/quirks.c
 +++ b/drivers/pci/quirks.c
 @@ -4452,6 +4452,30 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_BROADCOM, 0x9000,
@@ -2109,7 +1679,7 @@ index 82b21e34c545..0cf24ba613a2 100644
   * Intersil/Techwell TW686[4589]-based video capture cards have an empty (zero)
   * class code.  Fix it.
 diff --git a/drivers/scsi/sd.c b/drivers/scsi/sd.c
-index 950d8c9fb884..77ac6f8c1805 100644
+index 950d8c9fb8843..77ac6f8c18054 100644
 --- a/drivers/scsi/sd.c
 +++ b/drivers/scsi/sd.c
 @@ -121,6 +121,14 @@ static const char *sd_cache_types[] = {
@@ -2136,150 +1706,8 @@ index 950d8c9fb884..77ac6f8c1805 100644
  	err = scsi_register_driver(&sd_template.gendrv);
  	if (err)
  		goto err_out_driver;
-diff --git a/drivers/tty/serial/8250/8250_dma.c b/drivers/tty/serial/8250/8250_dma.c
-index f245a84f4a50..bdd26c9f34bd 100644
---- a/drivers/tty/serial/8250/8250_dma.c
-+++ b/drivers/tty/serial/8250/8250_dma.c
-@@ -162,7 +162,7 @@ void serial8250_tx_dma_flush(struct uart_8250_port *p)
- 	 */
- 	dma->tx_size = 0;
- 
--	dmaengine_terminate_async(dma->rxchan);
-+	dmaengine_terminate_async(dma->txchan);
- }
- 
- int serial8250_rx_dma(struct uart_8250_port *p)
-diff --git a/drivers/tty/serial/8250/8250_pci.c b/drivers/tty/serial/8250/8250_pci.c
-index df4d0d832e54..73c200127b08 100644
---- a/drivers/tty/serial/8250/8250_pci.c
-+++ b/drivers/tty/serial/8250/8250_pci.c
-@@ -2727,6 +2727,22 @@ static struct pci_serial_quirk pci_serial_quirks[] = {
- 		.init		= pci_oxsemi_tornado_init,
- 		.setup		= pci_oxsemi_tornado_setup,
- 	},
-+	{
-+		.vendor		= PCI_VENDOR_ID_INTASHIELD,
-+		.device		= 0x4026,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.init		= pci_oxsemi_tornado_init,
-+		.setup		= pci_oxsemi_tornado_setup,
-+	},
-+	{
-+		.vendor		= PCI_VENDOR_ID_INTASHIELD,
-+		.device		= 0x4021,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.init		= pci_oxsemi_tornado_init,
-+		.setup		= pci_oxsemi_tornado_setup,
-+	},
- 	{
- 		.vendor         = PCI_VENDOR_ID_INTEL,
- 		.device         = 0x8811,
-@@ -5253,6 +5269,14 @@ static const struct pci_device_id serial_pci_tbl[] = {
- 		PCI_ANY_ID, PCI_ANY_ID,
- 		0, 0,
- 		pbn_b2_2_115200 },
-+	{       PCI_VENDOR_ID_INTASHIELD, 0x0BA2,
-+		PCI_ANY_ID, PCI_ANY_ID,
-+		0, 0,
-+		pbn_b2_2_115200 },
-+	{       PCI_VENDOR_ID_INTASHIELD, 0x0BA3,
-+		PCI_ANY_ID, PCI_ANY_ID,
-+		0, 0,
-+		pbn_b2_2_115200 },
- 	/*
- 	 * Brainboxes UC-235/246
- 	 */
-@@ -5373,6 +5397,14 @@ static const struct pci_device_id serial_pci_tbl[] = {
- 		PCI_ANY_ID, PCI_ANY_ID,
- 		0, 0,
- 		pbn_b2_4_115200 },
-+	{	PCI_VENDOR_ID_INTASHIELD, 0x0C42,
-+		PCI_ANY_ID, PCI_ANY_ID,
-+		0, 0,
-+		pbn_b2_4_115200 },
-+	{	PCI_VENDOR_ID_INTASHIELD, 0x0C43,
-+		PCI_ANY_ID, PCI_ANY_ID,
-+		0, 0,
-+		pbn_b2_4_115200 },
- 	/*
- 	 * Brainboxes UC-420
- 	 */
-@@ -5599,6 +5631,20 @@ static const struct pci_device_id serial_pci_tbl[] = {
- 		PCI_ANY_ID, PCI_ANY_ID,
- 		0, 0,
- 		pbn_oxsemi_1_15625000 },
-+	/*
-+	 * Brainboxes XC-235
-+	 */
-+	{	PCI_VENDOR_ID_INTASHIELD, 0x4026,
-+		PCI_ANY_ID, PCI_ANY_ID,
-+		0, 0,
-+		pbn_oxsemi_1_15625000 },
-+	/*
-+	 * Brainboxes XC-475
-+	 */
-+	{	PCI_VENDOR_ID_INTASHIELD, 0x4021,
-+		PCI_ANY_ID, PCI_ANY_ID,
-+		0, 0,
-+		pbn_oxsemi_1_15625000 },
- 
- 	/*
- 	 * Perle PCI-RAS cards
-diff --git a/drivers/tty/serial/fsl_lpuart.c b/drivers/tty/serial/fsl_lpuart.c
-index c91b9d9818cd..79623b2482a0 100644
---- a/drivers/tty/serial/fsl_lpuart.c
-+++ b/drivers/tty/serial/fsl_lpuart.c
-@@ -1484,6 +1484,19 @@ static int lpuart32_config_rs485(struct uart_port *port, struct ktermios *termio
- 
- 	unsigned long modem = lpuart32_read(&sport->port, UARTMODIR)
- 				& ~(UARTMODIR_TXRTSPOL | UARTMODIR_TXRTSE);
-+	u32 ctrl;
-+
-+	/* TXRTSE and TXRTSPOL only can be changed when transmitter is disabled. */
-+	ctrl = lpuart32_read(&sport->port, UARTCTRL);
-+	if (ctrl & UARTCTRL_TE) {
-+		/* wait for the transmit engine to complete */
-+		lpuart32_wait_bit_set(&sport->port, UARTSTAT, UARTSTAT_TC);
-+		lpuart32_write(&sport->port, ctrl & ~UARTCTRL_TE, UARTCTRL);
-+
-+		while (lpuart32_read(&sport->port, UARTCTRL) & UARTCTRL_TE)
-+			cpu_relax();
-+	}
-+
- 	lpuart32_write(&sport->port, modem, UARTMODIR);
- 
- 	if (rs485->flags & SER_RS485_ENABLED) {
-@@ -1503,6 +1516,10 @@ static int lpuart32_config_rs485(struct uart_port *port, struct ktermios *termio
- 	}
- 
- 	lpuart32_write(&sport->port, modem, UARTMODIR);
-+
-+	if (ctrl & UARTCTRL_TE)
-+		lpuart32_write(&sport->port, ctrl, UARTCTRL);
-+
- 	return 0;
- }
- 
-diff --git a/drivers/tty/serial/stm32-usart.c b/drivers/tty/serial/stm32-usart.c
-index 1ec5d8c3aef8..0854ad8c90cd 100644
---- a/drivers/tty/serial/stm32-usart.c
-+++ b/drivers/tty/serial/stm32-usart.c
-@@ -965,10 +965,8 @@ static void stm32_usart_start_tx(struct uart_port *port)
- {
- 	struct tty_port *tport = &port->state->port;
- 
--	if (kfifo_is_empty(&tport->xmit_fifo) && !port->x_char) {
--		stm32_usart_rs485_rts_disable(port);
-+	if (kfifo_is_empty(&tport->xmit_fifo) && !port->x_char)
- 		return;
--	}
- 
- 	stm32_usart_rs485_rts_enable(port);
- 
 diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
-index dcba4281ea48..bb82bf5148b0 100644
+index dcba4281ea486..bb82bf5148b00 100644
 --- a/drivers/usb/core/hub.c
 +++ b/drivers/usb/core/hub.c
 @@ -5856,6 +5856,13 @@ static void hub_event(struct work_struct *work)
@@ -2296,50 +1724,8 @@ index dcba4281ea48..bb82bf5148b0 100644
  	/* Lock the device, then check to see if we were
  	 * disconnected while waiting for the lock to succeed. */
  	usb_lock_device(hdev);
-diff --git a/drivers/usb/host/xhci-ring.c b/drivers/usb/host/xhci-ring.c
-index 965bffce301e..5e89e9cdcec2 100644
---- a/drivers/usb/host/xhci-ring.c
-+++ b/drivers/usb/host/xhci-ring.c
-@@ -2865,6 +2865,10 @@ static int handle_tx_event(struct xhci_hcd *xhci,
- 		if (!ep_seg) {
- 
- 			if (ep->skip && usb_endpoint_xfer_isoc(&td->urb->ep->desc)) {
-+				/* this event is unlikely to match any TD, don't skip them all */
-+				if (trb_comp_code == COMP_STOPPED_LENGTH_INVALID)
-+					return 0;
-+
- 				skip_isoc_td(xhci, td, ep, status);
- 				if (!list_empty(&ep_ring->td_list))
- 					continue;
-diff --git a/drivers/usb/host/xhci.h b/drivers/usb/host/xhci.h
-index 779b01dee068..59c6c1c701b9 100644
---- a/drivers/usb/host/xhci.h
-+++ b/drivers/usb/host/xhci.h
-@@ -1759,11 +1759,20 @@ static inline void xhci_write_64(struct xhci_hcd *xhci,
- }
- 
- 
--/* Link TRB chain should always be set on 0.95 hosts, and AMD 0.96 ISOC rings */
-+/*
-+ * Reportedly, some chapters of v0.95 spec said that Link TRB always has its chain bit set.
-+ * Other chapters and later specs say that it should only be set if the link is inside a TD
-+ * which continues from the end of one segment to the next segment.
-+ *
-+ * Some 0.95 hardware was found to misbehave if any link TRB doesn't have the chain bit set.
-+ *
-+ * 0.96 hardware from AMD and NEC was found to ignore unchained isochronous link TRBs when
-+ * "resynchronizing the pipe" after a Missed Service Error.
-+ */
- static inline bool xhci_link_chain_quirk(struct xhci_hcd *xhci, enum xhci_ring_type type)
- {
- 	return (xhci->quirks & XHCI_LINK_TRB_QUIRK) ||
--	       (type == TYPE_ISOC && (xhci->quirks & XHCI_AMD_0x96_HOST));
-+	       (type == TYPE_ISOC && (xhci->quirks & (XHCI_AMD_0x96_HOST | XHCI_NEC_HOST)));
- }
- 
- /* xHCI debugging */
 diff --git a/include/linux/crypto.h b/include/linux/crypto.h
-index b164da5e129e..72bfb79b491d 100644
+index b164da5e129e8..72bfb79b491da 100644
 --- a/include/linux/crypto.h
 +++ b/include/linux/crypto.h
 @@ -134,6 +134,8 @@
@@ -2352,7 +1738,7 @@ index b164da5e129e..72bfb79b491d 100644
   * Miscellaneous stuff.
   */
 diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 7d63d1d75f22..c7481fdedbdd 100644
+index 7d63d1d75f22f..c7481fdedbddb 100644
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
 @@ -45,6 +45,8 @@ struct screen_info;
@@ -2420,7 +1806,7 @@ index 7d63d1d75f22..c7481fdedbdd 100644
  enum efi_secureboot_mode efi_get_secureboot_mode(efi_get_variable_t *get_var)
  {
 diff --git a/include/linux/lsm_hook_defs.h b/include/linux/lsm_hook_defs.h
-index e2f1ce37c41e..3fe30fcc506c 100644
+index e2f1ce37c41ef..3fe30fcc506c4 100644
 --- a/include/linux/lsm_hook_defs.h
 +++ b/include/linux/lsm_hook_defs.h
 @@ -444,6 +444,7 @@ LSM_HOOK(int, 0, bpf_token_capable, const struct bpf_token *token, int cap)
@@ -2432,7 +1818,7 @@ index e2f1ce37c41e..3fe30fcc506c 100644
  LSM_HOOK(int, 0, perf_event_open, struct perf_event_attr *attr, int type)
  LSM_HOOK(int, 0, perf_event_alloc, struct perf_event *event)
 diff --git a/include/linux/rmi.h b/include/linux/rmi.h
-index ab7eea01ab42..fff7c5f737fc 100644
+index ab7eea01ab427..fff7c5f737fc8 100644
 --- a/include/linux/rmi.h
 +++ b/include/linux/rmi.h
 @@ -364,6 +364,7 @@ struct rmi_driver_data {
@@ -2444,7 +1830,7 @@ index ab7eea01ab42..fff7c5f737fc 100644
  
  int rmi_register_transport_device(struct rmi_transport_dev *xport);
 diff --git a/include/linux/security.h b/include/linux/security.h
-index 980b6c207cad..a0f0b41d7dcc 100644
+index 980b6c207cade..a0f0b41d7dcca 100644
 --- a/include/linux/security.h
 +++ b/include/linux/security.h
 @@ -2386,4 +2386,13 @@ static inline void security_initramfs_populated(void)
@@ -2461,62 +1847,8 @@ index 980b6c207cad..a0f0b41d7dcc 100644
 +#endif /* CONFIG_SECURITY_LOCKDOWN_LSM */
 +
  #endif /* ! __LINUX_SECURITY_H */
-diff --git a/kernel/cgroup/rstat.c b/kernel/cgroup/rstat.c
-index aac91466279f..3e01781aeb7b 100644
---- a/kernel/cgroup/rstat.c
-+++ b/kernel/cgroup/rstat.c
-@@ -612,36 +612,33 @@ static void cgroup_force_idle_show(struct seq_file *seq, struct cgroup_base_stat
- void cgroup_base_stat_cputime_show(struct seq_file *seq)
- {
- 	struct cgroup *cgrp = seq_css(seq)->cgroup;
--	u64 usage, utime, stime, ntime;
-+	struct cgroup_base_stat bstat;
- 
- 	if (cgroup_parent(cgrp)) {
- 		cgroup_rstat_flush_hold(cgrp);
--		usage = cgrp->bstat.cputime.sum_exec_runtime;
-+		bstat = cgrp->bstat;
- 		cputime_adjust(&cgrp->bstat.cputime, &cgrp->prev_cputime,
--			       &utime, &stime);
--		ntime = cgrp->bstat.ntime;
-+			       &bstat.cputime.utime, &bstat.cputime.stime);
- 		cgroup_rstat_flush_release(cgrp);
- 	} else {
--		/* cgrp->bstat of root is not actually used, reuse it */
--		root_cgroup_cputime(&cgrp->bstat);
--		usage = cgrp->bstat.cputime.sum_exec_runtime;
--		utime = cgrp->bstat.cputime.utime;
--		stime = cgrp->bstat.cputime.stime;
--		ntime = cgrp->bstat.ntime;
-+		root_cgroup_cputime(&bstat);
- 	}
- 
--	do_div(usage, NSEC_PER_USEC);
--	do_div(utime, NSEC_PER_USEC);
--	do_div(stime, NSEC_PER_USEC);
--	do_div(ntime, NSEC_PER_USEC);
-+	do_div(bstat.cputime.sum_exec_runtime, NSEC_PER_USEC);
-+	do_div(bstat.cputime.utime, NSEC_PER_USEC);
-+	do_div(bstat.cputime.stime, NSEC_PER_USEC);
-+	do_div(bstat.ntime, NSEC_PER_USEC);
- 
- 	seq_printf(seq, "usage_usec %llu\n"
- 			"user_usec %llu\n"
- 			"system_usec %llu\n"
- 			"nice_usec %llu\n",
--			usage, utime, stime, ntime);
-+			bstat.cputime.sum_exec_runtime,
-+			bstat.cputime.utime,
-+			bstat.cputime.stime,
-+			bstat.ntime);
- 
--	cgroup_force_idle_show(seq, &cgrp->bstat);
-+	cgroup_force_idle_show(seq, &bstat);
- }
- 
- /* Add bpf kfuncs for cgroup_rstat_updated() and cgroup_rstat_flush() */
 diff --git a/kernel/module/signing.c b/kernel/module/signing.c
-index a2ff4242e623..f0d2be1ee4f1 100644
+index a2ff4242e623d..f0d2be1ee4f1c 100644
 --- a/kernel/module/signing.c
 +++ b/kernel/module/signing.c
 @@ -61,10 +61,17 @@ int mod_verify_sig(const void *mod, struct load_info *info)
@@ -2538,62 +1870,8 @@ index a2ff4242e623..f0d2be1ee4f1 100644
  }
  
  int module_sig_check(struct load_info *info, int flags)
-diff --git a/net/atm/mpc.c b/net/atm/mpc.c
-index 324e3ab96bb3..12da0269275c 100644
---- a/net/atm/mpc.c
-+++ b/net/atm/mpc.c
-@@ -1314,6 +1314,8 @@ static void MPOA_cache_impos_rcvd(struct k_message *msg,
- 	holding_time = msg->content.eg_info.holding_time;
- 	dprintk("(%s) entry = %p, holding_time = %u\n",
- 		mpc->dev->name, entry, holding_time);
-+	if (entry == NULL && !holding_time)
-+		return;
- 	if (entry == NULL && holding_time) {
- 		entry = mpc->eg_ops->add_entry(msg, mpc);
- 		mpc->eg_ops->put(entry);
-diff --git a/net/ipv6/netfilter/nf_socket_ipv6.c b/net/ipv6/netfilter/nf_socket_ipv6.c
-index a7690ec62325..9ea5ef56cb27 100644
---- a/net/ipv6/netfilter/nf_socket_ipv6.c
-+++ b/net/ipv6/netfilter/nf_socket_ipv6.c
-@@ -103,6 +103,10 @@ struct sock *nf_sk_lookup_slow_v6(struct net *net, const struct sk_buff *skb,
- 	struct sk_buff *data_skb = NULL;
- 	int doff = 0;
- 	int thoff = 0, tproto;
-+#if IS_ENABLED(CONFIG_NF_CONNTRACK)
-+	enum ip_conntrack_info ctinfo;
-+	struct nf_conn const *ct;
-+#endif
- 
- 	tproto = ipv6_find_hdr(skb, &thoff, -1, NULL, NULL);
- 	if (tproto < 0) {
-@@ -136,6 +140,25 @@ struct sock *nf_sk_lookup_slow_v6(struct net *net, const struct sk_buff *skb,
- 		return NULL;
- 	}
- 
-+#if IS_ENABLED(CONFIG_NF_CONNTRACK)
-+	/* Do the lookup with the original socket address in
-+	 * case this is a reply packet of an established
-+	 * SNAT-ted connection.
-+	 */
-+	ct = nf_ct_get(skb, &ctinfo);
-+	if (ct &&
-+	    ((tproto != IPPROTO_ICMPV6 &&
-+	      ctinfo == IP_CT_ESTABLISHED_REPLY) ||
-+	     (tproto == IPPROTO_ICMPV6 &&
-+	      ctinfo == IP_CT_RELATED_REPLY)) &&
-+	    (ct->status & IPS_SRC_NAT_DONE)) {
-+		daddr = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u3.in6;
-+		dport = (tproto == IPPROTO_TCP) ?
-+			ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u.tcp.port :
-+			ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u.udp.port;
-+	}
-+#endif
-+
- 	return nf_socket_get_sock_v6(net, data_skb, doff, tproto, saddr, daddr,
- 				     sport, dport, indev);
- }
 diff --git a/scripts/Makefile.extrawarn b/scripts/Makefile.extrawarn
-index dc081cf46d21..25fe35170155 100644
+index dc081cf46d211..25fe351701559 100644
 --- a/scripts/Makefile.extrawarn
 +++ b/scripts/Makefile.extrawarn
 @@ -20,6 +20,10 @@ KBUILD_CFLAGS += $(call cc-disable-warning, address-of-packed-member)
@@ -2608,7 +1886,7 @@ index dc081cf46d21..25fe35170155 100644
  KBUILD_CFLAGS += -Wframe-larger-than=$(CONFIG_FRAME_WARN)
  endif
 diff --git a/scripts/tags.sh b/scripts/tags.sh
-index 45eaf35f5bff..8cd9b8bbadc0 100755
+index 45eaf35f5bff8..8cd9b8bbadc0b 100755
 --- a/scripts/tags.sh
 +++ b/scripts/tags.sh
 @@ -16,6 +16,8 @@ fi
@@ -2621,7 +1899,7 @@ index 45eaf35f5bff..8cd9b8bbadc0 100755
  # ignore arbitrary directories
  if [ -n "${IGNORE_DIRS}" ]; then
 diff --git a/security/integrity/platform_certs/load_uefi.c b/security/integrity/platform_certs/load_uefi.c
-index d1fdd113450a..182e8090cfe8 100644
+index d1fdd113450a6..182e8090cfe85 100644
 --- a/security/integrity/platform_certs/load_uefi.c
 +++ b/security/integrity/platform_certs/load_uefi.c
 @@ -74,7 +74,8 @@ static __init void *get_cert_list(efi_char16_t *name, efi_guid_t *guid,
@@ -2645,7 +1923,7 @@ index d1fdd113450a..182e8090cfe8 100644
  	}
  
 diff --git a/security/lockdown/Kconfig b/security/lockdown/Kconfig
-index e84ddf484010..d0501353a4b9 100644
+index e84ddf4840101..d0501353a4b95 100644
 --- a/security/lockdown/Kconfig
 +++ b/security/lockdown/Kconfig
 @@ -16,6 +16,19 @@ config SECURITY_LOCKDOWN_LSM_EARLY
@@ -2669,7 +1947,7 @@ index e84ddf484010..d0501353a4b9 100644
  	prompt "Kernel default lockdown mode"
  	default LOCK_DOWN_KERNEL_FORCE_NONE
 diff --git a/security/lockdown/lockdown.c b/security/lockdown/lockdown.c
-index cf83afa1d879..aba751e7abff 100644
+index cf83afa1d879a..aba751e7abffe 100644
 --- a/security/lockdown/lockdown.c
 +++ b/security/lockdown/lockdown.c
 @@ -72,6 +72,17 @@ static int lockdown_is_locked_down(enum lockdown_reason what)
@@ -2690,197 +1968,3 @@ index cf83afa1d879..aba751e7abff 100644
  static struct security_hook_list lockdown_hooks[] __ro_after_init = {
  	LSM_HOOK_INIT(locked_down, lockdown_is_locked_down),
  };
-diff --git a/sound/pci/hda/patch_realtek.c b/sound/pci/hda/patch_realtek.c
-index a84857a3c2bf..78aab243c8b6 100644
---- a/sound/pci/hda/patch_realtek.c
-+++ b/sound/pci/hda/patch_realtek.c
-@@ -10519,6 +10519,7 @@ static const struct hda_quirk alc269_fixup_tbl[] = {
- 	SND_PCI_QUIRK(0x103c, 0x8811, "HP Spectre x360 15-eb1xxx", ALC285_FIXUP_HP_SPECTRE_X360_EB1),
- 	SND_PCI_QUIRK(0x103c, 0x8812, "HP Spectre x360 15-eb1xxx", ALC285_FIXUP_HP_SPECTRE_X360_EB1),
- 	SND_PCI_QUIRK(0x103c, 0x881d, "HP 250 G8 Notebook PC", ALC236_FIXUP_HP_MUTE_LED_COEFBIT2),
-+	SND_PCI_QUIRK(0x103c, 0x881e, "HP Laptop 15s-du3xxx", ALC236_FIXUP_HP_MUTE_LED_COEFBIT2),
- 	SND_PCI_QUIRK(0x103c, 0x8846, "HP EliteBook 850 G8 Notebook PC", ALC285_FIXUP_HP_GPIO_LED),
- 	SND_PCI_QUIRK(0x103c, 0x8847, "HP EliteBook x360 830 G8 Notebook PC", ALC285_FIXUP_HP_GPIO_LED),
- 	SND_PCI_QUIRK(0x103c, 0x884b, "HP EliteBook 840 Aero G8 Notebook PC", ALC285_FIXUP_HP_GPIO_LED),
-@@ -10783,6 +10784,7 @@ static const struct hda_quirk alc269_fixup_tbl[] = {
- 	SND_PCI_QUIRK(0x1043, 0x1d4e, "ASUS TM420", ALC256_FIXUP_ASUS_HPE),
- 	SND_PCI_QUIRK(0x1043, 0x1da2, "ASUS UP6502ZA/ZD", ALC245_FIXUP_CS35L41_SPI_2),
- 	SND_PCI_QUIRK(0x1043, 0x1df3, "ASUS UM5606WA", ALC294_FIXUP_BASS_SPEAKER_15),
-+	SND_PCI_QUIRK(0x1043, 0x1264, "ASUS UM5606KA", ALC294_FIXUP_BASS_SPEAKER_15),
- 	SND_PCI_QUIRK(0x1043, 0x1e02, "ASUS UX3402ZA", ALC245_FIXUP_CS35L41_SPI_2),
- 	SND_PCI_QUIRK(0x1043, 0x1e11, "ASUS Zephyrus G15", ALC289_FIXUP_ASUS_GA502),
- 	SND_PCI_QUIRK(0x1043, 0x1e12, "ASUS UM3402", ALC287_FIXUP_CS35L41_I2C_2),
-diff --git a/sound/usb/mixer_quirks.c b/sound/usb/mixer_quirks.c
-index ed6127b0389f..3d36d22f8e9e 100644
---- a/sound/usb/mixer_quirks.c
-+++ b/sound/usb/mixer_quirks.c
-@@ -4223,6 +4223,52 @@ static void snd_dragonfly_quirk_db_scale(struct usb_mixer_interface *mixer,
- 	}
- }
- 
-+/*
-+ * Some Plantronics headsets have control names that don't meet ALSA naming
-+ * standards. This function fixes nonstandard source names. By the time
-+ * this function is called the control name should look like one of these:
-+ * "source names Playback Volume"
-+ * "source names Playback Switch"
-+ * "source names Capture Volume"
-+ * "source names Capture Switch"
-+ * If any of the trigger words are found in the name then the name will
-+ * be changed to:
-+ * "Headset Playback Volume"
-+ * "Headset Playback Switch"
-+ * "Headset Capture Volume"
-+ * "Headset Capture Switch"
-+ * depending on the current suffix.
-+ */
-+static void snd_fix_plt_name(struct snd_usb_audio *chip,
-+			     struct snd_ctl_elem_id *id)
-+{
-+	/* no variant of "Sidetone" should be added to this list */
-+	static const char * const trigger[] = {
-+		"Earphone", "Microphone", "Receive", "Transmit"
-+	};
-+	static const char * const suffix[] = {
-+		" Playback Volume", " Playback Switch",
-+		" Capture Volume", " Capture Switch"
-+	};
-+	int i;
-+
-+	for (i = 0; i < ARRAY_SIZE(trigger); i++)
-+		if (strstr(id->name, trigger[i]))
-+			goto triggered;
-+	usb_audio_dbg(chip, "no change in %s\n", id->name);
-+	return;
-+
-+triggered:
-+	for (i = 0; i < ARRAY_SIZE(suffix); i++)
-+		if (strstr(id->name, suffix[i])) {
-+			usb_audio_dbg(chip, "fixing kctl name %s\n", id->name);
-+			snprintf(id->name, sizeof(id->name), "Headset%s",
-+				 suffix[i]);
-+			return;
-+		}
-+	usb_audio_dbg(chip, "something wrong in kctl name %s\n", id->name);
-+}
-+
- void snd_usb_mixer_fu_apply_quirk(struct usb_mixer_interface *mixer,
- 				  struct usb_mixer_elem_info *cval, int unitid,
- 				  struct snd_kcontrol *kctl)
-@@ -4240,5 +4286,10 @@ void snd_usb_mixer_fu_apply_quirk(struct usb_mixer_interface *mixer,
- 			cval->min_mute = 1;
- 		break;
- 	}
-+
-+	/* ALSA-ify some Plantronics headset control names */
-+	if (USB_ID_VENDOR(mixer->chip->usb_id) == 0x047f &&
-+	    (cval->control == UAC_FU_MUTE || cval->control == UAC_FU_VOLUME))
-+		snd_fix_plt_name(mixer->chip, &kctl->id);
- }
- 
-diff --git a/tools/perf/Documentation/intel-hybrid.txt b/tools/perf/Documentation/intel-hybrid.txt
-index e7a776ad25d7..0379903673a4 100644
---- a/tools/perf/Documentation/intel-hybrid.txt
-+++ b/tools/perf/Documentation/intel-hybrid.txt
-@@ -8,15 +8,15 @@ Part of events are available on core cpu, part of events are available
- on atom cpu and even part of events are available on both.
- 
- Kernel exports two new cpu pmus via sysfs:
--/sys/devices/cpu_core
--/sys/devices/cpu_atom
-+/sys/bus/event_source/devices/cpu_core
-+/sys/bus/event_source/devices/cpu_atom
- 
- The 'cpus' files are created under the directories. For example,
- 
--cat /sys/devices/cpu_core/cpus
-+cat /sys/bus/event_source/devices/cpu_core/cpus
- 0-15
- 
--cat /sys/devices/cpu_atom/cpus
-+cat /sys/bus/event_source/devices/cpu_atom/cpus
- 16-23
- 
- It indicates cpu0-cpu15 are core cpus and cpu16-cpu23 are atom cpus.
-@@ -60,8 +60,8 @@ can't carry pmu information. So now this type is extended to be PMU aware
- type. The PMU type ID is stored at attr.config[63:32].
- 
- PMU type ID is retrieved from sysfs.
--/sys/devices/cpu_atom/type
--/sys/devices/cpu_core/type
-+/sys/bus/event_source/devices/cpu_atom/type
-+/sys/bus/event_source/devices/cpu_core/type
- 
- The new attr.config layout for PERF_TYPE_HARDWARE:
- 
-diff --git a/tools/perf/Documentation/perf-list.txt b/tools/perf/Documentation/perf-list.txt
-index d0c65fad419a..c3ffd93f94d7 100644
---- a/tools/perf/Documentation/perf-list.txt
-+++ b/tools/perf/Documentation/perf-list.txt
-@@ -188,7 +188,7 @@ in the CPU vendor specific documentation.
- 
- The available PMUs and their raw parameters can be listed with
- 
--  ls /sys/devices/*/format
-+  ls /sys/bus/event_source/devices/*/format
- 
- For example the raw event "LSD.UOPS" core pmu event above could
- be specified as
-diff --git a/tools/perf/arch/x86/util/iostat.c b/tools/perf/arch/x86/util/iostat.c
-index 00f645a0c18a..7442a2cd87ed 100644
---- a/tools/perf/arch/x86/util/iostat.c
-+++ b/tools/perf/arch/x86/util/iostat.c
-@@ -32,7 +32,7 @@
- #define MAX_PATH 1024
- #endif
- 
--#define UNCORE_IIO_PMU_PATH	"devices/uncore_iio_%d"
-+#define UNCORE_IIO_PMU_PATH	"bus/event_source/devices/uncore_iio_%d"
- #define SYSFS_UNCORE_PMU_PATH	"%s/"UNCORE_IIO_PMU_PATH
- #define PLATFORM_MAPPING_PATH	UNCORE_IIO_PMU_PATH"/die%d"
- 
-diff --git a/tools/perf/builtin-stat.c b/tools/perf/builtin-stat.c
-index 77e327d4a9a7..68ea7589c143 100644
---- a/tools/perf/builtin-stat.c
-+++ b/tools/perf/builtin-stat.c
-@@ -97,7 +97,7 @@
- #include <internal/threadmap.h>
- 
- #define DEFAULT_SEPARATOR	" "
--#define FREEZE_ON_SMI_PATH	"devices/cpu/freeze_on_smi"
-+#define FREEZE_ON_SMI_PATH	"bus/event_source/devices/cpu/freeze_on_smi"
- 
- static void print_counters(struct timespec *ts, int argc, const char **argv);
- 
-diff --git a/tools/perf/util/mem-events.c b/tools/perf/util/mem-events.c
-index 3692e988c86e..0277d3e1505c 100644
---- a/tools/perf/util/mem-events.c
-+++ b/tools/perf/util/mem-events.c
-@@ -189,7 +189,7 @@ static bool perf_pmu__mem_events_supported(const char *mnt, struct perf_pmu *pmu
- 	if (!e->event_name)
- 		return true;
- 
--	scnprintf(path, PATH_MAX, "%s/devices/%s/events/%s", mnt, pmu->name, e->event_name);
-+	scnprintf(path, PATH_MAX, "%s/bus/event_source/devices/%s/events/%s", mnt, pmu->name, e->event_name);
- 
- 	return !stat(path, &st);
- }
-diff --git a/tools/perf/util/pmu.c b/tools/perf/util/pmu.c
-index 6206c8fe2bf9..a8193ac8f2e7 100644
---- a/tools/perf/util/pmu.c
-+++ b/tools/perf/util/pmu.c
-@@ -36,12 +36,12 @@
- #define UNIT_MAX_LEN	31 /* max length for event unit name */
- 
- enum event_source {
--	/* An event loaded from /sys/devices/<pmu>/events. */
-+	/* An event loaded from /sys/bus/event_source/devices/<pmu>/events. */
- 	EVENT_SRC_SYSFS,
- 	/* An event loaded from a CPUID matched json file. */
- 	EVENT_SRC_CPU_JSON,
- 	/*
--	 * An event loaded from a /sys/devices/<pmu>/identifier matched json
-+	 * An event loaded from a /sys/bus/event_source/devices/<pmu>/identifier matched json
- 	 * file.
- 	 */
- 	EVENT_SRC_SYS_JSON,

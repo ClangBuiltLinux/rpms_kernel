@@ -159,18 +159,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 6.14.0
-%define specversion 6.14.0
+%define specrpmversion 6.14.1
+%define specversion 6.14.1
 %define patchversion 6.14
-%define pkgrelease 200
+%define pkgrelease 100
 %define kversion 6
-%define tarfile_release 6.14
+%define tarfile_release 6.14.1
 # This is needed to do merge window version magic
 %define patchlevel 14
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 200%{?buildid}%{?dist}
+%define specrelease 100%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 6.14.0
+%define kabiversion 6.14.1
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4205,7 +4205,8 @@ fi\
 #
 #
 %changelog
-* Fri Apr 04 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.14.0-200]
+* Mon Apr 07 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.14.1-0]
+- Config updates for 6.14.1 (Justin M. Forbes)
 - redhat/kernel.spec: list python3-wheel explicitly for Fedora<42 (Jan Stancek)
 - serial: 8250_dma: terminate correct DMA in tx_dma_flush() (John Keeping)
 - serial: stm32: do not deassert RS485 RTS GPIO prematurely (Cheick Traore)
@@ -4238,6 +4239,7 @@ fi\
 - powerpc64/ftrace: fix module loading without patchable function entries (Anthony Iliopoulos)
 - x86/insn_decoder_test: allow longer symbol-names (David Rheinsberg)
 - apply -Wno-error=unterminated-string-initialization temporarily (Thorsten Leemhuis)
+- Linux v6.14.1
 
 * Mon Mar 24 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.14.0-1]
 - Reset RHEL_RELEASE for 6.15 cycle (Justin M. Forbes)
