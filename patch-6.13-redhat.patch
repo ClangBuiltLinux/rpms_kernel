@@ -675,7 +675,7 @@ index 0fa7c5728f1e6..e404279c86107 100644
  M:	Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>
  L:	platform-driver-x86@vger.kernel.org
 diff --git a/Makefile b/Makefile
-index 21a34e8991ac6..b62c835a76ffd 100644
+index ffed1f493b488..fccd69e110244 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -22,6 +22,18 @@ $(if $(filter __%, $(MAKECMDGOALS)), \
