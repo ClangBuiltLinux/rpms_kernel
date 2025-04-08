@@ -192,7 +192,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index e55726a71d95..6dd4447b6d37 100644
+index 38689a0c3605..10e552fbebf3 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -22,6 +22,18 @@ $(if $(filter __%, $(MAKECMDGOALS)), \
@@ -1059,7 +1059,7 @@ index bbf7029e224b..cf7faa970dd6 100644
  		dmi_decode_ipmi((const struct dmi_header *) dev->device_data);
  
 diff --git a/drivers/char/ipmi/ipmi_msghandler.c b/drivers/char/ipmi/ipmi_msghandler.c
-index 1e5313748f8b..f2a56c624f54 100644
+index 3ba9d7e9a6c7..82300dc5fd49 100644
 --- a/drivers/char/ipmi/ipmi_msghandler.c
 +++ b/drivers/char/ipmi/ipmi_msghandler.c
 @@ -35,6 +35,7 @@
@@ -1094,7 +1094,7 @@ index 1e5313748f8b..f2a56c624f54 100644
  	rv = ipmi_register_driver();
  	mutex_unlock(&ipmi_interfaces_mutex);
 diff --git a/drivers/char/random.c b/drivers/char/random.c
-index 92cbd24a36d8..d1f76d136ac6 100644
+index 38f2fab29c56..d38f1d9b1fbc 100644
 --- a/drivers/char/random.c
 +++ b/drivers/char/random.c
 @@ -51,9 +51,11 @@
@@ -2221,7 +2221,7 @@ index 0b1616e93cf4..85fc52038a82 100644
  		PCI_ANY_ID, PCI_ANY_ID, },
  	{PCI_VENDOR_ID_EMULEX, PCI_DEVICE_ID_LANCER_G7_FC,
 diff --git a/drivers/scsi/qla2xxx/qla_os.c b/drivers/scsi/qla2xxx/qla_os.c
-index 6b9b8218b512..f6def6339bc2 100644
+index b44d134e7105..bc6d03ada3ce 100644
 --- a/drivers/scsi/qla2xxx/qla_os.c
 +++ b/drivers/scsi/qla2xxx/qla_os.c
 @@ -8117,6 +8117,7 @@ static const struct pci_error_handlers qla2xxx_err_handler = {
@@ -2283,7 +2283,7 @@ index 950d8c9fb884..be7b84fb780b 100644
  	if (err)
  		goto err_out_driver;
 diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
-index 8c7f9cc785bb..cb8a5f51e42d 100644
+index 0e1dd6ef60a7..20ddc50a241c 100644
 --- a/drivers/usb/core/hub.c
 +++ b/drivers/usb/core/hub.c
 @@ -5854,6 +5854,13 @@ static void hub_event(struct work_struct *work)
@@ -2342,7 +2342,7 @@ index cadec6b1b554..e35b381d9717 100644
  }
  
 diff --git a/fs/ext4/super.c b/fs/ext4/super.c
-index 8122d4ffb3b5..623264b723dc 100644
+index 181934499624..7b093e7c12f5 100644
 --- a/fs/ext4/super.c
 +++ b/fs/ext4/super.c
 @@ -5637,6 +5637,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
@@ -4423,7 +4423,7 @@ index d75897559d18..08226fdd309d 100644
  KBUILD_CFLAGS += -Wframe-larger-than=$(CONFIG_FRAME_WARN)
  endif
 diff --git a/scripts/mod/modpost.c b/scripts/mod/modpost.c
-index 92627e8d0e16..cdf4e4c14d0b 100644
+index be89921d60b6..63e2f2ec68f0 100644
 --- a/scripts/mod/modpost.c
 +++ b/scripts/mod/modpost.c
 @@ -27,6 +27,7 @@

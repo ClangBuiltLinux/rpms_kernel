@@ -162,13 +162,13 @@ Summary: The Linux kernel
 %define specrpmversion 6.15.0
 %define specversion 6.15.0
 %define patchversion 6.15
-%define pkgrelease 0.rc0.20250406gitf4d2ef48250a.13
+%define pkgrelease 0.rc1.14
 %define kversion 6
-%define tarfile_release 6.14-13524-gf4d2ef48250a
+%define tarfile_release 6.15-rc1
 # This is needed to do merge window version magic
 %define patchlevel 15
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 0.rc0.20250406gitf4d2ef48250a.13%{?buildid}%{?dist}
+%define specrelease 0.rc1.14%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.15.0
 
@@ -2275,10 +2275,10 @@ BuildKernel() {
     install -m 644 System.map $RPM_BUILD_ROOT/boot/System.map-$KernelVer
     install -m 644 System.map $RPM_BUILD_ROOT/lib/modules/$KernelVer/System.map
 
-    %{log_msg "Create initrfamfs"}
+    %{log_msg "Reserving 40MB in boot for initramfs"}
     # We estimate the size of the initramfs because rpm needs to take this size
     # into consideration when performing disk space calculations. (See bz #530778)
-    dd if=/dev/zero of=$RPM_BUILD_ROOT/boot/initramfs-$KernelVer.img bs=1M count=20
+    dd if=/dev/zero of=$RPM_BUILD_ROOT/boot/initramfs-$KernelVer.img bs=1M count=40
 
     if [ -f arch/$Arch/boot/zImage.stub ]; then
       %{log_msg "Copy zImage.stub to RPM_BUILD_ROOT"}
@@ -4229,8 +4229,14 @@ fi\
 #
 #
 %changelog
-* Sun Apr 06 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.15.0-0.rc0.f4d2ef48250a.13]
+* Mon Apr 07 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.15.0-0.rc1.14]
 - apply -Wno-error=unterminated-string-initialization temporarily (Thorsten Leemhuis)
+
+* Mon Apr 07 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.15.0-0.rc1.13]
+- fedora: arm64: move some TI drivers to modular (Peter Robinson)
+- fedora: minor cleanups for 6.14 (Peter Robinson)
+- redhat/configs: enable CONFIG_I2C_MUX_PCA954x on x86 (Michal Schmidt)
+- Linux v6.15.0-0.rc1
 
 * Sun Apr 06 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.15.0-0.rc0.f4d2ef48250a.12]
 - Linux v6.15.0-0.rc0.f4d2ef48250a
