@@ -162,13 +162,13 @@ Summary: The Linux kernel
 %define specrpmversion 6.15.0
 %define specversion 6.15.0
 %define patchversion 6.15
-%define pkgrelease 0.rc1.14
+%define pkgrelease 0.rc1.15
 %define kversion 6
 %define tarfile_release 6.15-rc1
 # This is needed to do merge window version magic
 %define patchlevel 15
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 0.rc1.14%{?buildid}%{?dist}
+%define specrelease 0.rc1.15%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.15.0
 
@@ -2185,6 +2185,13 @@ InitBuildVars() {
     fi
 }
 
+#Build bootstrap bpftool
+BuildBpftool(){
+    export BPFBOOTSTRAP_CFLAGS=$(echo "%{__global_compiler_flags}" | sed -r "s/\-specs=[^\ ]+\/redhat-annobin-cc1//")
+    export BPFBOOTSTRAP_LDFLAGS=$(echo "%{__global_ldflags}" | sed -r "s/\-specs=[^\ ]+\/redhat-annobin-cc1//")
+    CFLAGS="" LDFLAGS="" make EXTRA_CFLAGS="${BPFBOOTSTRAP_CFLAGS}" EXTRA_CXXFLAGS="${BPFBOOTSTRAP_CFLAGS}" EXTRA_LDFLAGS="${BPFBOOTSTRAP_LDFLAGS}" %{?make_opts} %{?clang_make_opts} V=1 -C tools/bpf/bpftool bootstrap
+}
+
 BuildKernel() {
     %{log_msg "BuildKernel for $4"}
     MakeTarget=$1
@@ -2912,10 +2919,7 @@ BuildKernel() {
     if [ "$Variant" != "zfcpdump" ]; then
 	%{log_msg "Build the bootstrap bpftool to generate vmlinux.h"}
         # Build the bootstrap bpftool to generate vmlinux.h
-        export BPFBOOTSTRAP_CFLAGS=$(echo "%{__global_compiler_flags}" | sed -r "s/\-specs=[^\ ]+\/redhat-annobin-cc1//")
-        export BPFBOOTSTRAP_LDFLAGS=$(echo "%{__global_ldflags}" | sed -r "s/\-specs=[^\ ]+\/redhat-annobin-cc1//")
-        CFLAGS="" LDFLAGS="" make EXTRA_CFLAGS="${BPFBOOTSTRAP_CFLAGS}" EXTRA_CXXFLAGS="${BPFBOOTSTRAP_CFLAGS}" EXTRA_LDFLAGS="${BPFBOOTSTRAP_LDFLAGS}" %{?make_opts} %{?clang_make_opts} V=1 -C tools/bpf/bpftool bootstrap
-
+        BuildBpftool
         tools/bpf/bpftool/bootstrap/bpftool btf dump file vmlinux format c > $RPM_BUILD_ROOT/$DevelDir/vmlinux.h
     fi
 %endif
@@ -3152,7 +3156,10 @@ pushd tools/tracing/rtla
 popd
 %endif
 
-if [ -f $DevelDir/vmlinux.h ]; then
+#set RPM_VMLINUX_H
+if [ -f $RPM_BUILD_ROOT/$DevelDir/vmlinux.h ]; then
+  RPM_VMLINUX_H=$RPM_BUILD_ROOT/$DevelDir/vmlinux.h
+elif [ -f $DevelDir/vmlinux.h ]; then
   RPM_VMLINUX_H=$DevelDir/vmlinux.h
 fi
 echo "${RPM_VMLINUX_H}" > ../vmlinux_h_path
@@ -3173,8 +3180,13 @@ if [ ! -f include/generated/autoconf.h ]; then
    %{make} %{?_smp_mflags} modules_prepare
 fi
 
+# Build BPFtool for samples/bpf
+if [ ! -f tools/bpf/bpftool/bootstrap/bpftool ]; then
+  BuildBpftool
+fi
+
 %{log_msg "build samples/bpf"}
-%{make} %{?_smp_mflags} ARCH=$Arch V=1 M=samples/bpf/ VMLINUX_H="${RPM_VMLINUX_H}" || true
+%{make} %{?_smp_mflags} ARCH=$Arch BPFTOOL=$(pwd)/tools/bpf/bpftool/bootstrap/bpftool V=1 M=samples/bpf/ VMLINUX_H="${RPM_VMLINUX_H}" || true
 
 pushd tools/testing/selftests
 # We need to install here because we need to call make with ARCH set which
@@ -4229,8 +4241,13 @@ fi\
 #
 #
 %changelog
-* Mon Apr 07 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.15.0-0.rc1.14]
+* Tue Apr 08 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.15.0-0.rc1.15]
 - apply -Wno-error=unterminated-string-initialization temporarily (Thorsten Leemhuis)
+
+* Tue Apr 08 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.15.0-0.rc1.14]
+- redhat/configs: automotive: Enable CONFIG_BOOTPARAM_HUNG_TASK_PANIC config (Dorinda Bassey)
+- samples/bpf: fix build (Gregory Bell)
+- redhat: create 'systemd-volatile-overlay' addon for UKI (Emanuele Giuseppe Esposito)
 
 * Mon Apr 07 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.15.0-0.rc1.13]
 - fedora: arm64: move some TI drivers to modular (Peter Robinson)
