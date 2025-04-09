@@ -192,7 +192,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 38689a0c3605..10e552fbebf3 100644
+index f42418556507..12f0de36fd73 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -22,6 +22,18 @@ $(if $(filter __%, $(MAKECMDGOALS)), \
@@ -232,7 +232,7 @@ index 38689a0c3605..10e552fbebf3 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1325,7 +1348,13 @@ define filechk_version.h
+@@ -1328,7 +1351,13 @@ define filechk_version.h
  	((c) > 255 ? 255 : (c)))';                                       \
  	echo \#define LINUX_VERSION_MAJOR $(VERSION);                    \
  	echo \#define LINUX_VERSION_PATCHLEVEL $(PATCHLEVEL);            \
@@ -247,7 +247,7 @@ index 38689a0c3605..10e552fbebf3 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -1927,6 +1956,23 @@ endif
+@@ -1930,6 +1959,23 @@ endif
  
  ifdef CONFIG_MODULES
  
