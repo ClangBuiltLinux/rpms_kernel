@@ -1,6 +1,3 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/659655f4ff3c52bf384f6bb8b85065434a48148f
- 659655f4ff3c52bf384f6bb8b85065434a48148f apply -Wno-error=unterminated-string-initialization temporarily
-
 https://gitlab.com/cki-project/kernel-ark/-/commit/99c8b56381c2f05815c77e6e41380b3d23559ea0
  99c8b56381c2f05815c77e6e41380b3d23559ea0 mei: vsc: Fix fortify-panic caused by invalid counted_by() use
 

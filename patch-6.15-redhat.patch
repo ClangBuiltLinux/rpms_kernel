@@ -71,13 +71,12 @@
  kernel/rh_messages.c                               | 414 ++++++++++++++++
  kernel/rh_messages.h                               | 326 +++++++++++++
  kernel/rh_waived.c                                 | 104 ++++
- scripts/Makefile.extrawarn                         |   4 +
  scripts/mod/modpost.c                              |   8 +
  scripts/tags.sh                                    |   2 +
  security/integrity/platform_certs/load_uefi.c      |   6 +-
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |  11 +
- 79 files changed, 2744 insertions(+), 219 deletions(-)
+ 78 files changed, 2740 insertions(+), 219 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index d9fd26b95b34..aeafaa431ecd 100644
@@ -4407,21 +4406,6 @@ index 000000000000..84e22b1730cc
 +	return 0;
 +}
 +late_initcall(__add_rh_flag);
-diff --git a/scripts/Makefile.extrawarn b/scripts/Makefile.extrawarn
-index d75897559d18..08226fdd309d 100644
---- a/scripts/Makefile.extrawarn
-+++ b/scripts/Makefile.extrawarn
-@@ -20,6 +20,10 @@ KBUILD_CFLAGS += $(call cc-disable-warning, address-of-packed-member)
- KBUILD_CFLAGS += -Wmissing-declarations
- KBUILD_CFLAGS += -Wmissing-prototypes
- 
-+# temporarily disable a warning to allow compiling with gcc15, as suggested by
-+# Jakub Jelinek in https://bugzilla.redhat.com/show_bug.cgi?id=2338533#c7
-+KBUILD_CFLAGS += $(call cc-option,-Wno-error=unterminated-string-initialization)
-+
- ifneq ($(CONFIG_FRAME_WARN),0)
- KBUILD_CFLAGS += -Wframe-larger-than=$(CONFIG_FRAME_WARN)
- endif
 diff --git a/scripts/mod/modpost.c b/scripts/mod/modpost.c
 index be89921d60b6..63e2f2ec68f0 100644
 --- a/scripts/mod/modpost.c
