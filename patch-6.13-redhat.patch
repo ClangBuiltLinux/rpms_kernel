@@ -48,7 +48,7 @@
  drivers/hwtracing/coresight/coresight-etm4x-core.c |   19 +
  drivers/input/rmi4/rmi_driver.c                    |  124 +-
  drivers/iommu/iommu.c                              |   22 +
- drivers/media/i2c/ov08x40.c                        |  170 ++-
+ drivers/media/i2c/ov08x40.c                        |  162 +-
  drivers/nvme/host/core.c                           |   22 +-
  drivers/nvme/host/multipath.c                      |   19 +-
  drivers/nvme/host/nvme.h                           |    4 +
@@ -70,7 +70,7 @@
  security/lockdown/lockdown.c                       |   11 +
  sound/soc/codecs/rt712-sdca.c                      |   80 +-
  sound/soc/codecs/rt712-sdca.h                      |    3 +
- 72 files changed, 9231 insertions(+), 298 deletions(-)
+ 72 files changed, 9225 insertions(+), 296 deletions(-)
 
 diff --git a/Documentation/hid/index.rst b/Documentation/hid/index.rst
 index af02cf7cfa82..baf156b44b58 100644
@@ -674,7 +674,7 @@ index 0fa7c5728f1e..e404279c8610 100644
  M:	Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>
  L:	platform-driver-x86@vger.kernel.org
 diff --git a/Makefile b/Makefile
-index 9e74fb7cd249..b4aef57e449a 100644
+index 8dab1726be91..4bcc395665ed 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -22,6 +22,18 @@ $(if $(filter __%, $(MAKECMDGOALS)), \
@@ -714,7 +714,7 @@ index 9e74fb7cd249..b4aef57e449a 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1910,6 +1933,23 @@ endif
+@@ -1913,6 +1936,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -1097,7 +1097,7 @@ index 74dcccdc6482..d6265ddc87ef 100644
  	acpi_dev_get_resources(device, &resource_list,
  			       acpi_check_serial_bus_slave,
 diff --git a/drivers/ata/libahci.c b/drivers/ata/libahci.c
-index fdfa7b266218..f5f8ba457c93 100644
+index a28ffe1e5969..80ad0b23c496 100644
 --- a/drivers/ata/libahci.c
 +++ b/drivers/ata/libahci.c
 @@ -729,6 +729,24 @@ int ahci_stop_engine(struct ata_port *ap)
@@ -1388,10 +1388,10 @@ index 000000000000..de0a3714a5d4
 +	}
 +}
 diff --git a/drivers/hid/Kconfig b/drivers/hid/Kconfig
-index 363c860835d3..b7e010c384ba 100644
+index 84a757da4fb6..432ab6bd8e79 100644
 --- a/drivers/hid/Kconfig
 +++ b/drivers/hid/Kconfig
-@@ -1387,4 +1387,6 @@ source "drivers/hid/amd-sfh-hid/Kconfig"
+@@ -1401,4 +1401,6 @@ source "drivers/hid/amd-sfh-hid/Kconfig"
  
  source "drivers/hid/surface-hid/Kconfig"
  
@@ -1399,10 +1399,10 @@ index 363c860835d3..b7e010c384ba 100644
 +
  endif # HID_SUPPORT
 diff --git a/drivers/hid/Makefile b/drivers/hid/Makefile
-index 1f50a6ecadbb..0abfe51704a0 100644
+index a8118b0ebeb5..c7ecfbb3e228 100644
 --- a/drivers/hid/Makefile
 +++ b/drivers/hid/Makefile
-@@ -170,3 +170,5 @@ obj-$(CONFIG_INTEL_ISH_HID)	+= intel-ish-hid/
+@@ -171,3 +171,5 @@ obj-$(CONFIG_INTEL_ISH_HID)	+= intel-ish-hid/
  obj-$(CONFIG_AMD_SFH_HID)       += amd-sfh-hid/
  
  obj-$(CONFIG_SURFACE_HID_CORE)  += surface-hid/
@@ -9019,7 +9019,7 @@ index 599030e1e890..74dd17d516c0 100644
   * iommu_setup_default_domain - Set the default_domain for the group
   * @group: Group to change
 diff --git a/drivers/media/i2c/ov08x40.c b/drivers/media/i2c/ov08x40.c
-index b9682264e2f5..54575eea3c49 100644
+index 83b49cf114ac..54575eea3c49 100644
 --- a/drivers/media/i2c/ov08x40.c
 +++ b/drivers/media/i2c/ov08x40.c
 @@ -1322,9 +1322,6 @@ static int ov08x40_power_on(struct device *dev)
@@ -9300,31 +9300,6 @@ index b9682264e2f5..54575eea3c49 100644
  	}
  
  	/* Set default mode to max resolution */
-@@ -2324,11 +2326,14 @@ static void ov08x40_remove(struct i2c_client *client)
- 	ov08x40_free_controls(ov08x);
- 
- 	pm_runtime_disable(&client->dev);
-+	if (!pm_runtime_status_suspended(&client->dev))
-+		ov08x40_power_off(&client->dev);
- 	pm_runtime_set_suspended(&client->dev);
--
--	ov08x40_power_off(&client->dev);
- }
- 
-+static DEFINE_RUNTIME_DEV_PM_OPS(ov08x40_pm_ops, ov08x40_power_off,
-+				 ov08x40_power_on, NULL);
-+
- #ifdef CONFIG_ACPI
- static const struct acpi_device_id ov08x40_acpi_ids[] = {
- 	{"OVTI08F4"},
-@@ -2349,6 +2354,7 @@ static struct i2c_driver ov08x40_i2c_driver = {
- 		.name = "ov08x40",
- 		.acpi_match_table = ACPI_PTR(ov08x40_acpi_ids),
- 		.of_match_table = ov08x40_of_match,
-+		.pm = pm_sleep_ptr(&ov08x40_pm_ops),
- 	},
- 	.probe = ov08x40_probe,
- 	.remove = ov08x40_remove,
 diff --git a/drivers/nvme/host/core.c b/drivers/nvme/host/core.c
 index e4034cec5923..828a2fc01d7b 100644
 --- a/drivers/nvme/host/core.c
