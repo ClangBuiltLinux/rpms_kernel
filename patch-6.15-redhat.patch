@@ -191,7 +191,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index c91afd55099e..42eb59f606df 100644
+index e94bbb2298c8..836490042dea 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -22,6 +22,18 @@ $(if $(filter __%, $(MAKECMDGOALS)), \
@@ -231,7 +231,7 @@ index c91afd55099e..42eb59f606df 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1328,7 +1351,13 @@ define filechk_version.h
+@@ -1330,7 +1353,13 @@ define filechk_version.h
  	((c) > 255 ? 255 : (c)))';                                       \
  	echo \#define LINUX_VERSION_MAJOR $(VERSION);                    \
  	echo \#define LINUX_VERSION_PATCHLEVEL $(PATCHLEVEL);            \
@@ -246,7 +246,7 @@ index c91afd55099e..42eb59f606df 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -1930,6 +1959,23 @@ endif
+@@ -1932,6 +1961,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -2531,10 +2531,10 @@ index 2494d51707ef..b9d91c56c6ea 100644
  
  struct taint_flag {
 diff --git a/include/linux/pci.h b/include/linux/pci.h
-index 0e8e3fd77e96..e4f2bb3a16e3 100644
+index 51e2bd6405cd..68534218425a 100644
 --- a/include/linux/pci.h
 +++ b/include/linux/pci.h
-@@ -1630,6 +1630,7 @@ int pci_add_dynid(struct pci_driver *drv,
+@@ -1632,6 +1632,7 @@ int pci_add_dynid(struct pci_driver *drv,
  		  unsigned long driver_data);
  const struct pci_device_id *pci_match_id(const struct pci_device_id *ids,
  					 struct pci_dev *dev);
@@ -2542,7 +2542,7 @@ index 0e8e3fd77e96..e4f2bb3a16e3 100644
  int pci_scan_bridge(struct pci_bus *bus, struct pci_dev *dev, int max,
  		    int pass);
  
-@@ -2688,6 +2689,10 @@ static inline bool pci_is_thunderbolt_attached(struct pci_dev *pdev)
+@@ -2690,6 +2691,10 @@ static inline bool pci_is_thunderbolt_attached(struct pci_dev *pdev)
  	return false;
  }
  
