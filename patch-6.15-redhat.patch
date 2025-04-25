@@ -884,10 +884,10 @@ index dfc7cae90802..2a58d726149d 100644
  		alg->verify = sig_default_verify;
  	if (!alg->set_priv_key)
 diff --git a/crypto/testmgr.c b/crypto/testmgr.c
-index abd609d4c8ef..35e56cef44f1 100644
+index 82977ea25db3..b57167a92386 100644
 --- a/crypto/testmgr.c
 +++ b/crypto/testmgr.c
-@@ -4053,7 +4053,7 @@ static int test_akcipher_one(struct crypto_akcipher *tfm,
+@@ -4034,7 +4034,7 @@ static int test_akcipher_one(struct crypto_akcipher *tfm,
  	 * Don't invoke decrypt test which requires a private key
  	 * for vectors with only a public key.
  	 */
@@ -896,7 +896,7 @@ index abd609d4c8ef..35e56cef44f1 100644
  		err = 0;
  		goto free_all;
  	}
-@@ -4189,7 +4189,7 @@ static int test_sig_one(struct crypto_sig *tfm, const struct sig_testvec *vecs)
+@@ -4170,7 +4170,7 @@ static int test_sig_one(struct crypto_sig *tfm, const struct sig_testvec *vecs)
  	 * Don't invoke sign test (which requires a private key)
  	 * for vectors with only a public key.
  	 */
@@ -905,7 +905,7 @@ index abd609d4c8ef..35e56cef44f1 100644
  		return 0;
  
  	sig_size = crypto_sig_maxsize(tfm);
-@@ -5029,14 +5029,12 @@ static const struct alg_test_desc alg_test_descs[] = {
+@@ -5010,14 +5010,12 @@ static const struct alg_test_desc alg_test_descs[] = {
  	}, {
  		.alg = "ecdh-nist-p256",
  		.test = alg_test_kpp,
