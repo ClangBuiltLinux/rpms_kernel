@@ -190,7 +190,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 5aa9ee52a765..f02d241e6b4e 100644
+index 94be5dfb81fb..f0c337e2cd55 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -22,6 +22,18 @@ $(if $(filter __%, $(MAKECMDGOALS)), \
@@ -230,7 +230,7 @@ index 5aa9ee52a765..f02d241e6b4e 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1330,7 +1353,13 @@ define filechk_version.h
+@@ -1323,7 +1346,13 @@ define filechk_version.h
  	((c) > 255 ? 255 : (c)))';                                       \
  	echo \#define LINUX_VERSION_MAJOR $(VERSION);                    \
  	echo \#define LINUX_VERSION_PATCHLEVEL $(PATCHLEVEL);            \
@@ -245,7 +245,7 @@ index 5aa9ee52a765..f02d241e6b4e 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -1932,6 +1961,23 @@ endif
+@@ -1925,6 +1954,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -2417,10 +2417,10 @@ index bf3bbac4e02a..b9840b1a43fe 100644
  LSM_HOOK(int, 0, perf_event_open, int type)
  LSM_HOOK(int, 0, perf_event_alloc, struct perf_event *event)
 diff --git a/include/linux/module.h b/include/linux/module.h
-index d94b196d5a34..ead452836a9f 100644
+index b3329110d668..c96ec5f62ea5 100644
 --- a/include/linux/module.h
 +++ b/include/linux/module.h
-@@ -428,6 +428,7 @@ struct module {
+@@ -430,6 +430,7 @@ struct module {
  	struct module_attribute *modinfo_attrs;
  	const char *version;
  	const char *srcversion;
@@ -2428,7 +2428,7 @@ index d94b196d5a34..ead452836a9f 100644
  	struct kobject *holders_dir;
  
  	/* Exported symbols */
-@@ -1017,4 +1018,8 @@ static inline unsigned long find_kallsyms_symbol_value(struct module *mod,
+@@ -1019,4 +1020,8 @@ static inline unsigned long find_kallsyms_symbol_value(struct module *mod,
  
  #endif  /* CONFIG_MODULES && CONFIG_KALLSYMS */
  
