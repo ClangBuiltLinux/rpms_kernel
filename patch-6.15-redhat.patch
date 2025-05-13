@@ -78,10 +78,10 @@
  77 files changed, 2725 insertions(+), 208 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index d9fd26b95b34..aeafaa431ecd 100644
+index 8f75ec177399..0c4bc4a2203d 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -6223,6 +6223,17 @@
+@@ -6241,6 +6241,17 @@
  		2	The "airplane mode" button toggles between everything
  			blocked and everything unblocked.
  
@@ -99,7 +99,7 @@ index d9fd26b95b34..aeafaa431ecd 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -7551,6 +7562,15 @@
+@@ -7569,6 +7580,15 @@
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -346,10 +346,10 @@ index f244c5560e7f..464f915011b8 100644
  	/* boot_command_line has been already set up in early.c */
  	*cmdline_p = boot_command_line;
 diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
-index 12126adbc3a9..9bb1ebe65aa7 100644
+index 0ff057ff11ce..fdc376384b12 100644
 --- a/arch/x86/kernel/cpu/common.c
 +++ b/arch/x86/kernel/cpu/common.c
-@@ -1639,6 +1639,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
+@@ -1681,6 +1681,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
  		get_cpu_vendor(c);
  		intel_unlock_cpuid_leafs(c);
  		get_cpu_cap(c);
@@ -2417,7 +2417,7 @@ index bf3bbac4e02a..b9840b1a43fe 100644
  LSM_HOOK(int, 0, perf_event_open, int type)
  LSM_HOOK(int, 0, perf_event_alloc, struct perf_event *event)
 diff --git a/include/linux/module.h b/include/linux/module.h
-index b3329110d668..c96ec5f62ea5 100644
+index 8050f77c3b64..131bd7bbe936 100644
 --- a/include/linux/module.h
 +++ b/include/linux/module.h
 @@ -430,6 +430,7 @@ struct module {
@@ -2428,7 +2428,7 @@ index b3329110d668..c96ec5f62ea5 100644
  	struct kobject *holders_dir;
  
  	/* Exported symbols */
-@@ -1019,4 +1020,8 @@ static inline unsigned long find_kallsyms_symbol_value(struct module *mod,
+@@ -1024,4 +1025,8 @@ static inline unsigned long find_kallsyms_symbol_value(struct module *mod,
  
  #endif  /* CONFIG_MODULES && CONFIG_KALLSYMS */
  
