@@ -1,3 +1,6 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/69785a550e8aa1fa8f03e904e64e602a0ba719d2
+ 69785a550e8aa1fa8f03e904e64e602a0ba719d2 Revert "kbuild: Require pahole <v1.28 or >v1.29 with GENDWARFKSYMS on X86"
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/99c8b56381c2f05815c77e6e41380b3d23559ea0
  99c8b56381c2f05815c77e6e41380b3d23559ea0 mei: vsc: Fix fortify-panic caused by invalid counted_by() use
 

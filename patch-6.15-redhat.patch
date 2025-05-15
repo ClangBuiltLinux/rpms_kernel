@@ -63,6 +63,7 @@
  kernel/Makefile                                    |   1 +
  kernel/bpf/core.c                                  |   5 +
  kernel/bpf/syscall.c                               |  23 +
+ kernel/module/Kconfig                              |   5 -
  kernel/module/main.c                               |  13 +
  kernel/module/signing.c                            |   9 +-
  kernel/panic.c                                     |  12 +
@@ -75,7 +76,7 @@
  security/integrity/platform_certs/load_uefi.c      |   6 +-
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |  11 +
- 77 files changed, 2725 insertions(+), 208 deletions(-)
+ 78 files changed, 2725 insertions(+), 213 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index 8f75ec177399..0c4bc4a2203d 100644
@@ -190,7 +191,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 64c514f4bc19..815f96b6d348 100644
+index 0eb9e6c49b32..1488d275090e 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -22,6 +22,18 @@ $(if $(filter __%, $(MAKECMDGOALS)), \
@@ -230,7 +231,7 @@ index 64c514f4bc19..815f96b6d348 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1323,7 +1346,13 @@ define filechk_version.h
+@@ -1322,7 +1345,13 @@ define filechk_version.h
  	((c) > 255 ? 255 : (c)))';                                       \
  	echo \#define LINUX_VERSION_MAJOR $(VERSION);                    \
  	echo \#define LINUX_VERSION_PATCHLEVEL $(PATCHLEVEL);            \
@@ -245,7 +246,7 @@ index 64c514f4bc19..815f96b6d348 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -1925,6 +1954,23 @@ endif
+@@ -1924,6 +1953,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -3260,6 +3261,22 @@ index 64c3393e8270..827ab64621bb 100644
  		*(int *)table->data = unpriv_enable;
  	}
  
+diff --git a/kernel/module/Kconfig b/kernel/module/Kconfig
+index 39278737bb68..d7762ef5949a 100644
+--- a/kernel/module/Kconfig
++++ b/kernel/module/Kconfig
+@@ -192,11 +192,6 @@ config GENDWARFKSYMS
+ 	depends on !DEBUG_INFO_REDUCED && !DEBUG_INFO_SPLIT
+ 	# Requires ELF object files.
+ 	depends on !LTO
+-	# To avoid conflicts with the discarded __gendwarfksyms_ptr symbols on
+-	# X86, requires pahole before commit 47dcb534e253 ("btf_encoder: Stop
+-	# indexing symbols for VARs") or after commit 9810758003ce ("btf_encoder:
+-	# Verify 0 address DWARF variables are in ELF section").
+-	depends on !X86 || !DEBUG_INFO_BTF || PAHOLE_VERSION < 128 || PAHOLE_VERSION > 129
+ 	help
+ 	  Calculate symbol versions from DWARF debugging information using
+ 	  gendwarfksyms. Requires DEBUG_INFO to be enabled.
 diff --git a/kernel/module/main.c b/kernel/module/main.c
 index a2859dc3eea6..dda7d7026bbb 100644
 --- a/kernel/module/main.c
