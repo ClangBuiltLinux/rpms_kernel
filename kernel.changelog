@@ -1,6 +1,19 @@
-* Thu May 15 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.15.0-0.rc6.088d13246a46.54]
-- Revert "kbuild: Require pahole <v1.28 or >v1.29 with GENDWARFKSYMS on X86" (Justin M. Forbes)
-- Revert CONFIG_GENKSYMS for x86 (Justin M. Forbes)
+* Mon May 19 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.15.0-0.rc7.57]
+- redhat/configs: remove CRC16 config files (Scott Weaver)
+- Linux v6.15.0-0.rc7
+Resolves: 
+
+* Sun May 18 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.15.0-0.rc6.5723cc3450bc.56]
+- Revert CONFIG_GENKSYMS in pending for x86 (Justin M. Forbes)
+- Linux v6.15.0-0.rc6.5723cc3450bc
+Resolves: 
+
+* Sat May 17 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.15.0-0.rc6.172a9d94339c.55]
+- Linux v6.15.0-0.rc6.172a9d94339c
+Resolves: 
+
+* Fri May 16 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.15.0-0.rc6.fee3e843b309.54]
+- Linux v6.15.0-0.rc6.fee3e843b309
 Resolves: 
 
 * Thu May 15 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.15.0-0.rc6.088d13246a46.53]
