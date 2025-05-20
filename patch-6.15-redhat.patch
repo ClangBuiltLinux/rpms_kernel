@@ -22,6 +22,7 @@
  drivers/acpi/irq.c                                 |  17 +-
  drivers/acpi/scan.c                                |   9 +
  drivers/ata/libahci.c                              |  18 +
+ drivers/block/loop.c                               |  23 -
  drivers/char/ipmi/ipmi_dmi.c                       |  15 +
  drivers/char/ipmi/ipmi_msghandler.c                |  16 +-
  drivers/char/random.c                              | 126 ++++-
@@ -76,7 +77,7 @@
  security/integrity/platform_certs/load_uefi.c      |   6 +-
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |  11 +
- 78 files changed, 2729 insertions(+), 212 deletions(-)
+ 79 files changed, 2729 insertions(+), 235 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index 8f75ec177399..0c4bc4a2203d 100644
@@ -1050,6 +1051,54 @@ index 22afa4ff860d..78eacccaa1ae 100644
  	/* wait for engine to stop. This could be as long as 500 msec */
  	tmp = ata_wait_register(ap, port_mmio + PORT_CMD,
  				PORT_CMD_LIST_ON, PORT_CMD_LIST_ON, 1, 500);
+diff --git a/drivers/block/loop.c b/drivers/block/loop.c
+index b8ba7de08753..46cba261075f 100644
+--- a/drivers/block/loop.c
++++ b/drivers/block/loop.c
+@@ -505,17 +505,6 @@ static void loop_assign_backing_file(struct loop_device *lo, struct file *file)
+ 	lo->lo_min_dio_size = loop_query_min_dio_size(lo);
+ }
+ 
+-static int loop_check_backing_file(struct file *file)
+-{
+-	if (!file->f_op->read_iter)
+-		return -EINVAL;
+-
+-	if ((file->f_mode & FMODE_WRITE) && !file->f_op->write_iter)
+-		return -EINVAL;
+-
+-	return 0;
+-}
+-
+ /*
+  * loop_change_fd switched the backing store of a loopback device to
+  * a new file. This is useful for operating system installers to free up
+@@ -537,10 +526,6 @@ static int loop_change_fd(struct loop_device *lo, struct block_device *bdev,
+ 	if (!file)
+ 		return -EBADF;
+ 
+-	error = loop_check_backing_file(file);
+-	if (error)
+-		return error;
+-
+ 	/* suppress uevents while reconfiguring the device */
+ 	dev_set_uevent_suppress(disk_to_dev(lo->lo_disk), 1);
+ 
+@@ -978,14 +963,6 @@ static int loop_configure(struct loop_device *lo, blk_mode_t mode,
+ 
+ 	if (!file)
+ 		return -EBADF;
+-
+-	if ((mode & BLK_OPEN_WRITE) && !file->f_op->write_iter)
+-		return -EINVAL;
+-
+-	error = loop_check_backing_file(file);
+-	if (error)
+-		return error;
+-
+ 	is_loop = is_loop_device(file);
+ 
+ 	/* This is safe, since we have a reference from open(). */
 diff --git a/drivers/char/ipmi/ipmi_dmi.c b/drivers/char/ipmi/ipmi_dmi.c
 index bbf7029e224b..cf7faa970dd6 100644
 --- a/drivers/char/ipmi/ipmi_dmi.c
