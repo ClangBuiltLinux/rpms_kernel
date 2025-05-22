@@ -1,8 +1,5 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/82b5c32dac7854967d7152cd9e3d72fe6051f903
- 82b5c32dac7854967d7152cd9e3d72fe6051f903 Revert "loop: Add sanity check for read/write_iter"
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/b10ab0c5ed1faf5d5b3cf3ddcf133b33c5404c27
- b10ab0c5ed1faf5d5b3cf3ddcf133b33c5404c27 powerpc: Fix struct termio related ioctl macros
+https://gitlab.com/cki-project/kernel-ark/-/commit/2b54906ff5dde3a15ff82aefe0262b65a98c329a
+ 2b54906ff5dde3a15ff82aefe0262b65a98c329a redhat: make ENABLE_WERROR also enable OBJTOOL_WERROR
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/99c8b56381c2f05815c77e6e41380b3d23559ea0
  99c8b56381c2f05815c77e6e41380b3d23559ea0 mei: vsc: Fix fortify-panic caused by invalid counted_by() use

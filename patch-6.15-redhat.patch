@@ -5,7 +5,6 @@
  Makefile                                           |  48 +-
  arch/arm/Kconfig                                   |   4 +-
  arch/arm64/Kconfig                                 |   2 +-
- arch/powerpc/include/uapi/asm/ioctls.h             |   8 +-
  arch/s390/include/asm/ipl.h                        |   1 +
  arch/s390/kernel/ipl.c                             |   5 +
  arch/s390/kernel/setup.c                           |   4 +
@@ -22,7 +21,6 @@
  drivers/acpi/irq.c                                 |  17 +-
  drivers/acpi/scan.c                                |   9 +
  drivers/ata/libahci.c                              |  18 +
- drivers/block/loop.c                               |  23 -
  drivers/char/ipmi/ipmi_dmi.c                       |  15 +
  drivers/char/ipmi/ipmi_msghandler.c                |  16 +-
  drivers/char/random.c                              | 126 ++++-
@@ -72,12 +70,13 @@
  kernel/rh_messages.c                               | 414 ++++++++++++++++
  kernel/rh_messages.h                               | 326 +++++++++++++
  kernel/rh_waived.c                                 | 104 ++++
+ scripts/Makefile.lib                               |   3 +
  scripts/mod/modpost.c                              |   8 +
  scripts/tags.sh                                    |   2 +
  security/integrity/platform_certs/load_uefi.c      |   6 +-
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |  11 +
- 79 files changed, 2729 insertions(+), 235 deletions(-)
+ 78 files changed, 2728 insertions(+), 208 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index 8f75ec177399..0c4bc4a2203d 100644
@@ -300,25 +299,6 @@ index a182295e6f08..a3cfce882d26 100644
  	help
  	  For systems with 52-bit userspace VAs enabled, the kernel will attempt
  	  to maintain compatibility with older software by providing 48-bit VAs
-diff --git a/arch/powerpc/include/uapi/asm/ioctls.h b/arch/powerpc/include/uapi/asm/ioctls.h
-index 2c145da3b774..b5211e413829 100644
---- a/arch/powerpc/include/uapi/asm/ioctls.h
-+++ b/arch/powerpc/include/uapi/asm/ioctls.h
-@@ -23,10 +23,10 @@
- #define TCSETSW		_IOW('t', 21, struct termios)
- #define TCSETSF		_IOW('t', 22, struct termios)
- 
--#define TCGETA		_IOR('t', 23, struct termio)
--#define TCSETA		_IOW('t', 24, struct termio)
--#define TCSETAW		_IOW('t', 25, struct termio)
--#define TCSETAF		_IOW('t', 28, struct termio)
-+#define TCGETA		0x40147417 /* _IOR('t', 23, struct termio) */
-+#define TCSETA		0x80147418 /* _IOW('t', 24, struct termio) */
-+#define TCSETAW		0x80147419 /* _IOW('t', 25, struct termio) */
-+#define TCSETAF		0x8014741c /* _IOW('t', 28, struct termio) */
- 
- #define TCSBRK		_IO('t', 29)
- #define TCXONC		_IO('t', 30)
 diff --git a/arch/s390/include/asm/ipl.h b/arch/s390/include/asm/ipl.h
 index b0d00032479d..afb9544fb007 100644
 --- a/arch/s390/include/asm/ipl.h
@@ -1051,54 +1031,6 @@ index 22afa4ff860d..78eacccaa1ae 100644
  	/* wait for engine to stop. This could be as long as 500 msec */
  	tmp = ata_wait_register(ap, port_mmio + PORT_CMD,
  				PORT_CMD_LIST_ON, PORT_CMD_LIST_ON, 1, 500);
-diff --git a/drivers/block/loop.c b/drivers/block/loop.c
-index b8ba7de08753..46cba261075f 100644
---- a/drivers/block/loop.c
-+++ b/drivers/block/loop.c
-@@ -505,17 +505,6 @@ static void loop_assign_backing_file(struct loop_device *lo, struct file *file)
- 	lo->lo_min_dio_size = loop_query_min_dio_size(lo);
- }
- 
--static int loop_check_backing_file(struct file *file)
--{
--	if (!file->f_op->read_iter)
--		return -EINVAL;
--
--	if ((file->f_mode & FMODE_WRITE) && !file->f_op->write_iter)
--		return -EINVAL;
--
--	return 0;
--}
--
- /*
-  * loop_change_fd switched the backing store of a loopback device to
-  * a new file. This is useful for operating system installers to free up
-@@ -537,10 +526,6 @@ static int loop_change_fd(struct loop_device *lo, struct block_device *bdev,
- 	if (!file)
- 		return -EBADF;
- 
--	error = loop_check_backing_file(file);
--	if (error)
--		return error;
--
- 	/* suppress uevents while reconfiguring the device */
- 	dev_set_uevent_suppress(disk_to_dev(lo->lo_disk), 1);
- 
-@@ -978,14 +963,6 @@ static int loop_configure(struct loop_device *lo, blk_mode_t mode,
- 
- 	if (!file)
- 		return -EBADF;
--
--	if ((mode & BLK_OPEN_WRITE) && !file->f_op->write_iter)
--		return -EINVAL;
--
--	error = loop_check_backing_file(file);
--	if (error)
--		return error;
--
- 	is_loop = is_loop_device(file);
- 
- 	/* This is safe, since we have a reference from open(). */
 diff --git a/drivers/char/ipmi/ipmi_dmi.c b/drivers/char/ipmi/ipmi_dmi.c
 index bbf7029e224b..cf7faa970dd6 100644
 --- a/drivers/char/ipmi/ipmi_dmi.c
@@ -4410,6 +4342,21 @@ index 000000000000..84e22b1730cc
 +	return 0;
 +}
 +late_initcall(__add_rh_flag);
+diff --git a/scripts/Makefile.lib b/scripts/Makefile.lib
+index 2fe73cda0bdd..f766681e1b5c 100644
+--- a/scripts/Makefile.lib
++++ b/scripts/Makefile.lib
+@@ -272,7 +272,10 @@ objtool-args-$(CONFIG_HAVE_STATIC_CALL_INLINE)		+= --static-call
+ objtool-args-$(CONFIG_HAVE_UACCESS_VALIDATION)		+= --uaccess
+ objtool-args-$(or $(CONFIG_GCOV_KERNEL),$(CONFIG_KCOV))	+= --no-unreachable
+ objtool-args-$(CONFIG_PREFIX_SYMBOLS)			+= --prefix=$(CONFIG_FUNCTION_PADDING_BYTES)
++# RHEL-only: don't enforce OBJTOOL_WERROR for out of tree modules
++ifeq ($(KBUILD_EXTMOD),)
+ objtool-args-$(CONFIG_OBJTOOL_WERROR)			+= --Werror
++endif
+ 
+ objtool-args = $(objtool-args-y)					\
+ 	$(if $(delay-objtool), --link)					\
 diff --git a/scripts/mod/modpost.c b/scripts/mod/modpost.c
 index be89921d60b6..63e2f2ec68f0 100644
 --- a/scripts/mod/modpost.c
