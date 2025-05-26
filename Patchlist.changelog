@@ -1,3 +1,6 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/922dc9908b4481e757f847d56581691560a791cc
+ 922dc9908b4481e757f847d56581691560a791cc powerpc: Fix struct termio related ioctl macros
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/2b54906ff5dde3a15ff82aefe0262b65a98c329a
  2b54906ff5dde3a15ff82aefe0262b65a98c329a redhat: make ENABLE_WERROR also enable OBJTOOL_WERROR
 

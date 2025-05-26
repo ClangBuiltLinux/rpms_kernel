@@ -5,6 +5,7 @@
  Makefile                                           |  48 +-
  arch/arm/Kconfig                                   |   4 +-
  arch/arm64/Kconfig                                 |   2 +-
+ arch/powerpc/include/uapi/asm/ioctls.h             |   8 +-
  arch/s390/include/asm/ipl.h                        |   1 +
  arch/s390/kernel/ipl.c                             |   5 +
  arch/s390/kernel/setup.c                           |   4 +
@@ -76,7 +77,7 @@
  security/integrity/platform_certs/load_uefi.c      |   6 +-
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |  11 +
- 78 files changed, 2728 insertions(+), 208 deletions(-)
+ 79 files changed, 2732 insertions(+), 212 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index 8f75ec177399..0c4bc4a2203d 100644
@@ -191,7 +192,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index a9edd0303653..8bc83b55c192 100644
+index c1cd1b5fc269..2e18aa0af6af 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -22,6 +22,18 @@ $(if $(filter __%, $(MAKECMDGOALS)), \
@@ -299,6 +300,25 @@ index a182295e6f08..a3cfce882d26 100644
  	help
  	  For systems with 52-bit userspace VAs enabled, the kernel will attempt
  	  to maintain compatibility with older software by providing 48-bit VAs
+diff --git a/arch/powerpc/include/uapi/asm/ioctls.h b/arch/powerpc/include/uapi/asm/ioctls.h
+index 2c145da3b774..b5211e413829 100644
+--- a/arch/powerpc/include/uapi/asm/ioctls.h
++++ b/arch/powerpc/include/uapi/asm/ioctls.h
+@@ -23,10 +23,10 @@
+ #define TCSETSW		_IOW('t', 21, struct termios)
+ #define TCSETSF		_IOW('t', 22, struct termios)
+ 
+-#define TCGETA		_IOR('t', 23, struct termio)
+-#define TCSETA		_IOW('t', 24, struct termio)
+-#define TCSETAW		_IOW('t', 25, struct termio)
+-#define TCSETAF		_IOW('t', 28, struct termio)
++#define TCGETA		0x40147417 /* _IOR('t', 23, struct termio) */
++#define TCSETA		0x80147418 /* _IOW('t', 24, struct termio) */
++#define TCSETAW		0x80147419 /* _IOW('t', 25, struct termio) */
++#define TCSETAF		0x8014741c /* _IOW('t', 28, struct termio) */
+ 
+ #define TCSBRK		_IO('t', 29)
+ #define TCXONC		_IO('t', 30)
 diff --git a/arch/s390/include/asm/ipl.h b/arch/s390/include/asm/ipl.h
 index b0d00032479d..afb9544fb007 100644
 --- a/arch/s390/include/asm/ipl.h
@@ -1850,7 +1870,7 @@ index 2168b6cd7167..5d7cda175a0c 100644
  	if (data->f01_container->dev.driver) {
  		/* Driver already bound, so enable ATTN now. */
 diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
-index 4f91a740c15f..4ad2ac193ffd 100644
+index 9d728800a862..cc4aebbcb30f 100644
 --- a/drivers/iommu/iommu.c
 +++ b/drivers/iommu/iommu.c
 @@ -8,6 +8,7 @@
@@ -3262,7 +3282,7 @@ index 64c3393e8270..827ab64621bb 100644
  	}
  
 diff --git a/kernel/module/main.c b/kernel/module/main.c
-index a2859dc3eea6..dda7d7026bbb 100644
+index 5c6ab20240a6..9f986fb39ef9 100644
 --- a/kernel/module/main.c
 +++ b/kernel/module/main.c
 @@ -65,6 +65,8 @@
@@ -3290,7 +3310,7 @@ index a2859dc3eea6..dda7d7026bbb 100644
  	&modinfo_initstate,
  	&modinfo_coresize,
  #ifdef CONFIG_ARCH_WANTS_MODULES_DATA_IN_VMALLOC
-@@ -3228,6 +3232,11 @@ static int early_mod_check(struct load_info *info, int flags)
+@@ -3229,6 +3233,11 @@ static int early_mod_check(struct load_info *info, int flags)
  		return -EPERM;
  	}
  
@@ -3302,7 +3322,7 @@ index a2859dc3eea6..dda7d7026bbb 100644
  	err = rewrite_section_headers(info, flags);
  	if (err)
  		return err;
-@@ -3796,6 +3805,10 @@ void print_modules(void)
+@@ -3797,6 +3806,10 @@ void print_modules(void)
  		pr_cont(" [last unloaded: %s%s]", last_unloaded_module.name,
  			last_unloaded_module.taints);
  	pr_cont("\n");
