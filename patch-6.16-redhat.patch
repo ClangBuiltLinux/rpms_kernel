@@ -10,7 +10,7 @@
  arch/s390/kernel/ipl.c                             |   5 +
  arch/s390/kernel/setup.c                           |   4 +
  arch/x86/kernel/cpu/common.c                       |   1 +
- arch/x86/kernel/setup.c                            |  98 +++-
+ arch/x86/kernel/setup.c                            | 101 +++-
  crypto/akcipher.c                                  |   3 +-
  crypto/dh.c                                        |  25 +
  crypto/drbg.c                                      |  18 +-
@@ -77,13 +77,13 @@
  security/integrity/platform_certs/load_uefi.c      |   6 +-
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |  11 +
- 79 files changed, 2732 insertions(+), 212 deletions(-)
+ 79 files changed, 2735 insertions(+), 212 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 8f75ec177399..0c4bc4a2203d 100644
+index 1d6d39f4c68d..2cff8d57d036 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -6241,6 +6241,17 @@
+@@ -6266,6 +6266,17 @@
  		2	The "airplane mode" button toggles between everything
  			blocked and everything unblocked.
  
@@ -101,7 +101,7 @@ index 8f75ec177399..0c4bc4a2203d 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -7569,6 +7580,15 @@
+@@ -7599,6 +7610,15 @@
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -332,10 +332,10 @@ index b0d00032479d..afb9544fb007 100644
  /*
   * DIAG 308 support
 diff --git a/arch/s390/kernel/ipl.c b/arch/s390/kernel/ipl.c
-index 3b9d9ccfad63..648ac8c7e1fd 100644
+index ff15f91affde..baded34170cb 100644
 --- a/arch/s390/kernel/ipl.c
 +++ b/arch/s390/kernel/ipl.c
-@@ -2498,3 +2498,8 @@ int ipl_report_free(struct ipl_report *report)
+@@ -2497,3 +2497,8 @@ int ipl_report_free(struct ipl_report *report)
  }
  
  #endif
@@ -367,10 +367,10 @@ index f244c5560e7f..464f915011b8 100644
  	/* boot_command_line has been already set up in early.c */
  	*cmdline_p = boot_command_line;
 diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
-index 0ff057ff11ce..fdc376384b12 100644
+index 8feb8fd2957a..4519def69684 100644
 --- a/arch/x86/kernel/cpu/common.c
 +++ b/arch/x86/kernel/cpu/common.c
-@@ -1681,6 +1681,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
+@@ -1720,6 +1720,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
  		get_cpu_vendor(c);
  		intel_unlock_cpuid_leafs(c);
  		get_cpu_cap(c);
@@ -379,26 +379,29 @@ index 0ff057ff11ce..fdc376384b12 100644
  		get_cpu_address_sizes(c);
  		cpu_parse_early_param();
 diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index 9d2a13b37833..6287becaadd7 100644
+index 7d9ed79a93c0..eb6eb8db5855 100644
 --- a/arch/x86/kernel/setup.c
 +++ b/arch/x86/kernel/setup.c
-@@ -21,6 +21,7 @@
- #include <linux/root_dev.h>
- #include <linux/hugetlb.h>
+@@ -26,6 +26,7 @@
  #include <linux/tboot.h>
-+#include <linux/security.h>
  #include <linux/usb/xhci-dbgp.h>
- #include <linux/static_call.h>
- #include <linux/swiotlb.h>
-@@ -56,6 +57,7 @@
+ #include <linux/vmalloc.h>
++#include <linux/security.h>
+ 
+ #include <uapi/linux/mount.h>
+ 
+@@ -56,6 +57,10 @@
+ #include <asm/thermal.h>
  #include <asm/unwind.h>
  #include <asm/vsyscall.h>
- #include <linux/vmalloc.h>
 +#include <asm/intel-family.h>
- #if defined(CONFIG_X86_LOCAL_APIC)
- #include <asm/nmi.h>
- #endif
-@@ -794,6 +796,79 @@ static void __init early_reserve_memory(void)
++#if defined(CONFIG_X86_LOCAL_APIC)
++#include <asm/nmi.h>
++#endif
+ 
+ /*
+  * max_low_pfn_mapped: highest directly mapped pfn < 4 GB
+@@ -790,6 +795,79 @@ static void __init early_reserve_memory(void)
  	trim_snb_memory();
  }
  
@@ -478,7 +481,7 @@ index 9d2a13b37833..6287becaadd7 100644
  /*
   * Dump out kernel offset information on panic.
   */
-@@ -964,6 +1039,13 @@ void __init setup_arch(char **cmdline_p)
+@@ -960,6 +1038,13 @@ void __init setup_arch(char **cmdline_p)
  	if (efi_enabled(EFI_BOOT))
  		efi_init();
  
@@ -492,7 +495,7 @@ index 9d2a13b37833..6287becaadd7 100644
  	reserve_ibft_region();
  	x86_init.resources.dmi_setup();
  
-@@ -1127,19 +1209,7 @@ void __init setup_arch(char **cmdline_p)
+@@ -1123,19 +1208,7 @@ void __init setup_arch(char **cmdline_p)
  	/* Allocate bigger log buffer */
  	setup_log_buf(1);
  
@@ -513,7 +516,7 @@ index 9d2a13b37833..6287becaadd7 100644
  
  	reserve_initrd();
  
-@@ -1251,6 +1321,8 @@ void __init setup_arch(char **cmdline_p)
+@@ -1247,6 +1320,8 @@ void __init setup_arch(char **cmdline_p)
  		efi_apply_memmap_quirks();
  #endif
  
@@ -523,10 +526,10 @@ index 9d2a13b37833..6287becaadd7 100644
  }
  
 diff --git a/crypto/akcipher.c b/crypto/akcipher.c
-index 72c82d9aa077..da1ac5de8252 100644
+index a36f50c83827..f4f421e6cff2 100644
 --- a/crypto/akcipher.c
 +++ b/crypto/akcipher.c
-@@ -141,8 +141,7 @@ int crypto_register_akcipher(struct akcipher_alg *alg)
+@@ -142,8 +142,7 @@ int crypto_register_akcipher(struct akcipher_alg *alg)
  
  	if (!alg->encrypt)
  		alg->encrypt = akcipher_default_op;
@@ -537,7 +540,7 @@ index 72c82d9aa077..da1ac5de8252 100644
  		alg->set_priv_key = akcipher_default_set_key;
  
 diff --git a/crypto/dh.c b/crypto/dh.c
-index afc0fd847761..e13258c3d1d1 100644
+index 8250eeeebd0f..01f0f3963a74 100644
 --- a/crypto/dh.c
 +++ b/crypto/dh.c
 @@ -227,10 +227,35 @@ static int dh_compute_value(struct kpp_request *req)
@@ -577,7 +580,7 @@ index afc0fd847761..e13258c3d1d1 100644
  	}
  
 diff --git a/crypto/drbg.c b/crypto/drbg.c
-index f28dfc2511a2..7ddda2ab4d7b 100644
+index dbe4c8bb5ceb..02d7b74a4bd0 100644
 --- a/crypto/drbg.c
 +++ b/crypto/drbg.c
 @@ -1495,13 +1495,14 @@ static int drbg_generate(struct drbg_state *drbg,
@@ -632,7 +635,7 @@ index f28dfc2511a2..7ddda2ab4d7b 100644
  
  /*
 diff --git a/crypto/rng.c b/crypto/rng.c
-index 9d8804e46422..5dcf6fd52a77 100644
+index b8ae6ebc091d..466be8403948 100644
 --- a/crypto/rng.c
 +++ b/crypto/rng.c
 @@ -12,10 +12,13 @@
@@ -660,7 +663,7 @@ index 9d8804e46422..5dcf6fd52a77 100644
  struct crypto_rng *crypto_default_rng;
  EXPORT_SYMBOL_GPL(crypto_default_rng);
  static int crypto_default_rng_refcnt;
-@@ -106,31 +111,37 @@ struct crypto_rng *crypto_alloc_rng(const char *alg_name, u32 type, u32 mask)
+@@ -107,31 +112,37 @@ struct crypto_rng *crypto_alloc_rng(const char *alg_name, u32 type, u32 mask)
  }
  EXPORT_SYMBOL_GPL(crypto_alloc_rng);
  
@@ -707,7 +710,7 @@ index 9d8804e46422..5dcf6fd52a77 100644
  	mutex_unlock(&crypto_default_rng_lock);
  
  	return err;
-@@ -146,24 +157,33 @@ void crypto_put_default_rng(void)
+@@ -147,24 +158,33 @@ void crypto_put_default_rng(void)
  EXPORT_SYMBOL_GPL(crypto_put_default_rng);
  
  #if defined(CONFIG_CRYPTO_RNG) || defined(CONFIG_CRYPTO_RNG_MODULE)
@@ -747,7 +750,7 @@ index 9d8804e46422..5dcf6fd52a77 100644
  EXPORT_SYMBOL_GPL(crypto_del_default_rng);
  #endif
  
-@@ -217,5 +237,108 @@ void crypto_unregister_rngs(struct rng_alg *algs, int count)
+@@ -218,5 +238,108 @@ void crypto_unregister_rngs(struct rng_alg *algs, int count)
  }
  EXPORT_SYMBOL_GPL(crypto_unregister_rngs);
  
@@ -857,10 +860,10 @@ index 9d8804e46422..5dcf6fd52a77 100644
  MODULE_LICENSE("GPL");
  MODULE_DESCRIPTION("Random Number Generator");
 diff --git a/crypto/seqiv.c b/crypto/seqiv.c
-index 17e11d51ddc3..9c136a3b6267 100644
+index 2bae99e33526..a6dca30b28f2 100644
 --- a/crypto/seqiv.c
 +++ b/crypto/seqiv.c
-@@ -132,6 +132,19 @@ static int seqiv_aead_decrypt(struct aead_request *req)
+@@ -121,6 +121,19 @@ static int seqiv_aead_decrypt(struct aead_request *req)
  	return crypto_aead_decrypt(subreq);
  }
  
@@ -880,7 +883,7 @@ index 17e11d51ddc3..9c136a3b6267 100644
  static int seqiv_aead_create(struct crypto_template *tmpl, struct rtattr **tb)
  {
  	struct aead_instance *inst;
-@@ -149,7 +162,7 @@ static int seqiv_aead_create(struct crypto_template *tmpl, struct rtattr **tb)
+@@ -138,7 +151,7 @@ static int seqiv_aead_create(struct crypto_template *tmpl, struct rtattr **tb)
  	inst->alg.encrypt = seqiv_aead_encrypt;
  	inst->alg.decrypt = seqiv_aead_decrypt;
  
@@ -890,10 +893,10 @@ index 17e11d51ddc3..9c136a3b6267 100644
  
  	inst->alg.base.cra_ctxsize = sizeof(struct aead_geniv_ctx);
 diff --git a/crypto/sig.c b/crypto/sig.c
-index dfc7cae90802..2a58d726149d 100644
+index beba745b6405..fd41f6d3abf9 100644
 --- a/crypto/sig.c
 +++ b/crypto/sig.c
-@@ -106,8 +106,7 @@ static int sig_prepare_alg(struct sig_alg *alg)
+@@ -112,8 +112,7 @@ static int sig_prepare_alg(struct sig_alg *alg)
  {
  	struct crypto_alg *base = &alg->base;
  
@@ -904,10 +907,10 @@ index dfc7cae90802..2a58d726149d 100644
  		alg->verify = sig_default_verify;
  	if (!alg->set_priv_key)
 diff --git a/crypto/testmgr.c b/crypto/testmgr.c
-index 82977ea25db3..b57167a92386 100644
+index 72005074a5c2..a8cfc8da32c7 100644
 --- a/crypto/testmgr.c
 +++ b/crypto/testmgr.c
-@@ -4034,7 +4034,7 @@ static int test_akcipher_one(struct crypto_akcipher *tfm,
+@@ -3978,7 +3978,7 @@ static int test_akcipher_one(struct crypto_akcipher *tfm,
  	 * Don't invoke decrypt test which requires a private key
  	 * for vectors with only a public key.
  	 */
@@ -916,7 +919,7 @@ index 82977ea25db3..b57167a92386 100644
  		err = 0;
  		goto free_all;
  	}
-@@ -4170,7 +4170,7 @@ static int test_sig_one(struct crypto_sig *tfm, const struct sig_testvec *vecs)
+@@ -4114,7 +4114,7 @@ static int test_sig_one(struct crypto_sig *tfm, const struct sig_testvec *vecs)
  	 * Don't invoke sign test (which requires a private key)
  	 * for vectors with only a public key.
  	 */
@@ -925,7 +928,7 @@ index 82977ea25db3..b57167a92386 100644
  		return 0;
  
  	sig_size = crypto_sig_maxsize(tfm);
-@@ -5010,14 +5010,12 @@ static const struct alg_test_desc alg_test_descs[] = {
+@@ -4954,14 +4954,12 @@ static const struct alg_test_desc alg_test_descs[] = {
  	}, {
  		.alg = "ecdh-nist-p256",
  		.test = alg_test_kpp,
@@ -1113,7 +1116,7 @@ index 3ba9d7e9a6c7..82300dc5fd49 100644
  	rv = ipmi_register_driver();
  	mutex_unlock(&ipmi_interfaces_mutex);
 diff --git a/drivers/char/random.c b/drivers/char/random.c
-index 38f2fab29c56..d38f1d9b1fbc 100644
+index 5f22a08101f6..32791d2048fb 100644
 --- a/drivers/char/random.c
 +++ b/drivers/char/random.c
 @@ -51,9 +51,11 @@
@@ -1140,7 +1143,7 @@ index 38f2fab29c56..d38f1d9b1fbc 100644
  /*
   * This function returns a ChaCha state that you may use for generating
   * random data. It also returns up to 32 bytes on its own of random data
-@@ -743,7 +750,8 @@ static void __cold _credit_init_bits(size_t bits)
+@@ -744,7 +751,8 @@ static void __cold _credit_init_bits(size_t bits)
  			queue_work(system_unbound_wq, &set_ready);
  		atomic_notifier_call_chain(&random_ready_notifier, 0, NULL);
  #ifdef CONFIG_VDSO_GETRANDOM
@@ -1150,7 +1153,7 @@ index 38f2fab29c56..d38f1d9b1fbc 100644
  #endif
  		wake_up_interruptible(&crng_init_wait);
  		kill_fasync(&fasync, SIGIO, POLL_IN);
-@@ -763,6 +771,9 @@ static void __cold _credit_init_bits(size_t bits)
+@@ -764,6 +772,9 @@ static void __cold _credit_init_bits(size_t bits)
  }
  
  
@@ -1160,7 +1163,7 @@ index 38f2fab29c56..d38f1d9b1fbc 100644
  /**********************************************************************
   *
   * Entropy collection routines.
-@@ -980,6 +991,19 @@ void __init add_bootloader_randomness(const void *buf, size_t len)
+@@ -981,6 +992,19 @@ void __init add_bootloader_randomness(const void *buf, size_t len)
  		credit_init_bits(len * 8);
  }
  
@@ -1180,7 +1183,7 @@ index 38f2fab29c56..d38f1d9b1fbc 100644
  #if IS_ENABLED(CONFIG_VMGENID)
  static BLOCKING_NOTIFIER_HEAD(vmfork_chain);
  
-@@ -1389,6 +1413,7 @@ SYSCALL_DEFINE3(getrandom, char __user *, ubuf, size_t, len, unsigned int, flags
+@@ -1390,6 +1414,7 @@ SYSCALL_DEFINE3(getrandom, char __user *, ubuf, size_t, len, unsigned int, flags
  {
  	struct iov_iter iter;
  	int ret;
@@ -1188,7 +1191,7 @@ index 38f2fab29c56..d38f1d9b1fbc 100644
  
  	if (flags & ~(GRND_NONBLOCK | GRND_RANDOM | GRND_INSECURE))
  		return -EINVAL;
-@@ -1400,6 +1425,21 @@ SYSCALL_DEFINE3(getrandom, char __user *, ubuf, size_t, len, unsigned int, flags
+@@ -1401,6 +1426,21 @@ SYSCALL_DEFINE3(getrandom, char __user *, ubuf, size_t, len, unsigned int, flags
  	if ((flags & (GRND_INSECURE | GRND_RANDOM)) == (GRND_INSECURE | GRND_RANDOM))
  		return -EINVAL;
  
@@ -1210,7 +1213,7 @@ index 38f2fab29c56..d38f1d9b1fbc 100644
  	if (!crng_ready() && !(flags & GRND_INSECURE)) {
  		if (flags & GRND_NONBLOCK)
  			return -EAGAIN;
-@@ -1420,6 +1460,12 @@ static __poll_t random_poll(struct file *file, poll_table *wait)
+@@ -1421,6 +1461,12 @@ static __poll_t random_poll(struct file *file, poll_table *wait)
  	return crng_ready() ? EPOLLIN | EPOLLRDNORM : EPOLLOUT | EPOLLWRNORM;
  }
  
@@ -1223,7 +1226,7 @@ index 38f2fab29c56..d38f1d9b1fbc 100644
  static ssize_t write_pool_user(struct iov_iter *iter)
  {
  	u8 block[BLAKE2S_BLOCK_SIZE];
-@@ -1560,7 +1606,58 @@ static int random_fasync(int fd, struct file *filp, int on)
+@@ -1561,7 +1607,58 @@ static int random_fasync(int fd, struct file *filp, int on)
  	return fasync_helper(fd, filp, on, &fasync);
  }
  
@@ -1282,7 +1285,7 @@ index 38f2fab29c56..d38f1d9b1fbc 100644
  	.read_iter = random_read_iter,
  	.write_iter = random_write_iter,
  	.poll = random_poll,
-@@ -1573,6 +1670,7 @@ const struct file_operations random_fops = {
+@@ -1574,6 +1671,7 @@ const struct file_operations random_fops = {
  };
  
  const struct file_operations urandom_fops = {
@@ -1290,7 +1293,7 @@ index 38f2fab29c56..d38f1d9b1fbc 100644
  	.read_iter = urandom_read_iter,
  	.write_iter = random_write_iter,
  	.unlocked_ioctl = random_ioctl,
-@@ -1583,6 +1681,32 @@ const struct file_operations urandom_fops = {
+@@ -1584,6 +1682,32 @@ const struct file_operations urandom_fops = {
  	.splice_write = iter_file_splice_write,
  };
  
@@ -2270,10 +2273,10 @@ index c845c5daaeba..00e14194265f 100644
  
  error_proc:
 diff --git a/fs/erofs/super.c b/fs/erofs/super.c
-index da6ee7c39290..629e7b2bbda6 100644
+index e1e9f06e8342..a21358cbbe50 100644
 --- a/fs/erofs/super.c
 +++ b/fs/erofs/super.c
-@@ -569,6 +569,9 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
+@@ -604,6 +604,9 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
  {
  	struct inode *inode;
  	struct erofs_sb_info *sbi = EROFS_SB(sb);
@@ -2283,7 +2286,7 @@ index da6ee7c39290..629e7b2bbda6 100644
  	int err;
  
  	sb->s_magic = EROFS_SUPER_MAGIC;
-@@ -673,6 +676,12 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
+@@ -716,6 +719,12 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
  		return err;
  
  	erofs_info(sb, "mounted with root inode @ nid %llu.", sbi->root_nid);
@@ -2319,14 +2322,14 @@ index 181934499624..7b093e7c12f5 100644
  	err = ext4_register_sysfs(sb);
  	if (err)
 diff --git a/include/linux/crypto.h b/include/linux/crypto.h
-index 1e3809d28abd..46ca14e581a0 100644
+index b50f1954d1bb..604cea40eb9c 100644
 --- a/include/linux/crypto.h
 +++ b/include/linux/crypto.h
-@@ -138,6 +138,9 @@
+@@ -148,6 +148,9 @@
  #define CRYPTO_TFM_REQ_MAY_SLEEP	0x00000200
  #define CRYPTO_TFM_REQ_MAY_BACKLOG	0x00000400
  #define CRYPTO_TFM_REQ_ON_STACK		0x00000800
-+#define CRYPTO_TFM_REQ_NEED_RESEED	0x00000800
++#define CRYPTO_TFM_REQ_NEED_RESEED	0x00001000
 +
 +#define CRYPTO_TFM_FIPS_COMPLIANCE	0x80000000
  
@@ -2459,10 +2462,10 @@ index 8050f77c3b64..131bd7bbe936 100644
 +
  #endif /* _LINUX_MODULE_H */
 diff --git a/include/linux/panic.h b/include/linux/panic.h
-index 2494d51707ef..b9d91c56c6ea 100644
+index 4adc65766935..83e39e6ecf92 100644
 --- a/include/linux/panic.h
 +++ b/include/linux/panic.h
-@@ -75,7 +75,22 @@ static inline void set_arch_panic_timeout(int timeout, int arch_default_timeout)
+@@ -73,7 +73,22 @@ static inline void set_arch_panic_timeout(int timeout, int arch_default_timeout)
  #define TAINT_RANDSTRUCT		17
  #define TAINT_TEST			18
  #define TAINT_FWCTL			19
