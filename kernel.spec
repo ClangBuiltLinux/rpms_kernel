@@ -3447,7 +3447,7 @@ rm -rf %{buildroot}%{_libdir}/libperf.a
 
 %if %{with_tools}
 %ifarch %{cpupowerarchs}
-%{make} -C tools/power/cpupower DESTDIR=$RPM_BUILD_ROOT libdir=%{_libdir} mandir=%{_mandir} CPUFREQ_BENCH=false install
+%{make} -C tools/power/cpupower DESTDIR=$RPM_BUILD_ROOT libdir=%{_libdir} libexecdir=%{_libexecdir} mandir=%{_mandir} unitdir=%{_unitdir} CPUFREQ_BENCH=false install
 %find_lang cpupower
 mv cpupower.lang ../
 %ifarch x86_64
@@ -4010,6 +4010,9 @@ fi\
 %else
 %files -n %{package_name}-tools -f cpupower.lang
 %{_bindir}/cpupower
+%{_libexecdir}/cpupower
+%{_unitdir}/cpupower.service
+%config(noreplace) %{_sysconfdir}/cpupower-service.conf
 %{_datadir}/bash-completion/completions/cpupower
 %ifarch x86_64
 %{_bindir}/centrino-decode
@@ -4269,6 +4272,10 @@ fi\
 #
 #
 %changelog
+* Wed May 28 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.16.0-0.rc0.250528gfeacb1774bd5.5]
+- package the newly added cpupower.service (Thorsten Leemhuis)
+- cpupower: split unitdir from libdir in Makefile (Francesco Poli (wintermute))
+
 * Wed May 28 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.16.0-0.rc0.feacb1774bd5.5]
 - powerpc: Fix struct termio related ioctl macros (Madhavan Srinivasan)
 
