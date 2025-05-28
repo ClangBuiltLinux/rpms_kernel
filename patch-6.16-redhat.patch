@@ -80,10 +80,10 @@
  79 files changed, 2735 insertions(+), 212 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 1d6d39f4c68d..2cff8d57d036 100644
+index ea81784be981..5ed71f7a9eb4 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -6266,6 +6266,17 @@
+@@ -6273,6 +6273,17 @@
  		2	The "airplane mode" button toggles between everything
  			blocked and everything unblocked.
  
@@ -101,7 +101,7 @@ index 1d6d39f4c68d..2cff8d57d036 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -7599,6 +7610,15 @@
+@@ -7606,6 +7617,15 @@
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -192,7 +192,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index c1cd1b5fc269..2e18aa0af6af 100644
+index 3244c2a519e2..f4afa609618a 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -22,6 +22,18 @@ $(if $(filter __%, $(MAKECMDGOALS)), \
@@ -232,7 +232,7 @@ index c1cd1b5fc269..2e18aa0af6af 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1322,7 +1345,13 @@ define filechk_version.h
+@@ -1327,7 +1350,13 @@ define filechk_version.h
  	((c) > 255 ? 255 : (c)))';                                       \
  	echo \#define LINUX_VERSION_MAJOR $(VERSION);                    \
  	echo \#define LINUX_VERSION_PATCHLEVEL $(PATCHLEVEL);            \
@@ -247,7 +247,7 @@ index c1cd1b5fc269..2e18aa0af6af 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -1924,6 +1953,23 @@ endif
+@@ -1929,6 +1958,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -1116,7 +1116,7 @@ index 3ba9d7e9a6c7..82300dc5fd49 100644
  	rv = ipmi_register_driver();
  	mutex_unlock(&ipmi_interfaces_mutex);
 diff --git a/drivers/char/random.c b/drivers/char/random.c
-index 5f22a08101f6..32791d2048fb 100644
+index b8b24b6ed3fe..a38d31cb520d 100644
 --- a/drivers/char/random.c
 +++ b/drivers/char/random.c
 @@ -51,9 +51,11 @@
@@ -1143,7 +1143,7 @@ index 5f22a08101f6..32791d2048fb 100644
  /*
   * This function returns a ChaCha state that you may use for generating
   * random data. It also returns up to 32 bytes on its own of random data
-@@ -744,7 +751,8 @@ static void __cold _credit_init_bits(size_t bits)
+@@ -745,7 +752,8 @@ static void __cold _credit_init_bits(size_t bits)
  			queue_work(system_unbound_wq, &set_ready);
  		atomic_notifier_call_chain(&random_ready_notifier, 0, NULL);
  #ifdef CONFIG_VDSO_GETRANDOM
@@ -1153,7 +1153,7 @@ index 5f22a08101f6..32791d2048fb 100644
  #endif
  		wake_up_interruptible(&crng_init_wait);
  		kill_fasync(&fasync, SIGIO, POLL_IN);
-@@ -764,6 +772,9 @@ static void __cold _credit_init_bits(size_t bits)
+@@ -765,6 +773,9 @@ static void __cold _credit_init_bits(size_t bits)
  }
  
  
@@ -1163,7 +1163,7 @@ index 5f22a08101f6..32791d2048fb 100644
  /**********************************************************************
   *
   * Entropy collection routines.
-@@ -981,6 +992,19 @@ void __init add_bootloader_randomness(const void *buf, size_t len)
+@@ -982,6 +993,19 @@ void __init add_bootloader_randomness(const void *buf, size_t len)
  		credit_init_bits(len * 8);
  }
  
@@ -1183,7 +1183,7 @@ index 5f22a08101f6..32791d2048fb 100644
  #if IS_ENABLED(CONFIG_VMGENID)
  static BLOCKING_NOTIFIER_HEAD(vmfork_chain);
  
-@@ -1390,6 +1414,7 @@ SYSCALL_DEFINE3(getrandom, char __user *, ubuf, size_t, len, unsigned int, flags
+@@ -1391,6 +1415,7 @@ SYSCALL_DEFINE3(getrandom, char __user *, ubuf, size_t, len, unsigned int, flags
  {
  	struct iov_iter iter;
  	int ret;
@@ -1191,7 +1191,7 @@ index 5f22a08101f6..32791d2048fb 100644
  
  	if (flags & ~(GRND_NONBLOCK | GRND_RANDOM | GRND_INSECURE))
  		return -EINVAL;
-@@ -1401,6 +1426,21 @@ SYSCALL_DEFINE3(getrandom, char __user *, ubuf, size_t, len, unsigned int, flags
+@@ -1402,6 +1427,21 @@ SYSCALL_DEFINE3(getrandom, char __user *, ubuf, size_t, len, unsigned int, flags
  	if ((flags & (GRND_INSECURE | GRND_RANDOM)) == (GRND_INSECURE | GRND_RANDOM))
  		return -EINVAL;
  
@@ -1213,7 +1213,7 @@ index 5f22a08101f6..32791d2048fb 100644
  	if (!crng_ready() && !(flags & GRND_INSECURE)) {
  		if (flags & GRND_NONBLOCK)
  			return -EAGAIN;
-@@ -1421,6 +1461,12 @@ static __poll_t random_poll(struct file *file, poll_table *wait)
+@@ -1422,6 +1462,12 @@ static __poll_t random_poll(struct file *file, poll_table *wait)
  	return crng_ready() ? EPOLLIN | EPOLLRDNORM : EPOLLOUT | EPOLLWRNORM;
  }
  
@@ -1226,7 +1226,7 @@ index 5f22a08101f6..32791d2048fb 100644
  static ssize_t write_pool_user(struct iov_iter *iter)
  {
  	u8 block[BLAKE2S_BLOCK_SIZE];
-@@ -1561,7 +1607,58 @@ static int random_fasync(int fd, struct file *filp, int on)
+@@ -1562,7 +1608,58 @@ static int random_fasync(int fd, struct file *filp, int on)
  	return fasync_helper(fd, filp, on, &fasync);
  }
  
@@ -1285,7 +1285,7 @@ index 5f22a08101f6..32791d2048fb 100644
  	.read_iter = random_read_iter,
  	.write_iter = random_write_iter,
  	.poll = random_poll,
-@@ -1574,6 +1671,7 @@ const struct file_operations random_fops = {
+@@ -1575,6 +1672,7 @@ const struct file_operations random_fops = {
  };
  
  const struct file_operations urandom_fops = {
@@ -1293,7 +1293,7 @@ index 5f22a08101f6..32791d2048fb 100644
  	.read_iter = urandom_read_iter,
  	.write_iter = random_write_iter,
  	.unlocked_ioctl = random_ioctl,
-@@ -1584,6 +1682,32 @@ const struct file_operations urandom_fops = {
+@@ -1585,6 +1683,32 @@ const struct file_operations urandom_fops = {
  	.splice_write = iter_file_splice_write,
  };
  
@@ -1873,7 +1873,7 @@ index 2168b6cd7167..5d7cda175a0c 100644
  	if (data->f01_container->dev.driver) {
  		/* Driver already bound, so enable ATTN now. */
 diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
-index 9d728800a862..cc4aebbcb30f 100644
+index 6c02f93422ce..661adab86cae 100644
 --- a/drivers/iommu/iommu.c
 +++ b/drivers/iommu/iommu.c
 @@ -8,6 +8,7 @@
@@ -1884,7 +1884,7 @@ index 9d728800a862..cc4aebbcb30f 100644
  #include <linux/kernel.h>
  #include <linux/bits.h>
  #include <linux/bug.h>
-@@ -2940,6 +2941,27 @@ int iommu_dev_disable_feature(struct device *dev, enum iommu_dev_features feat)
+@@ -2952,6 +2953,27 @@ int iommu_dev_disable_feature(struct device *dev, enum iommu_dev_features feat)
  }
  EXPORT_SYMBOL_GPL(iommu_dev_disable_feature);
  
@@ -2490,7 +2490,7 @@ index 4adc65766935..83e39e6ecf92 100644
  
  struct taint_flag {
 diff --git a/include/linux/pci.h b/include/linux/pci.h
-index 51e2bd6405cd..68534218425a 100644
+index b231cbc67a35..5082b86aa701 100644
 --- a/include/linux/pci.h
 +++ b/include/linux/pci.h
 @@ -1632,6 +1632,7 @@ int pci_add_dynid(struct pci_driver *drv,
@@ -3183,7 +3183,7 @@ index cc9b54d95d22..fce0e3457cf7 100644
 +
  #endif /* ! __LINUX_SECURITY_H */
 diff --git a/init/main.c b/init/main.c
-index 7f0a2a3dbd29..9b9398febe87 100644
+index bf9c5d22953b..e31bb4a1fac0 100644
 --- a/init/main.c
 +++ b/init/main.c
 @@ -1160,8 +1160,10 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
@@ -3360,10 +3360,10 @@ index a2ff4242e623..f0d2be1ee4f1 100644
  
  int module_sig_check(struct load_info *info, int flags)
 diff --git a/kernel/panic.c b/kernel/panic.c
-index a3889f38153d..0e79932d65e5 100644
+index 047ea3215312..d10e1f738ca7 100644
 --- a/kernel/panic.c
 +++ b/kernel/panic.c
-@@ -512,6 +512,18 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
+@@ -542,6 +542,18 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
  	TAINT_FLAG(RANDSTRUCT,			'T', ' ', true),
  	TAINT_FLAG(TEST,			'N', ' ', true),
  	TAINT_FLAG(FWCTL,			'J', ' ', true),

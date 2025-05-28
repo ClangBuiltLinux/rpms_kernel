@@ -162,13 +162,13 @@ Summary: The Linux kernel
 %define specrpmversion 6.16.0
 %define specversion 6.16.0
 %define patchversion 6.16
-%define pkgrelease 0.rc0.250527g914873bc7df9.3
+%define pkgrelease 0.rc0.250528gfeacb1774bd5.5
 %define kversion 6
-%define tarfile_release 6.15-1972-g914873bc7df9
+%define tarfile_release 6.15-3589-gfeacb1774bd5
 # This is needed to do merge window version magic
 %define patchlevel 16
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 0.rc0.250527g914873bc7df9.3%{?buildid}%{?dist}
+%define specrelease 0.rc0.250528gfeacb1774bd5.5%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.16.0
 
@@ -4269,8 +4269,15 @@ fi\
 #
 #
 %changelog
-* Tue May 27 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.16.0-0.rc0.914873bc7df9.3]
+* Wed May 28 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.16.0-0.rc0.feacb1774bd5.5]
 - powerpc: Fix struct termio related ioctl macros (Madhavan Srinivasan)
+
+* Wed May 28 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.16.0-0.rc0.feacb1774bd5.4]
+- Turn CROS_EC_PROTO to m for Fedora to avoid mismatch (Justin M. Forbes)
+- Linux v6.16.0-0.rc0.feacb1774bd5
+
+* Wed May 28 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.16.0-0.rc0.914873bc7df9.3]
+- Reset changelog for 6.16 cycle (Justin M. Forbes)
 
 * Tue May 27 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.16.0-0.rc0.914873bc7df9.2]
 - Fix up CRYPTO_SHA256 configs for mismatch (Justin M. Forbes)
