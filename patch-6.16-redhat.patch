@@ -32,7 +32,6 @@
  drivers/hwtracing/coresight/coresight-etm4x-core.c |  19 +
  drivers/input/rmi4/rmi_driver.c                    | 124 +++--
  drivers/iommu/iommu.c                              |  22 +
- drivers/media/i2c/ov08x40.c                        |   2 +-
  drivers/message/fusion/mptsas.c                    |   5 +
  drivers/message/fusion/mptspi.c                    |   5 +
  drivers/net/wireguard/main.c                       |   6 +
@@ -78,7 +77,7 @@
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |  11 +
  tools/power/cpupower/Makefile                      |   9 +-
- 80 files changed, 2740 insertions(+), 216 deletions(-)
+ 79 files changed, 2739 insertions(+), 215 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index ea81784be981..5ed71f7a9eb4 100644
@@ -273,7 +272,7 @@ index 3244c2a519e2..f4afa609618a 100644
  	@:
  
 diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index 25ed6f1a7c7a..d19fc6d6c134 100644
+index 3072731fe09c..d34abca3e149 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
 @@ -1232,9 +1232,9 @@ config HIGHMEM
@@ -289,7 +288,7 @@ index 25ed6f1a7c7a..d19fc6d6c134 100644
  	  The VM uses one page of physical memory for each page table.
  	  For systems with a lot of processes, this can use a lot of
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index a182295e6f08..a3cfce882d26 100644
+index de9290d52fca..cc38b4cdcfbb 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
 @@ -1413,7 +1413,7 @@ endchoice
@@ -1340,7 +1339,7 @@ index a2d0009560d0..4f3486e6a84b 100644
  obj-$(CONFIG_EFI_RCI2_TABLE)		+= rci2-table.o
  obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
 diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 7309394b8fc9..d9f7cbba5769 100644
+index e57bff702b5f..1252e9d11235 100644
 --- a/drivers/firmware/efi/efi.c
 +++ b/drivers/firmware/efi/efi.c
 @@ -33,6 +33,7 @@
@@ -1351,7 +1350,7 @@ index 7309394b8fc9..d9f7cbba5769 100644
  
  #include <asm/early_ioremap.h>
  
-@@ -1007,40 +1008,101 @@ int efi_mem_type(unsigned long phys_addr)
+@@ -1008,40 +1009,101 @@ int efi_mem_type(unsigned long phys_addr)
  	return -EINVAL;
  }
  
@@ -1913,19 +1912,6 @@ index 6c02f93422ce..661adab86cae 100644
  /**
   * iommu_setup_default_domain - Set the default_domain for the group
   * @group: Group to change
-diff --git a/drivers/media/i2c/ov08x40.c b/drivers/media/i2c/ov08x40.c
-index cf0e41fc3071..54575eea3c49 100644
---- a/drivers/media/i2c/ov08x40.c
-+++ b/drivers/media/i2c/ov08x40.c
-@@ -1341,7 +1341,7 @@ static int ov08x40_power_on(struct device *dev)
- 	}
- 
- 	gpiod_set_value_cansleep(ov08x->reset_gpio, 0);
--	usleep_range(1500, 1800);
-+	usleep_range(5000, 5500);
- 
- 	return 0;
- 
 diff --git a/drivers/message/fusion/mptsas.c b/drivers/message/fusion/mptsas.c
 index 185c08eab4ca..215a68b1d863 100644
 --- a/drivers/message/fusion/mptsas.c
@@ -2260,10 +2246,10 @@ index 0e1dd6ef60a7..20ddc50a241c 100644
  	 * disconnected while waiting for the lock to succeed. */
  	usb_lock_device(hdev);
 diff --git a/fs/afs/main.c b/fs/afs/main.c
-index c845c5daaeba..00e14194265f 100644
+index 02475d415d88..f96c698324ae 100644
 --- a/fs/afs/main.c
 +++ b/fs/afs/main.c
-@@ -193,6 +193,9 @@ static int __init afs_init(void)
+@@ -194,6 +194,9 @@ static int __init afs_init(void)
  		goto error_proc;
  	}
  
@@ -2301,10 +2287,10 @@ index e1e9f06e8342..a21358cbbe50 100644
  }
  
 diff --git a/fs/ext4/super.c b/fs/ext4/super.c
-index 181934499624..7b093e7c12f5 100644
+index a7f80ca01174..7b890b71f2ab 100644
 --- a/fs/ext4/super.c
 +++ b/fs/ext4/super.c
-@@ -5637,6 +5637,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
+@@ -5635,6 +5635,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
  	atomic_set(&sbi->s_warning_count, 0);
  	atomic_set(&sbi->s_msg_count, 0);
  
@@ -3166,7 +3152,7 @@ index ab7eea01ab42..fff7c5f737fc 100644
  
  int rmi_register_transport_device(struct rmi_transport_dev *xport);
 diff --git a/include/linux/security.h b/include/linux/security.h
-index cc9b54d95d22..fce0e3457cf7 100644
+index dba349629229..9a32f178f9fe 100644
 --- a/include/linux/security.h
 +++ b/include/linux/security.h
 @@ -2390,4 +2390,13 @@ static inline void security_initramfs_populated(void)
@@ -3221,7 +3207,7 @@ index 434929de17ef..25028f21e684 100644
  obj-$(CONFIG_MULTIUSER) += groups.o
  obj-$(CONFIG_VHOST_TASK) += vhost_task.o
 diff --git a/kernel/bpf/core.c b/kernel/bpf/core.c
-index ba6b6118cf50..76f8fd7c7ee1 100644
+index c20babbf998f..653ff5c8d9d9 100644
 --- a/kernel/bpf/core.c
 +++ b/kernel/bpf/core.c
 @@ -571,7 +571,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
@@ -3238,7 +3224,7 @@ index ba6b6118cf50..76f8fd7c7ee1 100644
  long bpf_jit_limit_max __read_mostly;
  
 diff --git a/kernel/bpf/syscall.c b/kernel/bpf/syscall.c
-index 64c3393e8270..827ab64621bb 100644
+index 4b5f29168618..0551a653ba9b 100644
 --- a/kernel/bpf/syscall.c
 +++ b/kernel/bpf/syscall.c
 @@ -26,6 +26,7 @@
@@ -3249,7 +3235,7 @@ index 64c3393e8270..827ab64621bb 100644
  #include <uapi/linux/btf.h>
  #include <linux/pgtable.h>
  #include <linux/bpf_lsm.h>
-@@ -59,6 +60,23 @@ static DEFINE_SPINLOCK(map_idr_lock);
+@@ -60,6 +61,23 @@ static DEFINE_SPINLOCK(map_idr_lock);
  static DEFINE_IDR(link_idr);
  static DEFINE_SPINLOCK(link_idr_lock);
  
@@ -3273,7 +3259,7 @@ index 64c3393e8270..827ab64621bb 100644
  int sysctl_unprivileged_bpf_disabled __read_mostly =
  	IS_BUILTIN(CONFIG_BPF_UNPRIV_DEFAULT_OFF) ? 2 : 0;
  
-@@ -6159,6 +6177,11 @@ static int bpf_unpriv_handler(const struct ctl_table *table, int write,
+@@ -6161,6 +6179,11 @@ static int bpf_unpriv_handler(const struct ctl_table *table, int write,
  	if (write && !ret) {
  		if (locked_state && unpriv_enable != 1)
  			return -EPERM;
@@ -4367,7 +4353,7 @@ index 000000000000..84e22b1730cc
 +}
 +late_initcall(__add_rh_flag);
 diff --git a/scripts/Makefile.lib b/scripts/Makefile.lib
-index 2fe73cda0bdd..f766681e1b5c 100644
+index 6fc2a82ee3bb..7e16f090463d 100644
 --- a/scripts/Makefile.lib
 +++ b/scripts/Makefile.lib
 @@ -272,7 +272,10 @@ objtool-args-$(CONFIG_HAVE_STATIC_CALL_INLINE)		+= --static-call
