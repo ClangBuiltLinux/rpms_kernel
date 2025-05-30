@@ -25,6 +25,7 @@
  drivers/char/ipmi/ipmi_dmi.c                       |  15 +
  drivers/char/ipmi/ipmi_msghandler.c                |  16 +-
  drivers/char/random.c                              | 126 ++++-
+ drivers/crypto/Kconfig                             |   1 +
  drivers/firmware/efi/Makefile                      |   1 +
  drivers/firmware/efi/efi.c                         | 124 +++--
  drivers/firmware/efi/secureboot.c                  |  38 ++
@@ -77,7 +78,7 @@
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |  11 +
  tools/power/cpupower/Makefile                      |   9 +-
- 79 files changed, 2739 insertions(+), 215 deletions(-)
+ 80 files changed, 2740 insertions(+), 215 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index ea81784be981..5ed71f7a9eb4 100644
@@ -288,10 +289,10 @@ index 3072731fe09c..d34abca3e149 100644
  	  The VM uses one page of physical memory for each page table.
  	  For systems with a lot of processes, this can use a lot of
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index de9290d52fca..cc38b4cdcfbb 100644
+index c314eb429b9f..adf920d7bdde 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -1413,7 +1413,7 @@ endchoice
+@@ -1430,7 +1430,7 @@ endchoice
  
  config ARM64_FORCE_52BIT
  	bool "Force 52-bit virtual addresses for userspace"
@@ -1081,10 +1082,10 @@ index bbf7029e224b..cf7faa970dd6 100644
  		dmi_decode_ipmi((const struct dmi_header *) dev->device_data);
  
 diff --git a/drivers/char/ipmi/ipmi_msghandler.c b/drivers/char/ipmi/ipmi_msghandler.c
-index 3ba9d7e9a6c7..82300dc5fd49 100644
+index 064944ae9fdc..cab1ef505cd2 100644
 --- a/drivers/char/ipmi/ipmi_msghandler.c
 +++ b/drivers/char/ipmi/ipmi_msghandler.c
-@@ -35,6 +35,7 @@
+@@ -34,6 +34,7 @@
  #include <linux/uuid.h>
  #include <linux/nospec.h>
  #include <linux/vmalloc.h>
@@ -1092,7 +1093,7 @@ index 3ba9d7e9a6c7..82300dc5fd49 100644
  #include <linux/delay.h>
  
  #define IPMI_DRIVER_VERSION "39.2"
-@@ -5508,8 +5509,21 @@ static int __init ipmi_init_msghandler_mod(void)
+@@ -5548,8 +5549,21 @@ static int __init ipmi_init_msghandler_mod(void)
  {
  	int rv;
  
@@ -1326,6 +1327,18 @@ index b8b24b6ed3fe..a38d31cb520d 100644
  
  /********************************************************************
   *
+diff --git a/drivers/crypto/Kconfig b/drivers/crypto/Kconfig
+index 5686369779be..9f8a3a5bed7e 100644
+--- a/drivers/crypto/Kconfig
++++ b/drivers/crypto/Kconfig
+@@ -180,6 +180,7 @@ config CRYPTO_PAES_S390
+ 	depends on PKEY
+ 	select CRYPTO_ALGAPI
+ 	select CRYPTO_SKCIPHER
++	select CRYPTO_ENGINE
+ 	help
+ 	  This is the s390 hardware accelerated implementation of the
+ 	  AES cipher algorithms for use with protected key.
 diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
 index a2d0009560d0..4f3486e6a84b 100644
 --- a/drivers/firmware/efi/Makefile
@@ -2166,10 +2179,10 @@ index 0b1616e93cf4..85fc52038a82 100644
  		PCI_ANY_ID, PCI_ANY_ID, },
  	{PCI_VENDOR_ID_EMULEX, PCI_DEVICE_ID_LANCER_G7_FC,
 diff --git a/drivers/scsi/qla2xxx/qla_os.c b/drivers/scsi/qla2xxx/qla_os.c
-index b44d134e7105..bc6d03ada3ce 100644
+index 288ce04fc2b1..3e599d25d1b4 100644
 --- a/drivers/scsi/qla2xxx/qla_os.c
 +++ b/drivers/scsi/qla2xxx/qla_os.c
-@@ -8117,6 +8117,7 @@ static const struct pci_error_handlers qla2xxx_err_handler = {
+@@ -8105,6 +8105,7 @@ static const struct pci_error_handlers qla2xxx_err_handler = {
  };
  
  static const struct pci_device_id qla2xxx_pci_tbl[] = {
@@ -2177,7 +2190,7 @@ index b44d134e7105..bc6d03ada3ce 100644
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2100) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2200) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2300) },
-@@ -8129,13 +8130,18 @@ static const struct pci_device_id qla2xxx_pci_tbl[] = {
+@@ -8117,13 +8118,18 @@ static const struct pci_device_id qla2xxx_pci_tbl[] = {
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP8432) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP5422) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP5432) },
@@ -2197,7 +2210,7 @@ index b44d134e7105..bc6d03ada3ce 100644
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2271) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2261) },
 diff --git a/drivers/scsi/sd.c b/drivers/scsi/sd.c
-index 950d8c9fb884..be7b84fb780b 100644
+index 3f6e87705b62..ddfd99a32f14 100644
 --- a/drivers/scsi/sd.c
 +++ b/drivers/scsi/sd.c
 @@ -121,6 +121,14 @@ static const char *sd_cache_types[] = {
