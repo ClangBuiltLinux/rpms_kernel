@@ -81,10 +81,10 @@
  80 files changed, 2740 insertions(+), 215 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index ea81784be981..5ed71f7a9eb4 100644
+index a3ea40b22fb9..a1857f7d484d 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -6273,6 +6273,17 @@
+@@ -6298,6 +6298,17 @@
  		2	The "airplane mode" button toggles between everything
  			blocked and everything unblocked.
  
@@ -102,7 +102,7 @@ index ea81784be981..5ed71f7a9eb4 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -7606,6 +7617,15 @@
+@@ -7631,6 +7642,15 @@
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -289,10 +289,10 @@ index 3072731fe09c..d34abca3e149 100644
  	  The VM uses one page of physical memory for each page table.
  	  For systems with a lot of processes, this can use a lot of
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index c314eb429b9f..adf920d7bdde 100644
+index 55fc331af337..f5d5e59058a2 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -1430,7 +1430,7 @@ endchoice
+@@ -1427,7 +1427,7 @@ endchoice
  
  config ARM64_FORCE_52BIT
  	bool "Force 52-bit virtual addresses for userspace"
@@ -380,7 +380,7 @@ index 8feb8fd2957a..4519def69684 100644
  		get_cpu_address_sizes(c);
  		cpu_parse_early_param();
 diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index 7d9ed79a93c0..eb6eb8db5855 100644
+index fb27be697128..81283dd125b4 100644
 --- a/arch/x86/kernel/setup.c
 +++ b/arch/x86/kernel/setup.c
 @@ -26,6 +26,7 @@
@@ -402,7 +402,7 @@ index 7d9ed79a93c0..eb6eb8db5855 100644
  
  /*
   * max_low_pfn_mapped: highest directly mapped pfn < 4 GB
-@@ -790,6 +795,79 @@ static void __init early_reserve_memory(void)
+@@ -816,6 +821,79 @@ static void __init early_reserve_memory(void)
  	trim_snb_memory();
  }
  
@@ -482,7 +482,7 @@ index 7d9ed79a93c0..eb6eb8db5855 100644
  /*
   * Dump out kernel offset information on panic.
   */
-@@ -960,6 +1038,13 @@ void __init setup_arch(char **cmdline_p)
+@@ -986,6 +1064,13 @@ void __init setup_arch(char **cmdline_p)
  	if (efi_enabled(EFI_BOOT))
  		efi_init();
  
@@ -496,7 +496,7 @@ index 7d9ed79a93c0..eb6eb8db5855 100644
  	reserve_ibft_region();
  	x86_init.resources.dmi_setup();
  
-@@ -1123,19 +1208,7 @@ void __init setup_arch(char **cmdline_p)
+@@ -1149,19 +1234,7 @@ void __init setup_arch(char **cmdline_p)
  	/* Allocate bigger log buffer */
  	setup_log_buf(1);
  
@@ -517,7 +517,7 @@ index 7d9ed79a93c0..eb6eb8db5855 100644
  
  	reserve_initrd();
  
-@@ -1247,6 +1320,8 @@ void __init setup_arch(char **cmdline_p)
+@@ -1273,6 +1346,8 @@ void __init setup_arch(char **cmdline_p)
  		efi_apply_memmap_quirks();
  #endif
  
@@ -1886,7 +1886,7 @@ index 2168b6cd7167..5d7cda175a0c 100644
  	if (data->f01_container->dev.driver) {
  		/* Driver already bound, so enable ATTN now. */
 diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
-index 6c02f93422ce..661adab86cae 100644
+index a4b606c591da..772946ea4bb2 100644
 --- a/drivers/iommu/iommu.c
 +++ b/drivers/iommu/iommu.c
 @@ -8,6 +8,7 @@
@@ -1897,9 +1897,9 @@ index 6c02f93422ce..661adab86cae 100644
  #include <linux/kernel.h>
  #include <linux/bits.h>
  #include <linux/bug.h>
-@@ -2952,6 +2953,27 @@ int iommu_dev_disable_feature(struct device *dev, enum iommu_dev_features feat)
+@@ -2948,6 +2949,27 @@ int iommu_fwspec_add_ids(struct device *dev, const u32 *ids, int num_ids)
  }
- EXPORT_SYMBOL_GPL(iommu_dev_disable_feature);
+ EXPORT_SYMBOL_GPL(iommu_fwspec_add_ids);
  
 +#ifdef CONFIG_ARM64
 +static int __init iommu_quirks(void)
@@ -2404,10 +2404,10 @@ index 7d63d1d75f22..c7481fdedbdd 100644
  enum efi_secureboot_mode efi_get_secureboot_mode(efi_get_variable_t *get_var)
  {
 diff --git a/include/linux/kernel.h b/include/linux/kernel.h
-index be2e8c0a187e..114e213c89e2 100644
+index 1cce1f6410a9..89257a9a4de9 100644
 --- a/include/linux/kernel.h
 +++ b/include/linux/kernel.h
-@@ -402,4 +402,20 @@ static inline void ftrace_dump(enum ftrace_dump_mode oops_dump_mode) { }
+@@ -390,4 +390,20 @@ static inline void ftrace_dump(enum ftrace_dump_mode oops_dump_mode) { }
  	 /* OTHER_WRITABLE?  Generally considered a bad idea. */		\
  	 BUILD_BUG_ON_ZERO((perms) & 2) +					\
  	 (perms))
@@ -3183,10 +3183,10 @@ index dba349629229..9a32f178f9fe 100644
 +
  #endif /* ! __LINUX_SECURITY_H */
 diff --git a/init/main.c b/init/main.c
-index bf9c5d22953b..e31bb4a1fac0 100644
+index ed576c7f475d..5c3361bf0f10 100644
 --- a/init/main.c
 +++ b/init/main.c
-@@ -1160,8 +1160,10 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
+@@ -1162,8 +1162,10 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
  	char fn_name[KSYM_SYMBOL_LEN];
  	unsigned long addr;
  
@@ -3197,7 +3197,7 @@ index bf9c5d22953b..e31bb4a1fac0 100644
  
  	addr = (unsigned long) dereference_function_descriptor(fn);
  	sprint_symbol_no_offset(fn_name, addr);
-@@ -1172,6 +1174,9 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
+@@ -1174,6 +1176,9 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
  	 */
  	strreplace(fn_name, ' ', '\0');
  
@@ -3208,7 +3208,7 @@ index bf9c5d22953b..e31bb4a1fac0 100644
  		if (!strcmp(fn_name, entry->buf)) {
  			pr_debug("initcall %s blacklisted\n", fn_name);
 diff --git a/kernel/Makefile b/kernel/Makefile
-index 434929de17ef..25028f21e684 100644
+index 32e80dd626af..f29ce8957107 100644
 --- a/kernel/Makefile
 +++ b/kernel/Makefile
 @@ -12,6 +12,7 @@ obj-y     = fork.o exec_domain.o panic.o \
@@ -3237,7 +3237,7 @@ index c20babbf998f..653ff5c8d9d9 100644
  long bpf_jit_limit_max __read_mostly;
  
 diff --git a/kernel/bpf/syscall.c b/kernel/bpf/syscall.c
-index 4b5f29168618..0551a653ba9b 100644
+index dd5304c6ac3c..b38a64ce7b19 100644
 --- a/kernel/bpf/syscall.c
 +++ b/kernel/bpf/syscall.c
 @@ -26,6 +26,7 @@
@@ -3360,10 +3360,10 @@ index a2ff4242e623..f0d2be1ee4f1 100644
  
  int module_sig_check(struct load_info *info, int flags)
 diff --git a/kernel/panic.c b/kernel/panic.c
-index 047ea3215312..d10e1f738ca7 100644
+index b0b9a8bf4560..d5d09647f871 100644
 --- a/kernel/panic.c
 +++ b/kernel/panic.c
-@@ -542,6 +542,18 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
+@@ -540,6 +540,18 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
  	TAINT_FLAG(RANDSTRUCT,			'T', ' ', true),
  	TAINT_FLAG(TEST,			'N', ' ', true),
  	TAINT_FLAG(FWCTL,			'J', ' ', true),
