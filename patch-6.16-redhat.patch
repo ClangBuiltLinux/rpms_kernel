@@ -81,7 +81,7 @@
  80 files changed, 2740 insertions(+), 215 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index a3ea40b22fb9..a1857f7d484d 100644
+index a3ea40b22fb9a..a1857f7d484d5 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
 @@ -6298,6 +6298,17 @@
@@ -120,7 +120,7 @@ index a3ea40b22fb9..a1857f7d484d 100644
  			useful for debugging certain unwinder error
 diff --git a/Documentation/admin-guide/rh-waived-features.rst b/Documentation/admin-guide/rh-waived-features.rst
 new file mode 100644
-index 000000000000..45caec7fbae6
+index 0000000000000..45caec7fbae64
 --- /dev/null
 +++ b/Documentation/admin-guide/rh-waived-features.rst
 @@ -0,0 +1,21 @@
@@ -146,7 +146,7 @@ index 000000000000..45caec7fbae6
 +===============================
 +
 diff --git a/Kconfig b/Kconfig
-index 307e581144de..11e93e479ce4 100644
+index 307e581144de3..11e93e479ce4f 100644
 --- a/Kconfig
 +++ b/Kconfig
 @@ -32,3 +32,5 @@ source "lib/Kconfig.debug"
@@ -157,7 +157,7 @@ index 307e581144de..11e93e479ce4 100644
 +source "Kconfig.redhat"
 diff --git a/Kconfig.redhat b/Kconfig.redhat
 new file mode 100644
-index 000000000000..85771d74c34f
+index 0000000000000..85771d74c34f9
 --- /dev/null
 +++ b/Kconfig.redhat
 @@ -0,0 +1,31 @@
@@ -193,7 +193,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 3244c2a519e2..f4afa609618a 100644
+index 3244c2a519e24..f4afa609618ac 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -22,6 +22,18 @@ $(if $(filter __%, $(MAKECMDGOALS)), \
@@ -273,7 +273,7 @@ index 3244c2a519e2..f4afa609618a 100644
  	@:
  
 diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index 3072731fe09c..d34abca3e149 100644
+index 3072731fe09c5..d34abca3e1492 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
 @@ -1232,9 +1232,9 @@ config HIGHMEM
@@ -289,7 +289,7 @@ index 3072731fe09c..d34abca3e149 100644
  	  The VM uses one page of physical memory for each page table.
  	  For systems with a lot of processes, this can use a lot of
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 55fc331af337..f5d5e59058a2 100644
+index 55fc331af3371..f5d5e59058a27 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
 @@ -1427,7 +1427,7 @@ endchoice
@@ -302,7 +302,7 @@ index 55fc331af337..f5d5e59058a2 100644
  	  For systems with 52-bit userspace VAs enabled, the kernel will attempt
  	  to maintain compatibility with older software by providing 48-bit VAs
 diff --git a/arch/powerpc/include/uapi/asm/ioctls.h b/arch/powerpc/include/uapi/asm/ioctls.h
-index 2c145da3b774..b5211e413829 100644
+index 2c145da3b774a..b5211e413829a 100644
 --- a/arch/powerpc/include/uapi/asm/ioctls.h
 +++ b/arch/powerpc/include/uapi/asm/ioctls.h
 @@ -23,10 +23,10 @@
@@ -321,7 +321,7 @@ index 2c145da3b774..b5211e413829 100644
  #define TCSBRK		_IO('t', 29)
  #define TCXONC		_IO('t', 30)
 diff --git a/arch/s390/include/asm/ipl.h b/arch/s390/include/asm/ipl.h
-index b0d00032479d..afb9544fb007 100644
+index b0d00032479d6..afb9544fb0074 100644
 --- a/arch/s390/include/asm/ipl.h
 +++ b/arch/s390/include/asm/ipl.h
 @@ -139,6 +139,7 @@ int ipl_report_add_component(struct ipl_report *report, struct kexec_buf *kbuf,
@@ -333,7 +333,7 @@ index b0d00032479d..afb9544fb007 100644
  /*
   * DIAG 308 support
 diff --git a/arch/s390/kernel/ipl.c b/arch/s390/kernel/ipl.c
-index ff15f91affde..baded34170cb 100644
+index ff15f91affdea..baded34170cb2 100644
 --- a/arch/s390/kernel/ipl.c
 +++ b/arch/s390/kernel/ipl.c
 @@ -2497,3 +2497,8 @@ int ipl_report_free(struct ipl_report *report)
@@ -346,7 +346,7 @@ index ff15f91affde..baded34170cb 100644
 +	return !!ipl_secure_flag;
 +}
 diff --git a/arch/s390/kernel/setup.c b/arch/s390/kernel/setup.c
-index f244c5560e7f..464f915011b8 100644
+index f244c5560e7f6..464f915011b8a 100644
 --- a/arch/s390/kernel/setup.c
 +++ b/arch/s390/kernel/setup.c
 @@ -49,6 +49,7 @@
@@ -368,7 +368,7 @@ index f244c5560e7f..464f915011b8 100644
  	/* boot_command_line has been already set up in early.c */
  	*cmdline_p = boot_command_line;
 diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
-index 8feb8fd2957a..4519def69684 100644
+index 8feb8fd2957ad..4519def696841 100644
 --- a/arch/x86/kernel/cpu/common.c
 +++ b/arch/x86/kernel/cpu/common.c
 @@ -1720,6 +1720,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
@@ -380,7 +380,7 @@ index 8feb8fd2957a..4519def69684 100644
  		get_cpu_address_sizes(c);
  		cpu_parse_early_param();
 diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index fb27be697128..81283dd125b4 100644
+index fb27be6971286..81283dd125b41 100644
 --- a/arch/x86/kernel/setup.c
 +++ b/arch/x86/kernel/setup.c
 @@ -26,6 +26,7 @@
@@ -527,7 +527,7 @@ index fb27be697128..81283dd125b4 100644
  }
  
 diff --git a/crypto/akcipher.c b/crypto/akcipher.c
-index a36f50c83827..f4f421e6cff2 100644
+index a36f50c838278..f4f421e6cff20 100644
 --- a/crypto/akcipher.c
 +++ b/crypto/akcipher.c
 @@ -142,8 +142,7 @@ int crypto_register_akcipher(struct akcipher_alg *alg)
@@ -541,7 +541,7 @@ index a36f50c83827..f4f421e6cff2 100644
  		alg->set_priv_key = akcipher_default_set_key;
  
 diff --git a/crypto/dh.c b/crypto/dh.c
-index 8250eeeebd0f..01f0f3963a74 100644
+index 8250eeeebd0fe..01f0f3963a740 100644
 --- a/crypto/dh.c
 +++ b/crypto/dh.c
 @@ -227,10 +227,35 @@ static int dh_compute_value(struct kpp_request *req)
@@ -581,7 +581,7 @@ index 8250eeeebd0f..01f0f3963a74 100644
  	}
  
 diff --git a/crypto/drbg.c b/crypto/drbg.c
-index dbe4c8bb5ceb..02d7b74a4bd0 100644
+index dbe4c8bb5ceb7..02d7b74a4bd0a 100644
 --- a/crypto/drbg.c
 +++ b/crypto/drbg.c
 @@ -1495,13 +1495,14 @@ static int drbg_generate(struct drbg_state *drbg,
@@ -636,7 +636,7 @@ index dbe4c8bb5ceb..02d7b74a4bd0 100644
  
  /*
 diff --git a/crypto/rng.c b/crypto/rng.c
-index b8ae6ebc091d..466be8403948 100644
+index b8ae6ebc091dd..466be84039489 100644
 --- a/crypto/rng.c
 +++ b/crypto/rng.c
 @@ -12,10 +12,13 @@
@@ -861,7 +861,7 @@ index b8ae6ebc091d..466be8403948 100644
  MODULE_LICENSE("GPL");
  MODULE_DESCRIPTION("Random Number Generator");
 diff --git a/crypto/seqiv.c b/crypto/seqiv.c
-index 2bae99e33526..a6dca30b28f2 100644
+index 2bae99e335268..a6dca30b28f23 100644
 --- a/crypto/seqiv.c
 +++ b/crypto/seqiv.c
 @@ -121,6 +121,19 @@ static int seqiv_aead_decrypt(struct aead_request *req)
@@ -894,7 +894,7 @@ index 2bae99e33526..a6dca30b28f2 100644
  
  	inst->alg.base.cra_ctxsize = sizeof(struct aead_geniv_ctx);
 diff --git a/crypto/sig.c b/crypto/sig.c
-index beba745b6405..fd41f6d3abf9 100644
+index beba745b64057..fd41f6d3abf9a 100644
 --- a/crypto/sig.c
 +++ b/crypto/sig.c
 @@ -112,8 +112,7 @@ static int sig_prepare_alg(struct sig_alg *alg)
@@ -908,7 +908,7 @@ index beba745b6405..fd41f6d3abf9 100644
  		alg->verify = sig_default_verify;
  	if (!alg->set_priv_key)
 diff --git a/crypto/testmgr.c b/crypto/testmgr.c
-index 72005074a5c2..a8cfc8da32c7 100644
+index 72005074a5c26..a8cfc8da32c75 100644
 --- a/crypto/testmgr.c
 +++ b/crypto/testmgr.c
 @@ -3978,7 +3978,7 @@ static int test_akcipher_one(struct crypto_akcipher *tfm,
@@ -945,7 +945,7 @@ index 72005074a5c2..a8cfc8da32c7 100644
  			.kpp = __VECS(ecdh_p384_tv_template)
  		}
 diff --git a/drivers/acpi/apei/hest.c b/drivers/acpi/apei/hest.c
-index 20d757687e3d..90a13f20f052 100644
+index 20d757687e3d9..90a13f20f052b 100644
 --- a/drivers/acpi/apei/hest.c
 +++ b/drivers/acpi/apei/hest.c
 @@ -142,6 +142,14 @@ static int apei_hest_parse(apei_hest_func_t func, void *data)
@@ -964,7 +964,7 @@ index 20d757687e3d..90a13f20f052 100644
  	for (i = 0; i < hest_tab->error_source_count; i++) {
  		len = hest_esrc_len(hest_hdr);
 diff --git a/drivers/acpi/irq.c b/drivers/acpi/irq.c
-index 1687483ff319..390b67f19181 100644
+index 76a856c32c4d0..f2d25d95811c9 100644
 --- a/drivers/acpi/irq.c
 +++ b/drivers/acpi/irq.c
 @@ -143,6 +143,7 @@ struct acpi_irq_parse_one_ctx {
@@ -1007,7 +1007,7 @@ index 1687483ff319..390b67f19181 100644
  	return ctx.rc;
  }
 diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index fb1fe9f3b1a3..5a3312fc0ea0 100644
+index fb1fe9f3b1a36..5a3312fc0ea01 100644
 --- a/drivers/acpi/scan.c
 +++ b/drivers/acpi/scan.c
 @@ -1794,6 +1794,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
@@ -1027,7 +1027,7 @@ index fb1fe9f3b1a3..5a3312fc0ea0 100644
  	acpi_dev_get_resources(device, &resource_list,
  			       acpi_check_serial_bus_slave,
 diff --git a/drivers/ata/libahci.c b/drivers/ata/libahci.c
-index 22afa4ff860d..78eacccaa1ae 100644
+index 22afa4ff860d1..78eacccaa1ae8 100644
 --- a/drivers/ata/libahci.c
 +++ b/drivers/ata/libahci.c
 @@ -730,6 +730,24 @@ int ahci_stop_engine(struct ata_port *ap)
@@ -1056,7 +1056,7 @@ index 22afa4ff860d..78eacccaa1ae 100644
  	tmp = ata_wait_register(ap, port_mmio + PORT_CMD,
  				PORT_CMD_LIST_ON, PORT_CMD_LIST_ON, 1, 500);
 diff --git a/drivers/char/ipmi/ipmi_dmi.c b/drivers/char/ipmi/ipmi_dmi.c
-index bbf7029e224b..cf7faa970dd6 100644
+index bbf7029e224be..cf7faa970dd65 100644
 --- a/drivers/char/ipmi/ipmi_dmi.c
 +++ b/drivers/char/ipmi/ipmi_dmi.c
 @@ -215,6 +215,21 @@ static int __init scan_for_dmi_ipmi(void)
@@ -1082,7 +1082,7 @@ index bbf7029e224b..cf7faa970dd6 100644
  		dmi_decode_ipmi((const struct dmi_header *) dev->device_data);
  
 diff --git a/drivers/char/ipmi/ipmi_msghandler.c b/drivers/char/ipmi/ipmi_msghandler.c
-index 064944ae9fdc..cab1ef505cd2 100644
+index 064944ae9fdc3..cab1ef505cd29 100644
 --- a/drivers/char/ipmi/ipmi_msghandler.c
 +++ b/drivers/char/ipmi/ipmi_msghandler.c
 @@ -34,6 +34,7 @@
@@ -1117,7 +1117,7 @@ index 064944ae9fdc..cab1ef505cd2 100644
  	rv = ipmi_register_driver();
  	mutex_unlock(&ipmi_interfaces_mutex);
 diff --git a/drivers/char/random.c b/drivers/char/random.c
-index b8b24b6ed3fe..a38d31cb520d 100644
+index b8b24b6ed3fe4..a38d31cb520d9 100644
 --- a/drivers/char/random.c
 +++ b/drivers/char/random.c
 @@ -51,9 +51,11 @@
@@ -1328,7 +1328,7 @@ index b8b24b6ed3fe..a38d31cb520d 100644
  /********************************************************************
   *
 diff --git a/drivers/crypto/Kconfig b/drivers/crypto/Kconfig
-index 5686369779be..9f8a3a5bed7e 100644
+index 5686369779be0..9f8a3a5bed7ec 100644
 --- a/drivers/crypto/Kconfig
 +++ b/drivers/crypto/Kconfig
 @@ -180,6 +180,7 @@ config CRYPTO_PAES_S390
@@ -1340,7 +1340,7 @@ index 5686369779be..9f8a3a5bed7e 100644
  	  This is the s390 hardware accelerated implementation of the
  	  AES cipher algorithms for use with protected key.
 diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-index a2d0009560d0..4f3486e6a84b 100644
+index a2d0009560d0f..4f3486e6a84b2 100644
 --- a/drivers/firmware/efi/Makefile
 +++ b/drivers/firmware/efi/Makefile
 @@ -25,6 +25,7 @@ subdir-$(CONFIG_EFI_STUB)		+= libstub
@@ -1352,7 +1352,7 @@ index a2d0009560d0..4f3486e6a84b 100644
  obj-$(CONFIG_EFI_RCI2_TABLE)		+= rci2-table.o
  obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
 diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index e57bff702b5f..1252e9d11235 100644
+index e57bff702b5f4..1252e9d11235b 100644
 --- a/drivers/firmware/efi/efi.c
 +++ b/drivers/firmware/efi/efi.c
 @@ -33,6 +33,7 @@
@@ -1498,7 +1498,7 @@ index e57bff702b5f..1252e9d11235 100644
  
 diff --git a/drivers/firmware/efi/secureboot.c b/drivers/firmware/efi/secureboot.c
 new file mode 100644
-index 000000000000..de0a3714a5d4
+index 0000000000000..de0a3714a5d44
 --- /dev/null
 +++ b/drivers/firmware/efi/secureboot.c
 @@ -0,0 +1,38 @@
@@ -1541,7 +1541,7 @@ index 000000000000..de0a3714a5d4
 +	}
 +}
 diff --git a/drivers/hid/hid-rmi.c b/drivers/hid/hid-rmi.c
-index d4af17fdba46..154f0403cbf4 100644
+index d4af17fdba467..154f0403cbf4c 100644
 --- a/drivers/hid/hid-rmi.c
 +++ b/drivers/hid/hid-rmi.c
 @@ -321,21 +321,12 @@ static int rmi_input_event(struct hid_device *hdev, u8 *data, int size)
@@ -1643,7 +1643,7 @@ index d4af17fdba46..154f0403cbf4 100644
  	data->xport.ops = &hid_rmi_ops;
  
 diff --git a/drivers/hwtracing/coresight/coresight-etm4x-core.c b/drivers/hwtracing/coresight/coresight-etm4x-core.c
-index 2b8f10463840..b2c08e0bf594 100644
+index 2b8f104638402..b2c08e0bf594f 100644
 --- a/drivers/hwtracing/coresight/coresight-etm4x-core.c
 +++ b/drivers/hwtracing/coresight/coresight-etm4x-core.c
 @@ -11,6 +11,7 @@
@@ -1694,7 +1694,7 @@ index 2b8f10463840..b2c08e0bf594 100644
  	platform_driver_unregister(&etm4_platform_driver);
  	etm4_pm_clear();
 diff --git a/drivers/input/rmi4/rmi_driver.c b/drivers/input/rmi4/rmi_driver.c
-index 2168b6cd7167..5d7cda175a0c 100644
+index 2168b6cd71673..5d7cda175a0ce 100644
 --- a/drivers/input/rmi4/rmi_driver.c
 +++ b/drivers/input/rmi4/rmi_driver.c
 @@ -182,34 +182,47 @@ void rmi_set_attn_data(struct rmi_device *rmi_dev, unsigned long irq_status,
@@ -1886,7 +1886,7 @@ index 2168b6cd7167..5d7cda175a0c 100644
  	if (data->f01_container->dev.driver) {
  		/* Driver already bound, so enable ATTN now. */
 diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
-index a4b606c591da..772946ea4bb2 100644
+index a4b606c591da6..772946ea4bb2c 100644
 --- a/drivers/iommu/iommu.c
 +++ b/drivers/iommu/iommu.c
 @@ -8,6 +8,7 @@
@@ -1926,7 +1926,7 @@ index a4b606c591da..772946ea4bb2 100644
   * iommu_setup_default_domain - Set the default_domain for the group
   * @group: Group to change
 diff --git a/drivers/message/fusion/mptsas.c b/drivers/message/fusion/mptsas.c
-index 185c08eab4ca..215a68b1d863 100644
+index 185c08eab4ca1..215a68b1d863f 100644
 --- a/drivers/message/fusion/mptsas.c
 +++ b/drivers/message/fusion/mptsas.c
 @@ -5378,6 +5378,10 @@ static void mptsas_remove(struct pci_dev *pdev)
@@ -1949,7 +1949,7 @@ index 185c08eab4ca..215a68b1d863 100644
  };
  MODULE_DEVICE_TABLE(pci, mptsas_pci_table);
 diff --git a/drivers/message/fusion/mptspi.c b/drivers/message/fusion/mptspi.c
-index a3901fbfac4f..83add1994d2c 100644
+index a3901fbfac4f7..83add1994d2c2 100644
 --- a/drivers/message/fusion/mptspi.c
 +++ b/drivers/message/fusion/mptspi.c
 @@ -1240,12 +1240,17 @@ static struct spi_function_template mptspi_transport_functions = {
@@ -1971,7 +1971,7 @@ index a3901fbfac4f..83add1994d2c 100644
  };
  MODULE_DEVICE_TABLE(pci, mptspi_pci_table);
 diff --git a/drivers/net/wireguard/main.c b/drivers/net/wireguard/main.c
-index a00671b58701..eeef2766b8b3 100644
+index a00671b58701f..eeef2766b8b3d 100644
 --- a/drivers/net/wireguard/main.c
 +++ b/drivers/net/wireguard/main.c
 @@ -12,6 +12,7 @@
@@ -1995,7 +1995,7 @@ index a00671b58701..eeef2766b8b3 100644
  	if (ret < 0)
  		goto err_allowedips;
 diff --git a/drivers/pci/pci-driver.c b/drivers/pci/pci-driver.c
-index c8bd71a739f7..909e20634dae 100644
+index c8bd71a739f72..909e20634daef 100644
 --- a/drivers/pci/pci-driver.c
 +++ b/drivers/pci/pci-driver.c
 @@ -19,6 +19,7 @@
@@ -2023,7 +2023,7 @@ index c8bd71a739f7..909e20634dae 100644
  		return rc;
  	if (rc < 0) {
 diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
-index 94daca15a096..8de27d109820 100644
+index 94daca15a096f..8de27d1098208 100644
 --- a/drivers/pci/quirks.c
 +++ b/drivers/pci/quirks.c
 @@ -4452,6 +4452,30 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_BROADCOM, 0x9000,
@@ -2058,7 +2058,7 @@ index 94daca15a096..8de27d109820 100644
   * Intersil/Techwell TW686[4589]-based video capture cards have an empty (zero)
   * class code.  Fix it.
 diff --git a/drivers/scsi/aacraid/linit.c b/drivers/scsi/aacraid/linit.c
-index 4b12e6dd8f07..d017f54e3294 100644
+index 4b12e6dd8f07f..d017f54e32943 100644
 --- a/drivers/scsi/aacraid/linit.c
 +++ b/drivers/scsi/aacraid/linit.c
 @@ -77,6 +77,7 @@ char aac_driver_version[] = AAC_DRIVER_FULL_VERSION;
@@ -2078,7 +2078,7 @@ index 4b12e6dd8f07..d017f54e3294 100644
  	{ 0x9005, 0x028c, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 63 }, /* Adaptec PMC Series 7 (Denali) */
  	{ 0x9005, 0x028d, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 64 }, /* Adaptec PMC Series 8 */
 diff --git a/drivers/scsi/hpsa.c b/drivers/scsi/hpsa.c
-index c73a71ac3c29..9e7e41288a7a 100644
+index c73a71ac3c290..9e7e41288a7a5 100644
 --- a/drivers/scsi/hpsa.c
 +++ b/drivers/scsi/hpsa.c
 @@ -82,7 +82,9 @@ MODULE_DESCRIPTION("Driver for HP Smart Array Controller version " \
@@ -2105,7 +2105,7 @@ index c73a71ac3c29..9e7e41288a7a 100644
  };
  
 diff --git a/drivers/scsi/lpfc/lpfc_ids.h b/drivers/scsi/lpfc/lpfc_ids.h
-index 0b1616e93cf4..85fc52038a82 100644
+index 0b1616e93cf47..85fc52038a825 100644
 --- a/drivers/scsi/lpfc/lpfc_ids.h
 +++ b/drivers/scsi/lpfc/lpfc_ids.h
 @@ -24,6 +24,7 @@
@@ -2179,7 +2179,7 @@ index 0b1616e93cf4..85fc52038a82 100644
  		PCI_ANY_ID, PCI_ANY_ID, },
  	{PCI_VENDOR_ID_EMULEX, PCI_DEVICE_ID_LANCER_G7_FC,
 diff --git a/drivers/scsi/qla2xxx/qla_os.c b/drivers/scsi/qla2xxx/qla_os.c
-index 288ce04fc2b1..3e599d25d1b4 100644
+index 288ce04fc2b1a..3e599d25d1b49 100644
 --- a/drivers/scsi/qla2xxx/qla_os.c
 +++ b/drivers/scsi/qla2xxx/qla_os.c
 @@ -8105,6 +8105,7 @@ static const struct pci_error_handlers qla2xxx_err_handler = {
@@ -2210,7 +2210,7 @@ index 288ce04fc2b1..3e599d25d1b4 100644
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2271) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2261) },
 diff --git a/drivers/scsi/sd.c b/drivers/scsi/sd.c
-index 3f6e87705b62..ddfd99a32f14 100644
+index 3f6e87705b62e..ddfd99a32f147 100644
 --- a/drivers/scsi/sd.c
 +++ b/drivers/scsi/sd.c
 @@ -121,6 +121,14 @@ static const char *sd_cache_types[] = {
@@ -2241,7 +2241,7 @@ index 3f6e87705b62..ddfd99a32f14 100644
  	if (err)
  		goto err_out_driver;
 diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
-index 0e1dd6ef60a7..20ddc50a241c 100644
+index 0e1dd6ef60a71..20ddc50a241c1 100644
 --- a/drivers/usb/core/hub.c
 +++ b/drivers/usb/core/hub.c
 @@ -5854,6 +5854,13 @@ static void hub_event(struct work_struct *work)
@@ -2259,7 +2259,7 @@ index 0e1dd6ef60a7..20ddc50a241c 100644
  	 * disconnected while waiting for the lock to succeed. */
  	usb_lock_device(hdev);
 diff --git a/fs/afs/main.c b/fs/afs/main.c
-index 02475d415d88..f96c698324ae 100644
+index 02475d415d885..f96c698324ae4 100644
 --- a/fs/afs/main.c
 +++ b/fs/afs/main.c
 @@ -194,6 +194,9 @@ static int __init afs_init(void)
@@ -2273,7 +2273,7 @@ index 02475d415d88..f96c698324ae 100644
  
  error_proc:
 diff --git a/fs/erofs/super.c b/fs/erofs/super.c
-index e1e9f06e8342..a21358cbbe50 100644
+index e1e9f06e8342f..a21358cbbe50c 100644
 --- a/fs/erofs/super.c
 +++ b/fs/erofs/super.c
 @@ -604,6 +604,9 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
@@ -2300,7 +2300,7 @@ index e1e9f06e8342..a21358cbbe50 100644
  }
  
 diff --git a/fs/ext4/super.c b/fs/ext4/super.c
-index a7f80ca01174..7b890b71f2ab 100644
+index a7f80ca011747..7b890b71f2ab2 100644
 --- a/fs/ext4/super.c
 +++ b/fs/ext4/super.c
 @@ -5635,6 +5635,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
@@ -2322,7 +2322,7 @@ index a7f80ca01174..7b890b71f2ab 100644
  	err = ext4_register_sysfs(sb);
  	if (err)
 diff --git a/include/linux/crypto.h b/include/linux/crypto.h
-index b50f1954d1bb..604cea40eb9c 100644
+index b50f1954d1bba..604cea40eb9cd 100644
 --- a/include/linux/crypto.h
 +++ b/include/linux/crypto.h
 @@ -148,6 +148,9 @@
@@ -2336,7 +2336,7 @@ index b50f1954d1bb..604cea40eb9c 100644
  /*
   * Miscellaneous stuff.
 diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 7d63d1d75f22..c7481fdedbdd 100644
+index 7d63d1d75f22f..c7481fdedbddb 100644
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
 @@ -45,6 +45,8 @@ struct screen_info;
@@ -2404,7 +2404,7 @@ index 7d63d1d75f22..c7481fdedbdd 100644
  enum efi_secureboot_mode efi_get_secureboot_mode(efi_get_variable_t *get_var)
  {
 diff --git a/include/linux/kernel.h b/include/linux/kernel.h
-index 1cce1f6410a9..89257a9a4de9 100644
+index 1cce1f6410a9d..89257a9a4de99 100644
 --- a/include/linux/kernel.h
 +++ b/include/linux/kernel.h
 @@ -390,4 +390,20 @@ static inline void ftrace_dump(enum ftrace_dump_mode oops_dump_mode) { }
@@ -2429,7 +2429,7 @@ index 1cce1f6410a9..89257a9a4de9 100644
 +
  #endif
 diff --git a/include/linux/lsm_hook_defs.h b/include/linux/lsm_hook_defs.h
-index bf3bbac4e02a..b9840b1a43fe 100644
+index bf3bbac4e02a5..b9840b1a43fed 100644
 --- a/include/linux/lsm_hook_defs.h
 +++ b/include/linux/lsm_hook_defs.h
 @@ -444,6 +444,7 @@ LSM_HOOK(int, 0, bpf_token_capable, const struct bpf_token *token, int cap)
@@ -2441,7 +2441,7 @@ index bf3bbac4e02a..b9840b1a43fe 100644
  LSM_HOOK(int, 0, perf_event_open, int type)
  LSM_HOOK(int, 0, perf_event_alloc, struct perf_event *event)
 diff --git a/include/linux/module.h b/include/linux/module.h
-index 8050f77c3b64..131bd7bbe936 100644
+index 8050f77c3b64f..131bd7bbe936a 100644
 --- a/include/linux/module.h
 +++ b/include/linux/module.h
 @@ -430,6 +430,7 @@ struct module {
@@ -2462,7 +2462,7 @@ index 8050f77c3b64..131bd7bbe936 100644
 +
  #endif /* _LINUX_MODULE_H */
 diff --git a/include/linux/panic.h b/include/linux/panic.h
-index 4adc65766935..83e39e6ecf92 100644
+index 4adc657669354..83e39e6ecf92c 100644
 --- a/include/linux/panic.h
 +++ b/include/linux/panic.h
 @@ -73,7 +73,22 @@ static inline void set_arch_panic_timeout(int timeout, int arch_default_timeout)
@@ -2490,7 +2490,7 @@ index 4adc65766935..83e39e6ecf92 100644
  
  struct taint_flag {
 diff --git a/include/linux/pci.h b/include/linux/pci.h
-index b231cbc67a35..5082b86aa701 100644
+index b231cbc67a354..5082b86aa7017 100644
 --- a/include/linux/pci.h
 +++ b/include/linux/pci.h
 @@ -1632,6 +1632,7 @@ int pci_add_dynid(struct pci_driver *drv,
@@ -2513,7 +2513,7 @@ index b231cbc67a35..5082b86aa701 100644
  void pci_uevent_ers(struct pci_dev *pdev, enum  pci_ers_result err_type);
  #endif
 diff --git a/include/linux/random.h b/include/linux/random.h
-index 333cecfca93f..6421bf2415a5 100644
+index 333cecfca93fd..6421bf2415a53 100644
 --- a/include/linux/random.h
 +++ b/include/linux/random.h
 @@ -9,6 +9,13 @@
@@ -2542,7 +2542,7 @@ index 333cecfca93f..6421bf2415a5 100644
  #endif
 diff --git a/include/linux/rh_flags.h b/include/linux/rh_flags.h
 new file mode 100644
-index 000000000000..d498d319ace3
+index 0000000000000..d498d319ace3a
 --- /dev/null
 +++ b/include/linux/rh_flags.h
 @@ -0,0 +1,34 @@
@@ -2582,7 +2582,7 @@ index 000000000000..d498d319ace3
 +#endif
 diff --git a/include/linux/rh_kabi.h b/include/linux/rh_kabi.h
 new file mode 100644
-index 000000000000..5139cb2cabdc
+index 0000000000000..5139cb2cabdc0
 --- /dev/null
 +++ b/include/linux/rh_kabi.h
 @@ -0,0 +1,541 @@
@@ -3129,7 +3129,7 @@ index 000000000000..5139cb2cabdc
 +#endif /* _LINUX_RH_KABI_H */
 diff --git a/include/linux/rh_waived.h b/include/linux/rh_waived.h
 new file mode 100644
-index 000000000000..945dd71cc082
+index 0000000000000..945dd71cc0827
 --- /dev/null
 +++ b/include/linux/rh_waived.h
 @@ -0,0 +1,19 @@
@@ -3153,7 +3153,7 @@ index 000000000000..945dd71cc082
 +
 +#endif /* _RH_WAIVED_H */
 diff --git a/include/linux/rmi.h b/include/linux/rmi.h
-index ab7eea01ab42..fff7c5f737fc 100644
+index ab7eea01ab427..fff7c5f737fc8 100644
 --- a/include/linux/rmi.h
 +++ b/include/linux/rmi.h
 @@ -364,6 +364,7 @@ struct rmi_driver_data {
@@ -3165,7 +3165,7 @@ index ab7eea01ab42..fff7c5f737fc 100644
  
  int rmi_register_transport_device(struct rmi_transport_dev *xport);
 diff --git a/include/linux/security.h b/include/linux/security.h
-index dba349629229..9a32f178f9fe 100644
+index dba349629229c..9a32f178f9fec 100644
 --- a/include/linux/security.h
 +++ b/include/linux/security.h
 @@ -2390,4 +2390,13 @@ static inline void security_initramfs_populated(void)
@@ -3183,7 +3183,7 @@ index dba349629229..9a32f178f9fe 100644
 +
  #endif /* ! __LINUX_SECURITY_H */
 diff --git a/init/main.c b/init/main.c
-index ed576c7f475d..5c3361bf0f10 100644
+index ed576c7f475d6..5c3361bf0f10e 100644
 --- a/init/main.c
 +++ b/init/main.c
 @@ -1162,8 +1162,10 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
@@ -3208,7 +3208,7 @@ index ed576c7f475d..5c3361bf0f10 100644
  		if (!strcmp(fn_name, entry->buf)) {
  			pr_debug("initcall %s blacklisted\n", fn_name);
 diff --git a/kernel/Makefile b/kernel/Makefile
-index 32e80dd626af..f29ce8957107 100644
+index 32e80dd626af0..f29ce8957107b 100644
 --- a/kernel/Makefile
 +++ b/kernel/Makefile
 @@ -12,6 +12,7 @@ obj-y     = fork.o exec_domain.o panic.o \
@@ -3220,7 +3220,7 @@ index 32e80dd626af..f29ce8957107 100644
  obj-$(CONFIG_MULTIUSER) += groups.o
  obj-$(CONFIG_VHOST_TASK) += vhost_task.o
 diff --git a/kernel/bpf/core.c b/kernel/bpf/core.c
-index c20babbf998f..653ff5c8d9d9 100644
+index c20babbf998f4..653ff5c8d9d98 100644
 --- a/kernel/bpf/core.c
 +++ b/kernel/bpf/core.c
 @@ -571,7 +571,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
@@ -3237,7 +3237,7 @@ index c20babbf998f..653ff5c8d9d9 100644
  long bpf_jit_limit_max __read_mostly;
  
 diff --git a/kernel/bpf/syscall.c b/kernel/bpf/syscall.c
-index dd5304c6ac3c..b38a64ce7b19 100644
+index dd5304c6ac3cc..b38a64ce7b19c 100644
 --- a/kernel/bpf/syscall.c
 +++ b/kernel/bpf/syscall.c
 @@ -26,6 +26,7 @@
@@ -3285,7 +3285,7 @@ index dd5304c6ac3c..b38a64ce7b19 100644
  	}
  
 diff --git a/kernel/module/main.c b/kernel/module/main.c
-index 5c6ab20240a6..9f986fb39ef9 100644
+index 3d64e69cc03e9..65eb2a2d7d2fd 100644
 --- a/kernel/module/main.c
 +++ b/kernel/module/main.c
 @@ -65,6 +65,8 @@
@@ -3313,7 +3313,7 @@ index 5c6ab20240a6..9f986fb39ef9 100644
  	&modinfo_initstate,
  	&modinfo_coresize,
  #ifdef CONFIG_ARCH_WANTS_MODULES_DATA_IN_VMALLOC
-@@ -3229,6 +3233,11 @@ static int early_mod_check(struct load_info *info, int flags)
+@@ -3216,6 +3220,11 @@ static int early_mod_check(struct load_info *info, int flags)
  		return -EPERM;
  	}
  
@@ -3325,7 +3325,7 @@ index 5c6ab20240a6..9f986fb39ef9 100644
  	err = rewrite_section_headers(info, flags);
  	if (err)
  		return err;
-@@ -3797,6 +3806,10 @@ void print_modules(void)
+@@ -3784,6 +3793,10 @@ void print_modules(void)
  		pr_cont(" [last unloaded: %s%s]", last_unloaded_module.name,
  			last_unloaded_module.taints);
  	pr_cont("\n");
@@ -3337,7 +3337,7 @@ index 5c6ab20240a6..9f986fb39ef9 100644
  
  #ifdef CONFIG_MODULE_DEBUGFS
 diff --git a/kernel/module/signing.c b/kernel/module/signing.c
-index a2ff4242e623..f0d2be1ee4f1 100644
+index a2ff4242e623d..f0d2be1ee4f1c 100644
 --- a/kernel/module/signing.c
 +++ b/kernel/module/signing.c
 @@ -61,10 +61,17 @@ int mod_verify_sig(const void *mod, struct load_info *info)
@@ -3360,7 +3360,7 @@ index a2ff4242e623..f0d2be1ee4f1 100644
  
  int module_sig_check(struct load_info *info, int flags)
 diff --git a/kernel/panic.c b/kernel/panic.c
-index b0b9a8bf4560..d5d09647f871 100644
+index b0b9a8bf4560d..d5d09647f8714 100644
 --- a/kernel/panic.c
 +++ b/kernel/panic.c
 @@ -540,6 +540,18 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
@@ -3384,7 +3384,7 @@ index b0b9a8bf4560..d5d09647f871 100644
  #undef TAINT_FLAG
 diff --git a/kernel/rh_flags.c b/kernel/rh_flags.c
 new file mode 100644
-index 000000000000..10d26958f840
+index 0000000000000..10d26958f840c
 --- /dev/null
 +++ b/kernel/rh_flags.c
 @@ -0,0 +1,115 @@
@@ -3505,7 +3505,7 @@ index 000000000000..10d26958f840
 +subsys_initcall(rh_flags_init);
 diff --git a/kernel/rh_messages.c b/kernel/rh_messages.c
 new file mode 100644
-index 000000000000..bb69e8965748
+index 0000000000000..bb69e8965748b
 --- /dev/null
 +++ b/kernel/rh_messages.c
 @@ -0,0 +1,414 @@
@@ -3925,7 +3925,7 @@ index 000000000000..bb69e8965748
 +}
 diff --git a/kernel/rh_messages.h b/kernel/rh_messages.h
 new file mode 100644
-index 000000000000..647d7b9a4fe9
+index 0000000000000..647d7b9a4fe94
 --- /dev/null
 +++ b/kernel/rh_messages.h
 @@ -0,0 +1,326 @@
@@ -4257,7 +4257,7 @@ index 000000000000..647d7b9a4fe9
 +#endif /* __RH_MESSAGES_H */
 diff --git a/kernel/rh_waived.c b/kernel/rh_waived.c
 new file mode 100644
-index 000000000000..84e22b1730cc
+index 0000000000000..84e22b1730cc4
 --- /dev/null
 +++ b/kernel/rh_waived.c
 @@ -0,0 +1,104 @@
@@ -4366,10 +4366,10 @@ index 000000000000..84e22b1730cc
 +}
 +late_initcall(__add_rh_flag);
 diff --git a/scripts/Makefile.lib b/scripts/Makefile.lib
-index 6fc2a82ee3bb..7e16f090463d 100644
+index 2b332645e0c2a..3e037a4feb9a5 100644
 --- a/scripts/Makefile.lib
 +++ b/scripts/Makefile.lib
-@@ -272,7 +272,10 @@ objtool-args-$(CONFIG_HAVE_STATIC_CALL_INLINE)		+= --static-call
+@@ -275,7 +275,10 @@ objtool-args-$(CONFIG_HAVE_STATIC_CALL_INLINE)		+= --static-call
  objtool-args-$(CONFIG_HAVE_UACCESS_VALIDATION)		+= --uaccess
  objtool-args-$(or $(CONFIG_GCOV_KERNEL),$(CONFIG_KCOV))	+= --no-unreachable
  objtool-args-$(CONFIG_PREFIX_SYMBOLS)			+= --prefix=$(CONFIG_FUNCTION_PADDING_BYTES)
@@ -4381,7 +4381,7 @@ index 6fc2a82ee3bb..7e16f090463d 100644
  objtool-args = $(objtool-args-y)					\
  	$(if $(delay-objtool), --link)					\
 diff --git a/scripts/mod/modpost.c b/scripts/mod/modpost.c
-index be89921d60b6..63e2f2ec68f0 100644
+index be89921d60b61..63e2f2ec68f08 100644
 --- a/scripts/mod/modpost.c
 +++ b/scripts/mod/modpost.c
 @@ -27,6 +27,7 @@
@@ -4414,7 +4414,7 @@ index be89921d60b6..63e2f2ec68f0 100644
  	ret = snprintf(fname, sizeof(fname), "%s.mod.c", mod->name);
  	if (ret >= sizeof(fname)) {
 diff --git a/scripts/tags.sh b/scripts/tags.sh
-index 98680e9cd7be..0880675cf517 100755
+index 98680e9cd7be3..0880675cf5172 100755
 --- a/scripts/tags.sh
 +++ b/scripts/tags.sh
 @@ -16,6 +16,8 @@ fi
@@ -4427,7 +4427,7 @@ index 98680e9cd7be..0880675cf517 100755
  # ignore arbitrary directories
  if [ -n "${IGNORE_DIRS}" ]; then
 diff --git a/security/integrity/platform_certs/load_uefi.c b/security/integrity/platform_certs/load_uefi.c
-index d1fdd113450a..182e8090cfe8 100644
+index d1fdd113450a6..182e8090cfe85 100644
 --- a/security/integrity/platform_certs/load_uefi.c
 +++ b/security/integrity/platform_certs/load_uefi.c
 @@ -74,7 +74,8 @@ static __init void *get_cert_list(efi_char16_t *name, efi_guid_t *guid,
@@ -4451,7 +4451,7 @@ index d1fdd113450a..182e8090cfe8 100644
  	}
  
 diff --git a/security/lockdown/Kconfig b/security/lockdown/Kconfig
-index e84ddf484010..d0501353a4b9 100644
+index e84ddf4840101..d0501353a4b95 100644
 --- a/security/lockdown/Kconfig
 +++ b/security/lockdown/Kconfig
 @@ -16,6 +16,19 @@ config SECURITY_LOCKDOWN_LSM_EARLY
@@ -4475,7 +4475,7 @@ index e84ddf484010..d0501353a4b9 100644
  	prompt "Kernel default lockdown mode"
  	default LOCK_DOWN_KERNEL_FORCE_NONE
 diff --git a/security/lockdown/lockdown.c b/security/lockdown/lockdown.c
-index cf83afa1d879..aba751e7abff 100644
+index cf83afa1d879a..aba751e7abffe 100644
 --- a/security/lockdown/lockdown.c
 +++ b/security/lockdown/lockdown.c
 @@ -72,6 +72,17 @@ static int lockdown_is_locked_down(enum lockdown_reason what)
@@ -4497,7 +4497,7 @@ index cf83afa1d879..aba751e7abff 100644
  	LSM_HOOK_INIT(locked_down, lockdown_is_locked_down),
  };
 diff --git a/tools/power/cpupower/Makefile b/tools/power/cpupower/Makefile
-index be8dfac14076..c43db1c41205 100644
+index be8dfac140763..c43db1c412051 100644
 --- a/tools/power/cpupower/Makefile
 +++ b/tools/power/cpupower/Makefile
 @@ -73,6 +73,7 @@ sbindir ?=	/usr/sbin
