@@ -1995,7 +1995,7 @@ index a00671b58701f..eeef2766b8b3d 100644
  	if (ret < 0)
  		goto err_allowedips;
 diff --git a/drivers/pci/pci-driver.c b/drivers/pci/pci-driver.c
-index c8bd71a739f72..909e20634daef 100644
+index 67db34fd10ee7..304d38640d104 100644
 --- a/drivers/pci/pci-driver.c
 +++ b/drivers/pci/pci-driver.c
 @@ -19,6 +19,7 @@
@@ -2023,10 +2023,10 @@ index c8bd71a739f72..909e20634daef 100644
  		return rc;
  	if (rc < 0) {
 diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
-index 94daca15a096f..8de27d1098208 100644
+index d7f4ee634263c..733eae7c997a8 100644
 --- a/drivers/pci/quirks.c
 +++ b/drivers/pci/quirks.c
-@@ -4452,6 +4452,30 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_BROADCOM, 0x9000,
+@@ -4448,6 +4448,30 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_BROADCOM, 0x9000,
  DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_BROADCOM, 0x9084,
  				quirk_bridge_cavm_thrx2_pcie_root);
  
@@ -2490,10 +2490,10 @@ index 4adc657669354..83e39e6ecf92c 100644
  
  struct taint_flag {
 diff --git a/include/linux/pci.h b/include/linux/pci.h
-index b231cbc67a354..5082b86aa7017 100644
+index 05e68f35f3923..2e4f58364d7f7 100644
 --- a/include/linux/pci.h
 +++ b/include/linux/pci.h
-@@ -1632,6 +1632,7 @@ int pci_add_dynid(struct pci_driver *drv,
+@@ -1627,6 +1627,7 @@ int pci_add_dynid(struct pci_driver *drv,
  		  unsigned long driver_data);
  const struct pci_device_id *pci_match_id(const struct pci_device_id *ids,
  					 struct pci_dev *dev);
@@ -2501,7 +2501,7 @@ index b231cbc67a354..5082b86aa7017 100644
  int pci_scan_bridge(struct pci_bus *bus, struct pci_dev *dev, int max,
  		    int pass);
  
-@@ -2690,6 +2691,10 @@ static inline bool pci_is_thunderbolt_attached(struct pci_dev *pdev)
+@@ -2737,6 +2738,10 @@ static inline bool pci_is_thunderbolt_attached(struct pci_dev *pdev)
  	return false;
  }
  

@@ -1,11 +1,11 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/f797ea55291e77e02a6850529972ae7fb376205c
- f797ea55291e77e02a6850529972ae7fb376205c drivers/crypto: make PAES_S390 select CRYPTO_ENGINE
+https://gitlab.com/cki-project/kernel-ark/-/commit/13de79f66d8e532be8ef774fe62a3cefe6b9363f
+ 13de79f66d8e532be8ef774fe62a3cefe6b9363f drivers/crypto: make PAES_S390 select CRYPTO_ENGINE
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/b6d3927ab968350d91df32cc56ad960f4edb6c6a
- b6d3927ab968350d91df32cc56ad960f4edb6c6a cpupower: split unitdir from libdir in Makefile
+https://gitlab.com/cki-project/kernel-ark/-/commit/af2a862b7c9b1a0e333c6ab76e8db09b64671eca
+ af2a862b7c9b1a0e333c6ab76e8db09b64671eca cpupower: split unitdir from libdir in Makefile
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/7d5940a5dcc4ce6091765d8a9e8aa2340b0072c0
- 7d5940a5dcc4ce6091765d8a9e8aa2340b0072c0 powerpc: Fix struct termio related ioctl macros
+https://gitlab.com/cki-project/kernel-ark/-/commit/2e5abce9103bd032fa2a2e857f5e9a5d13d657de
+ 2e5abce9103bd032fa2a2e857f5e9a5d13d657de powerpc: Fix struct termio related ioctl macros
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/a66ceecaa34b5524a42617d289f3d2fe7b7702d5
  a66ceecaa34b5524a42617d289f3d2fe7b7702d5 redhat: make ENABLE_WERROR also enable OBJTOOL_WERROR
