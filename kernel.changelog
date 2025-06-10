@@ -1,5 +1,22 @@
 * Tue Jun 10 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.15.2-0]
 - Revert "drm/amd/display: more liberal vmin/vmax update for freesync" (Justin M. Forbes)
+- Linux v6.15.2
+Resolves: 
+
+* Wed Jun 04 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.15.1-0]
+- arm64: dts: rockchip: Drop assigned-clock* from cpu nodes on rk3588 (Diederik de Haas)
+- arm64: dts: rockchip: Improve LED config for NanoPi R5S (Diederik de Haas)
+- arm64: dts: rockchip: Move rk3568 PCIe3 MSI to use GIC ITS (Chukun Pan)
+- arm64: dts: rockchip: Update eMMC for NanoPi R5 series (Peter Robinson)
+- arm64: dts: rockchip: Add vcc-supply to SPI flash on rk3566-rock3c (Peter Robinson)
+- arm64: dts: rockchip: Add vcc-supply to SPI flash on rk3566-quartz64-b (Diederik de Haas)
+- arm64: dts: rockchip: Add phy-supply to gmac0 on NanoPi R5S (Diederik de Haas)
+- arm64: dts: rockchip: Add vcc-supply to SPI flash on rk3588-rock-5b (Diederik de Haas)
+- arm64: dts: rockchip: Add vcc-supply to SPI flash on rk3399-rockpro64 (Diederik de Haas)
+- arm64: dts: rockchip: Add vcc-supply to SPI flash on rk3328-rock64 (Diederik de Haas)
+- arm64: dts: rockchip: Move SHMEM memory to reserved memory on rk3588 (Chukun Pan)
+- arm64: dts: rockchip: Add gmac phy reset GPIO to QNAP TS433 (Uwe Kleine-König)
+- arm64: dts: rockchip: Correct gmac phy address on QNAP TS433 (Uwe Kleine-König)
 - Reset build id for fedora-srpm script (Justin M. Forbes)
 - redhat/configs: Add configs for new ov02c10 and ov02e10 drivers (Hans de Goede)
 - media: i2c: Add Omnivision OV02C10 sensor driver (Heimir Thor Sverrisson)
@@ -20,7 +37,7 @@
 - redhat: add downstream SBAT for UKI addons (Emanuele Giuseppe Esposito)
 - uki_addons: provide custom SBAT as input parameter (Emanuele Giuseppe Esposito)
 - uki_addons: remove completely sbat/sbat.conf (Emanuele Giuseppe Esposito)
-- Linux v6.15.2
+- Linux v6.15.1
 Resolves: 
 
 * Mon May 26 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.15.0-60]
