@@ -1,41 +1,5 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/d7909c16c62ed14251352afd2ac6a17246533c14
- d7909c16c62ed14251352afd2ac6a17246533c14 arm64: dts: rockchip: Drop assigned-clock* from cpu nodes on rk3588
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/f6fe2f2da41fd014a8d4a1b7275527706b9038e1
- f6fe2f2da41fd014a8d4a1b7275527706b9038e1 arm64: dts: rockchip: Improve LED config for NanoPi R5S
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/f47c758ab8faa5cac82fcf47abf030258c0cd130
- f47c758ab8faa5cac82fcf47abf030258c0cd130 arm64: dts: rockchip: Move rk3568 PCIe3 MSI to use GIC ITS
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/b6aeff3f14aef90537e7182d613bf386ec5e8786
- b6aeff3f14aef90537e7182d613bf386ec5e8786 arm64: dts: rockchip: Update eMMC for NanoPi R5 series
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/e2eedda3d3f2c4be70753804cf5431f817991772
- e2eedda3d3f2c4be70753804cf5431f817991772 arm64: dts: rockchip: Add vcc-supply to SPI flash on rk3566-rock3c
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/af4f01cfac541cdfcdf3ee7a74804249d0a62a1a
- af4f01cfac541cdfcdf3ee7a74804249d0a62a1a arm64: dts: rockchip: Add vcc-supply to SPI flash on rk3566-quartz64-b
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/bbf40beb1a9a3729b99101da133ae1ece5ee7ab1
- bbf40beb1a9a3729b99101da133ae1ece5ee7ab1 arm64: dts: rockchip: Add phy-supply to gmac0 on NanoPi R5S
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/22cebdf881b3d6fb20f2c9e0cc91f80ea359a105
- 22cebdf881b3d6fb20f2c9e0cc91f80ea359a105 arm64: dts: rockchip: Add vcc-supply to SPI flash on rk3588-rock-5b
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/09864738a9a39780a147c9cb94a8e1320116a712
- 09864738a9a39780a147c9cb94a8e1320116a712 arm64: dts: rockchip: Add vcc-supply to SPI flash on rk3399-rockpro64
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/43438a08982d340ae5e384a02b2bfb99aa22333e
- 43438a08982d340ae5e384a02b2bfb99aa22333e arm64: dts: rockchip: Add vcc-supply to SPI flash on rk3328-rock64
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/c1f80e194a5d3bbfc66eaa55e65a00349ab15541
- c1f80e194a5d3bbfc66eaa55e65a00349ab15541 arm64: dts: rockchip: Move SHMEM memory to reserved memory on rk3588
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/f3a28964ec84f5a742a9bf7d68d548370c734dc6
- f3a28964ec84f5a742a9bf7d68d548370c734dc6 arm64: dts: rockchip: Add gmac phy reset GPIO to QNAP TS433
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/f8201d5b071e16b72238977851c23982c8a72114
- f8201d5b071e16b72238977851c23982c8a72114 arm64: dts: rockchip: Correct gmac phy address on QNAP TS433
+https://gitlab.com/cki-project/kernel-ark/-/commit/360edb99bae1b906107ec7dbb0d5a5410306fccd
+ 360edb99bae1b906107ec7dbb0d5a5410306fccd Revert "drm/amd/display: more liberal vmin/vmax update for freesync"
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/889cf0727884fcc305faed0ff3278555fc63ad02
  889cf0727884fcc305faed0ff3278555fc63ad02 media: i2c: Add Omnivision OV02C10 sensor driver
