@@ -1,8 +1,8 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/223ef884f63ba7916a4c0bbb3364b861c1759f47
- 223ef884f63ba7916a4c0bbb3364b861c1759f47 cpupower: split unitdir from libdir in Makefile
+https://gitlab.com/cki-project/kernel-ark/-/commit/0e2d5d0f6d7398f95cc8c83988d27b2ac0614c67
+ 0e2d5d0f6d7398f95cc8c83988d27b2ac0614c67 cpupower: split unitdir from libdir in Makefile
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/e089fea76458d10f969a64061ae39c69e8b5380f
- e089fea76458d10f969a64061ae39c69e8b5380f powerpc: Fix struct termio related ioctl macros
+https://gitlab.com/cki-project/kernel-ark/-/commit/f99d2f6c30cdffe833b52501fd0185bb260741eb
+ f99d2f6c30cdffe833b52501fd0185bb260741eb powerpc: Fix struct termio related ioctl macros
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/a66ceecaa34b5524a42617d289f3d2fe7b7702d5
  a66ceecaa34b5524a42617d289f3d2fe7b7702d5 redhat: make ENABLE_WERROR also enable OBJTOOL_WERROR
