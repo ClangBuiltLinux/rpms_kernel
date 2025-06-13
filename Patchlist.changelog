@@ -1,3 +1,12 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/b78918ec98de6f613fa637f316a52e876c7a5129
+ b78918ec98de6f613fa637f316a52e876c7a5129 wifi: ath12k: support MLO as well if single_chip_mlo_support flag is set
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/2b999e5f25214ae45082748a74e2ff38fa9d7a36
+ 2b999e5f25214ae45082748a74e2ff38fa9d7a36 wifi: ath12k: use fw_features only when it is valid
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/12cc0da62614ef79a61cad2447f628e5afeeebc6
+ 12cc0da62614ef79a61cad2447f628e5afeeebc6 wifi: ath12k: introduce ath12k_fw_feature_supported()
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/fed56a38083dbd26bde4eba51ea6878797b01376
  fed56a38083dbd26bde4eba51ea6878797b01376 Revert "drm/amd/display: more liberal vmin/vmax update for freesync"
 

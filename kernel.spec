@@ -162,13 +162,13 @@ Summary: The Linux kernel
 %define specrpmversion 6.15.2
 %define specversion 6.15.2
 %define patchversion 6.15
-%define pkgrelease 200
+%define pkgrelease 201
 %define kversion 6
 %define tarfile_release 6.15.2
 # This is needed to do merge window version magic
 %define patchlevel 15
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 200%{?buildid}%{?dist}
+%define specrelease 201%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.15.2
 
@@ -4261,6 +4261,13 @@ fi\
 #
 #
 %changelog
+* Fri Jun 13 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.15.2-0]
+- wifi: ath12k: support MLO as well if single_chip_mlo_support flag is set (Baochen Qiang)
+- wifi: ath12k: use fw_features only when it is valid (Baochen Qiang)
+- wifi: ath12k: introduce ath12k_fw_feature_supported() (Baochen Qiang)
+- aarch64: Switch TI_SCI_CLK and TI_SCI_PM_DOMAINS symbols to built-in (Peter Robinson)
+- redhat/configs: fedora: set some qcom clk, icc, and pinctrl drivers to built in (Brian Masney)
+
 * Tue Jun 10 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.15.2-0]
 - Revert "drm/amd/display: more liberal vmin/vmax update for freesync" (Justin M. Forbes)
 - Linux v6.15.2

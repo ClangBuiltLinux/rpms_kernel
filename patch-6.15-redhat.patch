@@ -37,6 +37,12 @@
  drivers/media/i2c/ov02c10.c                        | 1013 ++++++++++++++++++++
  drivers/media/i2c/ov02e10.c                        |  969 +++++++++++++++++++
  drivers/media/i2c/ov08x40.c                        |    2 +-
+ drivers/net/wireless/ath/ath12k/core.c             |   23 +-
+ drivers/net/wireless/ath/ath12k/core.h             |    4 +
+ drivers/net/wireless/ath/ath12k/fw.c               |    9 +-
+ drivers/net/wireless/ath/ath12k/fw.h               |    3 +-
+ drivers/net/wireless/ath/ath12k/pci.c              |    4 +-
+ drivers/net/wireless/ath/ath12k/qmi.c              |    6 +-
  drivers/pci/quirks.c                               |   24 +
  drivers/platform/x86/intel/int3472/Makefile        |    3 +-
  .../platform/x86/intel/int3472/clk_and_regulator.c |  166 ++--
@@ -55,7 +61,7 @@
  security/integrity/platform_certs/load_uefi.c      |    6 +-
  security/lockdown/Kconfig                          |   13 +
  security/lockdown/lockdown.c                       |   11 +
- 57 files changed, 2730 insertions(+), 341 deletions(-)
+ 63 files changed, 2762 insertions(+), 358 deletions(-)
 
 diff --git a/MAINTAINERS b/MAINTAINERS
 index dd844ac8d910..dab2b4892122 100644
@@ -3402,6 +3408,174 @@ index cf0e41fc3071..54575eea3c49 100644
 +	usleep_range(5000, 5500);
  
  	return 0;
+ 
+diff --git a/drivers/net/wireless/ath/ath12k/core.c b/drivers/net/wireless/ath/ath12k/core.c
+index 0b2dec081c6e..a364bb5df1bf 100644
+--- a/drivers/net/wireless/ath/ath12k/core.c
++++ b/drivers/net/wireless/ath/ath12k/core.c
+@@ -1843,20 +1843,18 @@ void ath12k_core_hw_group_set_mlo_capable(struct ath12k_hw_group *ag)
+ 
+ 	lockdep_assert_held(&ag->mutex);
+ 
+-	/* If more than one devices are grouped, then inter MLO
+-	 * functionality can work still independent of whether internally
+-	 * each device supports single_chip_mlo or not.
+-	 * Only when there is one device, then disable for WCN chipsets
+-	 * till the required driver implementation is in place.
+-	 */
+ 	if (ag->num_devices == 1) {
+ 		ab = ag->ab[0];
+-
+-		/* WCN chipsets does not advertise in firmware features
+-		 * hence skip checking
+-		 */
+-		if (ab->hw_params->def_num_link)
++		/* QCN9274 firmware uses firmware IE for MLO advertisement */
++		if (ab->fw.fw_features_valid) {
++			ag->mlo_capable =
++				ath12k_fw_feature_supported(ab, ATH12K_FW_FEATURE_MLO);
+ 			return;
++		}
++
++		/* while WCN7850 firmware uses QMI single_chip_mlo_support bit */
++		ag->mlo_capable = ab->single_chip_mlo_support;
++		return;
+ 	}
+ 
+ 	ag->mlo_capable = true;
+@@ -1869,7 +1867,7 @@ void ath12k_core_hw_group_set_mlo_capable(struct ath12k_hw_group *ag)
+ 		/* even if 1 device's firmware feature indicates MLO
+ 		 * unsupported, make MLO unsupported for the whole group
+ 		 */
+-		if (!test_bit(ATH12K_FW_FEATURE_MLO, ab->fw.fw_features)) {
++		if (!ath12k_fw_feature_supported(ab, ATH12K_FW_FEATURE_MLO)) {
+ 			ag->mlo_capable = false;
+ 			return;
+ 		}
+@@ -1975,6 +1973,7 @@ struct ath12k_base *ath12k_core_alloc(struct device *dev, size_t priv_size,
+ 	ab->dev = dev;
+ 	ab->hif.bus = bus;
+ 	ab->qmi.num_radios = U8_MAX;
++	ab->single_chip_mlo_support = false;
+ 
+ 	/* Device index used to identify the devices in a group.
+ 	 *
+diff --git a/drivers/net/wireless/ath/ath12k/core.h b/drivers/net/wireless/ath/ath12k/core.h
+index 3fac4f00d383..785439a0b257 100644
+--- a/drivers/net/wireless/ath/ath12k/core.h
++++ b/drivers/net/wireless/ath/ath12k/core.h
+@@ -1051,6 +1051,7 @@ struct ath12k_base {
+ 		size_t m3_len;
+ 
+ 		DECLARE_BITMAP(fw_features, ATH12K_FW_FEATURE_COUNT);
++		bool fw_features_valid;
+ 	} fw;
+ 
+ 	const struct hal_rx_ops *hal_rx_ops;
+@@ -1088,6 +1089,9 @@ struct ath12k_base {
+ 	enum ath12k_firmware_mode fw_mode;
+ 	struct ath12k_ftm_event_obj ftm_event_obj;
+ 
++	/* Denote whether MLO is possible within the device */
++	bool single_chip_mlo_support;
++
+ 	/* must be last */
+ 	u8 drv_priv[] __aligned(sizeof(void *));
+ };
+diff --git a/drivers/net/wireless/ath/ath12k/fw.c b/drivers/net/wireless/ath/ath12k/fw.c
+index 5be4b2d4a19d..5ac497f80cad 100644
+--- a/drivers/net/wireless/ath/ath12k/fw.c
++++ b/drivers/net/wireless/ath/ath12k/fw.c
+@@ -1,6 +1,6 @@
+ // SPDX-License-Identifier: BSD-3-Clause-Clear
+ /*
+- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
++ * Copyright (c) 2022-2025 Qualcomm Innovation Center, Inc. All rights reserved.
+  */
+ 
+ #include "core.h"
+@@ -99,6 +99,8 @@ static int ath12k_fw_request_firmware_api_n(struct ath12k_base *ab,
+ 					__set_bit(i, ab->fw.fw_features);
+ 			}
+ 
++			ab->fw.fw_features_valid = true;
++
+ 			ath12k_dbg_dump(ab, ATH12K_DBG_BOOT, "features", "",
+ 					ab->fw.fw_features,
+ 					sizeof(ab->fw.fw_features));
+@@ -169,3 +171,8 @@ void ath12k_fw_unmap(struct ath12k_base *ab)
+ 	release_firmware(ab->fw.fw);
+ 	memset(&ab->fw, 0, sizeof(ab->fw));
+ }
++
++bool ath12k_fw_feature_supported(struct ath12k_base *ab, enum ath12k_fw_features feat)
++{
++	return ab->fw.fw_features_valid && test_bit(feat, ab->fw.fw_features);
++}
+diff --git a/drivers/net/wireless/ath/ath12k/fw.h b/drivers/net/wireless/ath/ath12k/fw.h
+index 273c003eff3b..7afaefed5086 100644
+--- a/drivers/net/wireless/ath/ath12k/fw.h
++++ b/drivers/net/wireless/ath/ath12k/fw.h
+@@ -1,6 +1,6 @@
+ /* SPDX-License-Identifier: BSD-3-Clause-Clear */
+ /*
+- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
++ * Copyright (c) 2022-2025 Qualcomm Innovation Center, Inc. All rights reserved.
+  */
+ 
+ #ifndef ATH12K_FW_H
+@@ -32,5 +32,6 @@ enum ath12k_fw_features {
+ 
+ void ath12k_fw_map(struct ath12k_base *ab);
+ void ath12k_fw_unmap(struct ath12k_base *ab);
++bool ath12k_fw_feature_supported(struct ath12k_base *ab, enum ath12k_fw_features feat);
+ 
+ #endif /* ATH12K_FW_H */
+diff --git a/drivers/net/wireless/ath/ath12k/pci.c b/drivers/net/wireless/ath/ath12k/pci.c
+index b474696ac6d8..247154f255d7 100644
+--- a/drivers/net/wireless/ath/ath12k/pci.c
++++ b/drivers/net/wireless/ath/ath12k/pci.c
+@@ -718,7 +718,7 @@ static void ath12k_pci_init_qmi_ce_config(struct ath12k_base *ab)
+ 	cfg->svc_to_ce_map_len = ab->hw_params->svc_to_ce_map_len;
+ 	ab->qmi.service_ins_id = ab->hw_params->qmi_service_ins_id;
+ 
+-	if (test_bit(ATH12K_FW_FEATURE_MULTI_QRTR_ID, ab->fw.fw_features)) {
++	if (ath12k_fw_feature_supported(ab, ATH12K_FW_FEATURE_MULTI_QRTR_ID)) {
+ 		ab_pci->qmi_instance =
+ 			u32_encode_bits(pci_domain_nr(bus), DOMAIN_NUMBER_MASK) |
+ 			u32_encode_bits(bus->number, BUS_NUMBER_MASK);
+@@ -1472,7 +1472,7 @@ int ath12k_pci_power_up(struct ath12k_base *ab)
+ 
+ 	ath12k_pci_msi_enable(ab_pci);
+ 
+-	if (test_bit(ATH12K_FW_FEATURE_MULTI_QRTR_ID, ab->fw.fw_features))
++	if (ath12k_fw_feature_supported(ab, ATH12K_FW_FEATURE_MULTI_QRTR_ID))
+ 		ath12k_pci_update_qrtr_node_id(ab);
+ 
+ 	ret = ath12k_mhi_start(ab_pci);
+diff --git a/drivers/net/wireless/ath/ath12k/qmi.c b/drivers/net/wireless/ath/ath12k/qmi.c
+index 348dbc81bad8..c5e31b954796 100644
+--- a/drivers/net/wireless/ath/ath12k/qmi.c
++++ b/drivers/net/wireless/ath/ath12k/qmi.c
+@@ -2264,6 +2264,9 @@ static void ath12k_qmi_phy_cap_send(struct ath12k_base *ab)
+ 		goto out;
+ 	}
+ 
++	if (resp.single_chip_mlo_support_valid && resp.single_chip_mlo_support)
++		ab->single_chip_mlo_support = true;
++
+ 	if (!resp.num_phy_valid) {
+ 		ret = -ENODATA;
+ 		goto out;
+@@ -2272,7 +2275,8 @@ static void ath12k_qmi_phy_cap_send(struct ath12k_base *ab)
+ 	ab->qmi.num_radios = resp.num_phy;
+ 
+ 	ath12k_dbg(ab, ATH12K_DBG_QMI,
+-		   "phy capability resp valid %d num_phy %d valid %d board_id %d\n",
++		   "phy capability resp valid %d single_chip_mlo_support %d valid %d num_phy %d valid %d board_id %d\n",
++		   resp.single_chip_mlo_support_valid, resp.single_chip_mlo_support,
+ 		   resp.num_phy_valid, resp.num_phy,
+ 		   resp.board_id_valid, resp.board_id);
  
 diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
 index 94daca15a096..8de27d109820 100644
