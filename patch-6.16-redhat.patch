@@ -2,7 +2,7 @@
  Documentation/admin-guide/rh-waived-features.rst   |  21 +
  Kconfig                                            |   2 +
  Kconfig.redhat                                     |  31 ++
- Makefile                                           |  48 +-
+ Makefile                                           |  38 +-
  arch/arm/Kconfig                                   |   4 +-
  arch/arm64/Kconfig                                 |   2 +-
  arch/s390/include/asm/ipl.h                        |   1 +
@@ -75,7 +75,7 @@
  security/integrity/platform_certs/load_uefi.c      |   6 +-
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |  11 +
- 77 files changed, 2730 insertions(+), 207 deletions(-)
+ 77 files changed, 2720 insertions(+), 207 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index f1f2c0874da9..bcbfd150b8a1 100644
@@ -190,29 +190,10 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index ba0827a1fccd..bfe526e88cea 100644
+index ba0827a1fccd..7a837ba416cf 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -22,6 +22,18 @@ $(if $(filter __%, $(MAKECMDGOALS)), \
- PHONY := __all
- __all:
- 
-+# Set RHEL variables
-+# Note that this ifdef'ery is required to handle when building with
-+# the O= mechanism (relocate the object file results) due to upstream
-+# commit 67d7c302 which broke our RHEL include file
-+ifneq ($(realpath source),)
-+include $(realpath source)/Makefile.rhelver
-+else
-+ifneq ($(realpath Makefile.rhelver),)
-+include Makefile.rhelver
-+endif
-+endif
-+
- # We are using a recursive build, so we need to do a little thinking
- # to get the ordering right.
- #
-@@ -355,6 +367,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
+@@ -355,6 +355,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
      endif
  endif
  
@@ -230,7 +211,16 @@ index ba0827a1fccd..bfe526e88cea 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1322,7 +1345,13 @@ define filechk_version.h
+@@ -1298,6 +1309,8 @@ uapi-asm-generic:
+ # Generate some files
+ # ---------------------------------------------------------------------------
+ 
++include $(srctree)/Makefile.rhelver
++
+ # KERNELRELEASE can change from a few different places, meaning version.h
+ # needs to be updated, so this check is forced on all builds
+ 
+@@ -1322,7 +1335,13 @@ define filechk_version.h
  	((c) > 255 ? 255 : (c)))';                                       \
  	echo \#define LINUX_VERSION_MAJOR $(VERSION);                    \
  	echo \#define LINUX_VERSION_PATCHLEVEL $(PATCHLEVEL);            \
@@ -245,7 +235,7 @@ index ba0827a1fccd..bfe526e88cea 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -1924,6 +1953,23 @@ endif
+@@ -1924,6 +1943,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -886,10 +876,10 @@ index beba745b6405..fd41f6d3abf9 100644
  		alg->verify = sig_default_verify;
  	if (!alg->set_priv_key)
 diff --git a/crypto/testmgr.c b/crypto/testmgr.c
-index 72005074a5c2..a8cfc8da32c7 100644
+index 32f753d6c430..7fa1ec63795c 100644
 --- a/crypto/testmgr.c
 +++ b/crypto/testmgr.c
-@@ -3978,7 +3978,7 @@ static int test_akcipher_one(struct crypto_akcipher *tfm,
+@@ -3987,7 +3987,7 @@ static int test_akcipher_one(struct crypto_akcipher *tfm,
  	 * Don't invoke decrypt test which requires a private key
  	 * for vectors with only a public key.
  	 */
@@ -898,7 +888,7 @@ index 72005074a5c2..a8cfc8da32c7 100644
  		err = 0;
  		goto free_all;
  	}
-@@ -4114,7 +4114,7 @@ static int test_sig_one(struct crypto_sig *tfm, const struct sig_testvec *vecs)
+@@ -4123,7 +4123,7 @@ static int test_sig_one(struct crypto_sig *tfm, const struct sig_testvec *vecs)
  	 * Don't invoke sign test (which requires a private key)
  	 * for vectors with only a public key.
  	 */
@@ -907,7 +897,7 @@ index 72005074a5c2..a8cfc8da32c7 100644
  		return 0;
  
  	sig_size = crypto_sig_maxsize(tfm);
-@@ -4954,14 +4954,12 @@ static const struct alg_test_desc alg_test_descs[] = {
+@@ -4963,14 +4963,12 @@ static const struct alg_test_desc alg_test_descs[] = {
  	}, {
  		.alg = "ecdh-nist-p256",
  		.test = alg_test_kpp,

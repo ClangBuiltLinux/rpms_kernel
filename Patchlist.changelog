@@ -1,3 +1,6 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/8fa39ad0e51091a6e5236725ec959abb7177772f
+ 8fa39ad0e51091a6e5236725ec959abb7177772f Simplify include Makefile.rhelver
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/a66ceecaa34b5524a42617d289f3d2fe7b7702d5
  a66ceecaa34b5524a42617d289f3d2fe7b7702d5 redhat: make ENABLE_WERROR also enable OBJTOOL_WERROR
 
