@@ -190,7 +190,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index f884dfe10246..600198d612c8 100644
+index 1c9ea229809f..4b83d7676140 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -355,6 +355,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -336,7 +336,7 @@ index f244c5560e7f..464f915011b8 100644
  	/* boot_command_line has been already set up in early.c */
  	*cmdline_p = boot_command_line;
 diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
-index 8feb8fd2957a..4519def69684 100644
+index 27125e009847..40e5c9b1e707 100644
 --- a/arch/x86/kernel/cpu/common.c
 +++ b/arch/x86/kernel/cpu/common.c
 @@ -1720,6 +1720,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
