@@ -190,7 +190,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 1c9ea229809f..4b83d7676140 100644
+index 7eea2a41c905..64635af4a041 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -355,6 +355,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -2166,7 +2166,7 @@ index d4b484c0fd9d..4e5bb4cce484 100644
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2271) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2261) },
 diff --git a/drivers/scsi/sd.c b/drivers/scsi/sd.c
-index 3f6e87705b62..ddfd99a32f14 100644
+index eeaa6af294b8..150578ffc41a 100644
 --- a/drivers/scsi/sd.c
 +++ b/drivers/scsi/sd.c
 @@ -121,6 +121,14 @@ static const char *sd_cache_types[] = {
@@ -2197,10 +2197,10 @@ index 3f6e87705b62..ddfd99a32f14 100644
  	if (err)
  		goto err_out_driver;
 diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
-index 770d1e91183c..46ccd737c4ee 100644
+index 3e1215f7a9a0..0920136b0c21 100644
 --- a/drivers/usb/core/hub.c
 +++ b/drivers/usb/core/hub.c
-@@ -5858,6 +5858,13 @@ static void hub_event(struct work_struct *work)
+@@ -5889,6 +5889,13 @@ static void hub_event(struct work_struct *work)
  			(u16) hub->change_bits[0],
  			(u16) hub->event_bits[0]);
  
