@@ -78,7 +78,7 @@
  77 files changed, 2720 insertions(+), 207 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index f1f2c0874da9..bcbfd150b8a1 100644
+index 07e22ba5bfe3..f9d712044457 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
 @@ -6301,6 +6301,17 @@
@@ -99,7 +99,7 @@ index f1f2c0874da9..bcbfd150b8a1 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -7634,6 +7645,15 @@
+@@ -7647,6 +7658,15 @@
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -336,10 +336,10 @@ index f244c5560e7f..464f915011b8 100644
  	/* boot_command_line has been already set up in early.c */
  	*cmdline_p = boot_command_line;
 diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
-index 27125e009847..40e5c9b1e707 100644
+index fb50c1dd53ef..c68958773d34 100644
 --- a/arch/x86/kernel/cpu/common.c
 +++ b/arch/x86/kernel/cpu/common.c
-@@ -1720,6 +1720,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
+@@ -1732,6 +1732,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
  		get_cpu_vendor(c);
  		intel_unlock_cpuid_leafs(c);
  		get_cpu_cap(c);
