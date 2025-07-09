@@ -3241,7 +3241,7 @@ index dd5304c6ac3c..b38a64ce7b19 100644
  	}
  
 diff --git a/kernel/module/main.c b/kernel/module/main.c
-index 413ac6ea3702..5bc4453090ce 100644
+index c2c08007029d..a9d9c03ffd6d 100644
 --- a/kernel/module/main.c
 +++ b/kernel/module/main.c
 @@ -65,6 +65,8 @@
@@ -3269,7 +3269,7 @@ index 413ac6ea3702..5bc4453090ce 100644
  	&modinfo_initstate,
  	&modinfo_coresize,
  #ifdef CONFIG_ARCH_WANTS_MODULES_DATA_IN_VMALLOC
-@@ -3299,6 +3303,11 @@ static int early_mod_check(struct load_info *info, int flags)
+@@ -3304,6 +3308,11 @@ static int early_mod_check(struct load_info *info, int flags)
  		return -EPERM;
  	}
  
@@ -3281,7 +3281,7 @@ index 413ac6ea3702..5bc4453090ce 100644
  	err = rewrite_section_headers(info, flags);
  	if (err)
  		return err;
-@@ -3870,6 +3879,10 @@ void print_modules(void)
+@@ -3875,6 +3884,10 @@ void print_modules(void)
  		pr_cont(" [last unloaded: %s%s]", last_unloaded_module.name,
  			last_unloaded_module.taints);
  	pr_cont("\n");
