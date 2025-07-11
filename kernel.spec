@@ -162,13 +162,13 @@ Summary: The Linux kernel
 %define specrpmversion 6.16.0
 %define specversion 6.16.0
 %define patchversion 6.16
-%define pkgrelease 0.rc5.250709g733923397fd9.47
+%define pkgrelease 0.rc5.250711gbc9ff192a6c9.49
 %define kversion 6
-%define tarfile_release 6.16-rc5-38-g733923397fd9
+%define tarfile_release 6.16-rc5-121-gbc9ff192a6c9
 # This is needed to do merge window version magic
 %define patchlevel 16
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 0.rc5.250709g733923397fd9.47%{?buildid}%{?dist}
+%define specrelease 0.rc5.250711gbc9ff192a6c9.49%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.16.0
 
@@ -1179,7 +1179,7 @@ device drivers shipped with it are documented in these files.
 You'll want to install this package if you need a reference to the
 options that can be passed to Linux kernel modules at load time.
 
-
+%if %{with_headers}
 %package headers
 Summary: Header files for the Linux kernel for use by glibc
 Obsoletes: glibc-kernheaders < 3.0-46
@@ -1194,7 +1194,9 @@ between the Linux kernel and userspace libraries and programs.  The
 header files define structures and constants that are needed for
 building most standard programs and are also needed for rebuilding the
 glibc package.
+%endif
 
+%if %{with_cross_headers}
 %package cross-headers
 Summary: Header files for the Linux kernel for use by cross-glibc
 %if 0%{?gemini}
@@ -1207,6 +1209,7 @@ between the Linux kernel and userspace libraries and programs.  The
 header files define structures and constants that are needed for
 building most standard programs and are also needed for rebuilding the
 cross-glibc package.
+%endif
 
 %package debuginfo-common-%{_target_cpu}
 Summary: Kernel source files used by %{name}-debuginfo packages
@@ -1403,6 +1406,7 @@ Summary: gcov graph and source files for coverage data collection.\
 %{?1:%{1}-}gcov includes the gcov graph and source files for gcov coverage collection.\
 %{nil}
 
+%if %{with_kernel_abi_stablelists}
 %package -n %{package_name}-abi-stablelists
 Summary: The Red Hat Enterprise Linux kernel ABI symbol stablelists
 AutoReqProv: no
@@ -1410,6 +1414,7 @@ AutoReqProv: no
 The kABI package contains information pertaining to the Red Hat Enterprise
 Linux kernel ABI, including lists of kernel symbols that are needed by
 external Linux kernel modules, and a yum plugin to aid enforcement.
+%endif
 
 %if %{with_kabidw_base}
 %package kernel-kabidw-base-internal
@@ -4347,8 +4352,19 @@ fi\
 #
 #
 %changelog
-* Wed Jul 09 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.16.0-0.rc5.733923397fd9.47]
+* Fri Jul 11 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.16.0-0.rc5.250711gbc9ff192a6c9.49]
+- drm/framebuffer: Acquire internal references on GEM handles (Thomas Zimmermann)
+
+* Fri Jul 11 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.16.0-0.rc5.bc9ff192a6c9.49]
 - redhat/configs: clang_lto: disable CONFIG_FORTIFY_KUNIT_TEST (Scott Weaver)
+
+* Fri Jul 11 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.16.0-0.rc5.bc9ff192a6c9.48]
+- kernel.spec: honor packaging flags (Scott Weaver)
+- Fix FIPS mode for Fedora (Justin M. Forbes)
+- Linux v6.16.0-0.rc5.bc9ff192a6c9
+
+* Thu Jul 10 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.16.0-0.rc5.8c2e52ebbe88.47]
+- Linux v6.16.0-0.rc5.8c2e52ebbe88
 
 * Wed Jul 09 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.16.0-0.rc5.733923397fd9.46]
 - Linux v6.16.0-0.rc5.733923397fd9
