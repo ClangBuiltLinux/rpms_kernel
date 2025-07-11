@@ -1,6 +1,3 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/4b7f8251dd4c5206c4af97072ceb007ae841fff4
- 4b7f8251dd4c5206c4af97072ceb007ae841fff4 drm/framebuffer: Acquire internal references on GEM handles
-
 https://gitlab.com/cki-project/kernel-ark/-/commit/8fa39ad0e51091a6e5236725ec959abb7177772f
  8fa39ad0e51091a6e5236725ec959abb7177772f Simplify include Makefile.rhelver
 
