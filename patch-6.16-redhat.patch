@@ -78,7 +78,7 @@
  77 files changed, 2720 insertions(+), 207 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index f1f2c0874da9..bcbfd150b8a1 100644
+index 07e22ba5bfe3..f9d712044457 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
 @@ -6301,6 +6301,17 @@
@@ -99,7 +99,7 @@ index f1f2c0874da9..bcbfd150b8a1 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -7634,6 +7645,15 @@
+@@ -7647,6 +7658,15 @@
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -190,7 +190,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 1c9ea229809f..4b83d7676140 100644
+index 7eea2a41c905..64635af4a041 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -355,6 +355,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -276,10 +276,10 @@ index 3072731fe09c..d34abca3e149 100644
  	  The VM uses one page of physical memory for each page table.
  	  For systems with a lot of processes, this can use a lot of
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 55fc331af337..f5d5e59058a2 100644
+index 393d71124f5d..ea142284db99 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -1427,7 +1427,7 @@ endchoice
+@@ -1428,7 +1428,7 @@ endchoice
  
  config ARM64_FORCE_52BIT
  	bool "Force 52-bit virtual addresses for userspace"
@@ -336,10 +336,10 @@ index f244c5560e7f..464f915011b8 100644
  	/* boot_command_line has been already set up in early.c */
  	*cmdline_p = boot_command_line;
 diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
-index 27125e009847..40e5c9b1e707 100644
+index fb50c1dd53ef..c68958773d34 100644
 --- a/arch/x86/kernel/cpu/common.c
 +++ b/arch/x86/kernel/cpu/common.c
-@@ -1720,6 +1720,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
+@@ -1732,6 +1732,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
  		get_cpu_vendor(c);
  		intel_unlock_cpuid_leafs(c);
  		get_cpu_cap(c);
@@ -2166,7 +2166,7 @@ index d4b484c0fd9d..4e5bb4cce484 100644
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2271) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2261) },
 diff --git a/drivers/scsi/sd.c b/drivers/scsi/sd.c
-index 3f6e87705b62..ddfd99a32f14 100644
+index eeaa6af294b8..150578ffc41a 100644
 --- a/drivers/scsi/sd.c
 +++ b/drivers/scsi/sd.c
 @@ -121,6 +121,14 @@ static const char *sd_cache_types[] = {
@@ -2197,10 +2197,10 @@ index 3f6e87705b62..ddfd99a32f14 100644
  	if (err)
  		goto err_out_driver;
 diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
-index 770d1e91183c..46ccd737c4ee 100644
+index 3e1215f7a9a0..0920136b0c21 100644
 --- a/drivers/usb/core/hub.c
 +++ b/drivers/usb/core/hub.c
-@@ -5858,6 +5858,13 @@ static void hub_event(struct work_struct *work)
+@@ -5889,6 +5889,13 @@ static void hub_event(struct work_struct *work)
  			(u16) hub->change_bits[0],
  			(u16) hub->event_bits[0]);
  
@@ -3241,7 +3241,7 @@ index dd5304c6ac3c..b38a64ce7b19 100644
  	}
  
 diff --git a/kernel/module/main.c b/kernel/module/main.c
-index 413ac6ea3702..5bc4453090ce 100644
+index c2c08007029d..a9d9c03ffd6d 100644
 --- a/kernel/module/main.c
 +++ b/kernel/module/main.c
 @@ -65,6 +65,8 @@
@@ -3269,7 +3269,7 @@ index 413ac6ea3702..5bc4453090ce 100644
  	&modinfo_initstate,
  	&modinfo_coresize,
  #ifdef CONFIG_ARCH_WANTS_MODULES_DATA_IN_VMALLOC
-@@ -3299,6 +3303,11 @@ static int early_mod_check(struct load_info *info, int flags)
+@@ -3304,6 +3308,11 @@ static int early_mod_check(struct load_info *info, int flags)
  		return -EPERM;
  	}
  
@@ -3281,7 +3281,7 @@ index 413ac6ea3702..5bc4453090ce 100644
  	err = rewrite_section_headers(info, flags);
  	if (err)
  		return err;
-@@ -3870,6 +3879,10 @@ void print_modules(void)
+@@ -3875,6 +3884,10 @@ void print_modules(void)
  		pr_cont(" [last unloaded: %s%s]", last_unloaded_module.name,
  			last_unloaded_module.taints);
  	pr_cont("\n");
