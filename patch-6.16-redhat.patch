@@ -190,7 +190,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index c09766beb7ef..53ff996eef00 100644
+index be33e8c868ae..d5139906e788 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -355,6 +355,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -2197,10 +2197,10 @@ index eeaa6af294b8..150578ffc41a 100644
  	if (err)
  		goto err_out_driver;
 diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
-index 3e1215f7a9a0..0920136b0c21 100644
+index 256fe8c86828..2e4a09948df8 100644
 --- a/drivers/usb/core/hub.c
 +++ b/drivers/usb/core/hub.c
-@@ -5889,6 +5889,13 @@ static void hub_event(struct work_struct *work)
+@@ -5893,6 +5893,13 @@ static void hub_event(struct work_struct *work)
  			(u16) hub->change_bits[0],
  			(u16) hub->event_bits[0]);
  
