@@ -1,3 +1,6 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/8213e993e6b114c71d7607458ea0a967b59ec690
+ 8213e993e6b114c71d7607458ea0a967b59ec690 selftests/bpf: Remove ksyms_weak_lskel test
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/8fa39ad0e51091a6e5236725ec959abb7177772f
  8fa39ad0e51091a6e5236725ec959abb7177772f Simplify include Makefile.rhelver
 

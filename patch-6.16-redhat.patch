@@ -75,7 +75,9 @@
  security/integrity/platform_certs/load_uefi.c      |   6 +-
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |  11 +
- 77 files changed, 2720 insertions(+), 207 deletions(-)
+ tools/testing/selftests/bpf/Makefile               |   2 +-
+ tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
+ 79 files changed, 2721 insertions(+), 239 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index 07e22ba5bfe3..f9d712044457 100644
@@ -190,7 +192,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index be33e8c868ae..d5139906e788 100644
+index 478f2004602d..f8f9a2c89957 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -355,6 +355,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -260,7 +262,7 @@ index be33e8c868ae..d5139906e788 100644
  	@:
  
 diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index 3072731fe09c..d34abca3e149 100644
+index 962451e54fdd..8602c0ac5f43 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
 @@ -1232,9 +1232,9 @@ config HIGHMEM
@@ -4452,3 +4454,72 @@ index cf83afa1d879..aba751e7abff 100644
  static struct security_hook_list lockdown_hooks[] __ro_after_init = {
  	LSM_HOOK_INIT(locked_down, lockdown_is_locked_down),
  };
+diff --git a/tools/testing/selftests/bpf/Makefile b/tools/testing/selftests/bpf/Makefile
+index 910d8d6402ef..5267287ba225 100644
+--- a/tools/testing/selftests/bpf/Makefile
++++ b/tools/testing/selftests/bpf/Makefile
+@@ -501,7 +501,7 @@ LSKELS := fentry_test.c fexit_test.c fexit_sleep.c atomics.c 		\
+ 	test_ringbuf_n.c test_ringbuf_map_key.c test_ringbuf_write.c
+ 
+ # Generate both light skeleton and libbpf skeleton for these
+-LSKELS_EXTRA := test_ksyms_module.c test_ksyms_weak.c kfunc_call_test.c \
++LSKELS_EXTRA := test_ksyms_module.c kfunc_call_test.c \
+ 	kfunc_call_test_subprog.c
+ SKEL_BLACKLIST += $$(LSKELS)
+ 
+diff --git a/tools/testing/selftests/bpf/prog_tests/ksyms_btf.c b/tools/testing/selftests/bpf/prog_tests/ksyms_btf.c
+index 1d7a2f1e0731..b22f3a9cb8b8 100644
+--- a/tools/testing/selftests/bpf/prog_tests/ksyms_btf.c
++++ b/tools/testing/selftests/bpf/prog_tests/ksyms_btf.c
+@@ -7,7 +7,6 @@
+ #include "test_ksyms_btf.skel.h"
+ #include "test_ksyms_btf_null_check.skel.h"
+ #include "test_ksyms_weak.skel.h"
+-#include "test_ksyms_weak.lskel.h"
+ #include "test_ksyms_btf_write_check.skel.h"
+ 
+ static int duration;
+@@ -111,33 +110,6 @@ static void test_weak_syms(void)
+ 	test_ksyms_weak__destroy(skel);
+ }
+ 
+-static void test_weak_syms_lskel(void)
+-{
+-	struct test_ksyms_weak_lskel *skel;
+-	struct test_ksyms_weak_lskel__data *data;
+-	int err;
+-
+-	skel = test_ksyms_weak_lskel__open_and_load();
+-	if (!ASSERT_OK_PTR(skel, "test_ksyms_weak_lskel__open_and_load"))
+-		return;
+-
+-	err = test_ksyms_weak_lskel__attach(skel);
+-	if (!ASSERT_OK(err, "test_ksyms_weak_lskel__attach"))
+-		goto cleanup;
+-
+-	/* trigger tracepoint */
+-	usleep(1);
+-
+-	data = skel->data;
+-	ASSERT_EQ(data->out__existing_typed, 0, "existing typed ksym");
+-	ASSERT_NEQ(data->out__existing_typeless, -1, "existing typeless ksym");
+-	ASSERT_EQ(data->out__non_existent_typeless, 0, "nonexistent typeless ksym");
+-	ASSERT_EQ(data->out__non_existent_typed, 0, "nonexistent typed ksym");
+-
+-cleanup:
+-	test_ksyms_weak_lskel__destroy(skel);
+-}
+-
+ static void test_write_check(bool test_handler1)
+ {
+ 	struct test_ksyms_btf_write_check *skel;
+@@ -180,9 +152,6 @@ void test_ksyms_btf(void)
+ 	if (test__start_subtest("weak_ksyms"))
+ 		test_weak_syms();
+ 
+-	if (test__start_subtest("weak_ksyms_lskel"))
+-		test_weak_syms_lskel();
+-
+ 	if (test__start_subtest("write_check1"))
+ 		test_write_check(true);
+ 
