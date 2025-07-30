@@ -4368,6 +4368,9 @@ fi\
 #
 #
 %changelog
+* Wed Jul 30 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.17.0-0.rc0.250730g4b290aae788e.3]
+- Turn off TEST_MISC_MINOR as its deps are no longer met (Justin M. Forbes)
+
 * Wed Jul 30 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.17.0-0.rc0.4b290aae788e.3]
 - redhat/configs: clang_lto: disable CONFIG_FORTIFY_KUNIT_TEST (Scott Weaver)
 
