@@ -80,10 +80,10 @@
  79 files changed, 2721 insertions(+), 239 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index c3491143c706..51a416ab65f8 100644
+index 0d2ea9a60145..38e4ba5c0933 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -6313,6 +6313,17 @@
+@@ -6324,6 +6324,17 @@
  		2	The "airplane mode" button toggles between everything
  			blocked and everything unblocked.
  
@@ -101,7 +101,7 @@ index c3491143c706..51a416ab65f8 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -7667,6 +7678,15 @@
+@@ -7683,6 +7694,15 @@
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -278,10 +278,10 @@ index a6e80653abd1..123445597ef9 100644
  	  The VM uses one page of physical memory for each page table.
  	  For systems with a lot of processes, this can use a lot of
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 7c456aa838b9..af7cba45c790 100644
+index 8b6cbdd1441b..f999c457d2f7 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -1426,7 +1426,7 @@ endchoice
+@@ -1429,7 +1429,7 @@ endchoice
  
  config ARM64_FORCE_52BIT
  	bool "Force 52-bit virtual addresses for userspace"
@@ -303,7 +303,7 @@ index b0d00032479d..afb9544fb007 100644
  /*
   * DIAG 308 support
 diff --git a/arch/s390/kernel/ipl.c b/arch/s390/kernel/ipl.c
-index ff15f91affde..baded34170cb 100644
+index 961a3d60a4dd..927ba8a7b3ac 100644
 --- a/arch/s390/kernel/ipl.c
 +++ b/arch/s390/kernel/ipl.c
 @@ -2497,3 +2497,8 @@ int ipl_report_free(struct ipl_report *report)
@@ -338,10 +338,10 @@ index f244c5560e7f..464f915011b8 100644
  	/* boot_command_line has been already set up in early.c */
  	*cmdline_p = boot_command_line;
 diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
-index fb50c1dd53ef..c68958773d34 100644
+index 34a054181c4d..d9aa9b84ff52 100644
 --- a/arch/x86/kernel/cpu/common.c
 +++ b/arch/x86/kernel/cpu/common.c
-@@ -1732,6 +1732,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
+@@ -1733,6 +1733,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
  		get_cpu_vendor(c);
  		intel_unlock_cpuid_leafs(c);
  		get_cpu_cap(c);
@@ -1981,7 +1981,7 @@ index b853585cb1f8..5ecda807b87c 100644
  		return rc;
  	if (rc < 0) {
 diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
-index d7f4ee634263..733eae7c997a 100644
+index cf483d82572c..6165b351731f 100644
 --- a/drivers/pci/quirks.c
 +++ b/drivers/pci/quirks.c
 @@ -4448,6 +4448,30 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_BROADCOM, 0x9000,
@@ -2399,10 +2399,10 @@ index fd11fffdd3c3..af87dc6e56dd 100644
  LSM_HOOK(int, 0, perf_event_open, int type)
  LSM_HOOK(int, 0, perf_event_alloc, struct perf_event *event)
 diff --git a/include/linux/module.h b/include/linux/module.h
-index 5faa1fb1f4b4..036ee89e331b 100644
+index a845cc81cc87..b95f8074f7a7 100644
 --- a/include/linux/module.h
 +++ b/include/linux/module.h
-@@ -430,6 +430,7 @@ struct module {
+@@ -429,6 +429,7 @@ struct module {
  	struct module_attribute *modinfo_attrs;
  	const char *version;
  	const char *srcversion;
@@ -2410,7 +2410,7 @@ index 5faa1fb1f4b4..036ee89e331b 100644
  	struct kobject *holders_dir;
  
  	/* Exported symbols */
-@@ -1019,4 +1020,8 @@ static inline unsigned long find_kallsyms_symbol_value(struct module *mod,
+@@ -1018,4 +1019,8 @@ static inline unsigned long find_kallsyms_symbol_value(struct module *mod,
  
  #endif  /* CONFIG_MODULES && CONFIG_KALLSYMS */
  
@@ -2420,10 +2420,10 @@ index 5faa1fb1f4b4..036ee89e331b 100644
 +
  #endif /* _LINUX_MODULE_H */
 diff --git a/include/linux/panic.h b/include/linux/panic.h
-index 4adc65766935..83e39e6ecf92 100644
+index 8f2b5d92ac05..e5e782bb72b2 100644
 --- a/include/linux/panic.h
 +++ b/include/linux/panic.h
-@@ -73,7 +73,22 @@ static inline void set_arch_panic_timeout(int timeout, int arch_default_timeout)
+@@ -71,7 +71,22 @@ static inline void set_arch_panic_timeout(int timeout, int arch_default_timeout)
  #define TAINT_RANDSTRUCT		17
  #define TAINT_TEST			18
  #define TAINT_FWCTL			19
@@ -3141,10 +3141,10 @@ index 521bcb5b9717..537e928730e9 100644
 +
  #endif /* ! __LINUX_SECURITY_H */
 diff --git a/init/main.c b/init/main.c
-index 225a58279acd..147796614002 100644
+index f9f401b6fdfb..b8cdb6856e4f 100644
 --- a/init/main.c
 +++ b/init/main.c
-@@ -1163,8 +1163,10 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
+@@ -1158,8 +1158,10 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
  	char fn_name[KSYM_SYMBOL_LEN];
  	unsigned long addr;
  
@@ -3155,7 +3155,7 @@ index 225a58279acd..147796614002 100644
  
  	addr = (unsigned long) dereference_function_descriptor(fn);
  	sprint_symbol_no_offset(fn_name, addr);
-@@ -1175,6 +1177,9 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
+@@ -1170,6 +1172,9 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
  	 */
  	strreplace(fn_name, ' ', '\0');
  
@@ -3243,7 +3243,7 @@ index dd5304c6ac3c..b38a64ce7b19 100644
  	}
  
 diff --git a/kernel/module/main.c b/kernel/module/main.c
-index 43df45c39f59..e515620468b0 100644
+index cdcc50a5353d..eaf25f9f3fd0 100644
 --- a/kernel/module/main.c
 +++ b/kernel/module/main.c
 @@ -65,6 +65,8 @@
@@ -3255,7 +3255,7 @@ index 43df45c39f59..e515620468b0 100644
  /*
   * Mutex protects:
   * 1) List of modules (also safely readable within RCU read section),
-@@ -578,6 +580,7 @@ static const struct module_attribute modinfo_##field = {              \
+@@ -606,6 +608,7 @@ static const struct module_attribute modinfo_##field = {              \
  
  MODINFO_ATTR(version);
  MODINFO_ATTR(srcversion);
@@ -3263,7 +3263,7 @@ index 43df45c39f59..e515620468b0 100644
  
  static struct {
  	char name[MODULE_NAME_LEN + 1];
-@@ -1028,6 +1031,7 @@ const struct module_attribute *const modinfo_attrs[] = {
+@@ -1056,6 +1059,7 @@ const struct module_attribute *const modinfo_attrs[] = {
  	&module_uevent,
  	&modinfo_version,
  	&modinfo_srcversion,
@@ -3271,7 +3271,7 @@ index 43df45c39f59..e515620468b0 100644
  	&modinfo_initstate,
  	&modinfo_coresize,
  #ifdef CONFIG_ARCH_WANTS_MODULES_DATA_IN_VMALLOC
-@@ -3304,6 +3308,11 @@ static int early_mod_check(struct load_info *info, int flags)
+@@ -3332,6 +3336,11 @@ static int early_mod_check(struct load_info *info, int flags)
  		return -EPERM;
  	}
  
@@ -3283,7 +3283,7 @@ index 43df45c39f59..e515620468b0 100644
  	err = rewrite_section_headers(info, flags);
  	if (err)
  		return err;
-@@ -3877,6 +3886,10 @@ void print_modules(void)
+@@ -3905,6 +3914,10 @@ void print_modules(void)
  		pr_cont(" [last unloaded: %s%s]", last_unloaded_module.name,
  			last_unloaded_module.taints);
  	pr_cont("\n");
@@ -3318,10 +3318,10 @@ index a2ff4242e623..f0d2be1ee4f1 100644
  
  int module_sig_check(struct load_info *info, int flags)
 diff --git a/kernel/panic.c b/kernel/panic.c
-index b0b9a8bf4560..d5d09647f871 100644
+index 64e58835086d..d46ed85bd2e0 100644
 --- a/kernel/panic.c
 +++ b/kernel/panic.c
-@@ -540,6 +540,18 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
+@@ -600,6 +600,18 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
  	TAINT_FLAG(RANDSTRUCT,			'T', ' ', true),
  	TAINT_FLAG(TEST,			'N', ' ', true),
  	TAINT_FLAG(FWCTL,			'J', ' ', true),

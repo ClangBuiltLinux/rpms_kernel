@@ -165,13 +165,13 @@ Summary: The Linux kernel
 %define specrpmversion 6.17.0
 %define specversion 6.17.0
 %define patchversion 6.17
-%define pkgrelease 0.rc0.250729g86aa72182095.2
+%define pkgrelease 0.rc0.250730g4b290aae788e.3
 %define kversion 6
-%define tarfile_release 6.16-2094-g86aa72182095
+%define tarfile_release 6.16-4405-g4b290aae788e
 # This is needed to do merge window version magic
 %define patchlevel 17
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 0.rc0.250729g86aa72182095.3%{?buildid}%{?dist}
+%define specrelease 0.rc0.250730g4b290aae788e.3%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.17.0
 
@@ -769,7 +769,7 @@ BuildRequires: sparse
 %if %{with_perf}
 BuildRequires: zlib-devel binutils-devel newt-devel perl(ExtUtils::Embed) bison flex xz-devel
 BuildRequires: audit-libs-devel python3-setuptools
-BuildRequires: java-25-devel
+BuildRequires: java-devel
 BuildRequires: libbpf-devel >= 0.6.0-1
 BuildRequires: libbabeltrace-devel
 BuildRequires: libtraceevent-devel
@@ -4368,11 +4368,13 @@ fi\
 #
 #
 %changelog
-* Tue Jul 29 2025 jiri vanek <jvanek@redhat.com> - 6.17.0-0.rc0.250729g86aa72182095.3
-- Rebuilt for java-25-openjdk as preffered jdk
-
-* Tue Jul 29 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.17.0-0.rc0.86aa72182095.2]
+* Wed Jul 30 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.17.0-0.rc0.4b290aae788e.3]
 - redhat/configs: clang_lto: disable CONFIG_FORTIFY_KUNIT_TEST (Scott Weaver)
+
+* Wed Jul 30 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.17.0-0.rc0.4b290aae788e.2]
+- redhat/configs: Disable CRYPTO_KRB5 for zfcpdump (Vladis Dronov)
+- Trim changelog after rebase (Justin M. Forbes)
+- Linux v6.17.0-0.rc0.4b290aae788e
 
 * Tue Jul 29 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.17.0-0.rc0.86aa72182095.1]
 - Flip TEGRA124_CPUFREQ to m for config mismatch (Justin M. Forbes)
@@ -7362,3 +7364,10 @@ fi\
 
 * Mon Jul 28 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.16.0-64]
 - Linux v6.16.0
+
+###
+# The following Emacs magic makes C-c C-e use UTC dates.
+# Local Variables:
+# rpm-change-log-uses-utc: t
+# End:
+###
