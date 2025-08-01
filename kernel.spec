@@ -159,18 +159,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 6.15.8
-%define specversion 6.15.8
+%define specrpmversion 6.15.9
+%define specversion 6.15.9
 %define patchversion 6.15
 %define pkgrelease 100
 %define kversion 6
-%define tarfile_release 6.15.8
+%define tarfile_release 6.15.9
 # This is needed to do merge window version magic
 %define patchlevel 15
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 100%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 6.15.8
+%define kabiversion 6.15.9
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4261,6 +4261,9 @@ fi\
 #
 #
 %changelog
+* Fri Aug 01 2025 Augusto Caringi <acaringi@redhat.com> [6.15.9-0]
+- Linux v6.15.9
+
 * Thu Jul 24 2025 Augusto Caringi <acaringi@redhat.com> [6.15.8-0]
 - Linux v6.15.8
 
