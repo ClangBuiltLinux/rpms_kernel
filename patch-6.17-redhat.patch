@@ -80,10 +80,10 @@
  79 files changed, 2721 insertions(+), 239 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 0d2ea9a60145..38e4ba5c0933 100644
+index 8981ae1c9355..b3c1641a5901 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -6324,6 +6324,17 @@
+@@ -6338,6 +6338,17 @@
  		2	The "airplane mode" button toggles between everything
  			blocked and everything unblocked.
  
@@ -101,7 +101,7 @@ index 0d2ea9a60145..38e4ba5c0933 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -7683,6 +7694,15 @@
+@@ -7699,6 +7710,15 @@
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -262,7 +262,7 @@ index 076de54b3311..48c8a5312920 100644
  	@:
  
 diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index a6e80653abd1..123445597ef9 100644
+index b1f3df39ed40..5e1c1169e27e 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
 @@ -1230,9 +1230,9 @@ config HIGHMEM
@@ -278,7 +278,7 @@ index a6e80653abd1..123445597ef9 100644
  	  The VM uses one page of physical memory for each page table.
  	  For systems with a lot of processes, this can use a lot of
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 8b6cbdd1441b..f999c457d2f7 100644
+index e9bbfacc35a6..59f8e55f3ec0 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
 @@ -1429,7 +1429,7 @@ endchoice
@@ -350,7 +350,7 @@ index 34a054181c4d..d9aa9b84ff52 100644
  		get_cpu_address_sizes(c);
  		cpu_parse_early_param();
 diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index fb27be697128..fa66228cad14 100644
+index 0792f31961ac..dc381372f798 100644
 --- a/arch/x86/kernel/setup.c
 +++ b/arch/x86/kernel/setup.c
 @@ -21,6 +21,7 @@
@@ -372,7 +372,7 @@ index fb27be697128..fa66228cad14 100644
  
  /*
   * max_low_pfn_mapped: highest directly mapped pfn < 4 GB
-@@ -816,6 +821,79 @@ static void __init early_reserve_memory(void)
+@@ -820,6 +825,79 @@ static void __init early_reserve_memory(void)
  	trim_snb_memory();
  }
  
@@ -452,7 +452,7 @@ index fb27be697128..fa66228cad14 100644
  /*
   * Dump out kernel offset information on panic.
   */
-@@ -986,6 +1064,13 @@ void __init setup_arch(char **cmdline_p)
+@@ -990,6 +1068,13 @@ void __init setup_arch(char **cmdline_p)
  	if (efi_enabled(EFI_BOOT))
  		efi_init();
  
@@ -466,7 +466,7 @@ index fb27be697128..fa66228cad14 100644
  	reserve_ibft_region();
  	x86_init.resources.dmi_setup();
  
-@@ -1149,19 +1234,7 @@ void __init setup_arch(char **cmdline_p)
+@@ -1153,19 +1238,7 @@ void __init setup_arch(char **cmdline_p)
  	/* Allocate bigger log buffer */
  	setup_log_buf(1);
  
@@ -487,7 +487,7 @@ index fb27be697128..fa66228cad14 100644
  
  	reserve_initrd();
  
-@@ -1273,6 +1346,8 @@ void __init setup_arch(char **cmdline_p)
+@@ -1277,6 +1350,8 @@ void __init setup_arch(char **cmdline_p)
  		efi_apply_memmap_quirks();
  #endif
  
@@ -878,7 +878,7 @@ index beba745b6405..fd41f6d3abf9 100644
  		alg->verify = sig_default_verify;
  	if (!alg->set_priv_key)
 diff --git a/crypto/testmgr.c b/crypto/testmgr.c
-index d636e04b55d5..0e0e407d2106 100644
+index ee33ba21ae2b..ace3c3309bea 100644
 --- a/crypto/testmgr.c
 +++ b/crypto/testmgr.c
 @@ -3934,7 +3934,7 @@ static int test_akcipher_one(struct crypto_akcipher *tfm,
@@ -899,7 +899,7 @@ index d636e04b55d5..0e0e407d2106 100644
  		return 0;
  
  	sig_size = crypto_sig_maxsize(tfm);
-@@ -4928,14 +4928,12 @@ static const struct alg_test_desc alg_test_descs[] = {
+@@ -4929,14 +4929,12 @@ static const struct alg_test_desc alg_test_descs[] = {
  	}, {
  		.alg = "ecdh-nist-p256",
  		.test = alg_test_kpp,
@@ -1844,7 +1844,7 @@ index 2168b6cd7167..5d7cda175a0c 100644
  	if (data->f01_container->dev.driver) {
  		/* Driver already bound, so enable ATTN now. */
 diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
-index a4b606c591da..772946ea4bb2 100644
+index 060ebe330ee1..2dfed8d43967 100644
 --- a/drivers/iommu/iommu.c
 +++ b/drivers/iommu/iommu.c
 @@ -8,6 +8,7 @@
@@ -1855,7 +1855,7 @@ index a4b606c591da..772946ea4bb2 100644
  #include <linux/kernel.h>
  #include <linux/bits.h>
  #include <linux/bug.h>
-@@ -2948,6 +2949,27 @@ int iommu_fwspec_add_ids(struct device *dev, const u32 *ids, int num_ids)
+@@ -2941,6 +2942,27 @@ int iommu_fwspec_add_ids(struct device *dev, const u32 *ids, int num_ids)
  }
  EXPORT_SYMBOL_GPL(iommu_fwspec_add_ids);
  
@@ -2168,7 +2168,7 @@ index d4b484c0fd9d..4e5bb4cce484 100644
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2271) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2261) },
 diff --git a/drivers/scsi/sd.c b/drivers/scsi/sd.c
-index 7ce49d8f21c9..6ab6487216c7 100644
+index 4a68b2ab2804..068eafc3ab01 100644
 --- a/drivers/scsi/sd.c
 +++ b/drivers/scsi/sd.c
 @@ -121,6 +121,14 @@ static const char *sd_cache_types[] = {
@@ -2186,7 +2186,7 @@ index 7ce49d8f21c9..6ab6487216c7 100644
  static void sd_set_flush_flag(struct scsi_disk *sdkp,
  		struct queue_limits *lim)
  {
-@@ -4376,6 +4384,11 @@ static int __init init_sd(void)
+@@ -4371,6 +4379,11 @@ static int __init init_sd(void)
  		goto err_out_class;
  	}
  
@@ -2280,10 +2280,10 @@ index c7d39da7e733..bc9d490ca73e 100644
  	err = ext4_register_sysfs(sb);
  	if (err)
 diff --git a/include/linux/crypto.h b/include/linux/crypto.h
-index b50f1954d1bb..604cea40eb9c 100644
+index a2137e19be7d..df268ca70170 100644
 --- a/include/linux/crypto.h
 +++ b/include/linux/crypto.h
-@@ -148,6 +148,9 @@
+@@ -151,6 +151,9 @@
  #define CRYPTO_TFM_REQ_MAY_SLEEP	0x00000200
  #define CRYPTO_TFM_REQ_MAY_BACKLOG	0x00000400
  #define CRYPTO_TFM_REQ_ON_STACK		0x00000800
@@ -2362,7 +2362,7 @@ index e3776d9cad07..620a193416ba 100644
  enum efi_secureboot_mode efi_get_secureboot_mode(efi_get_variable_t *get_var)
  {
 diff --git a/include/linux/kernel.h b/include/linux/kernel.h
-index 1cce1f6410a9..89257a9a4de9 100644
+index 989315dabb86..db38a0b1f379 100644
 --- a/include/linux/kernel.h
 +++ b/include/linux/kernel.h
 @@ -390,4 +390,20 @@ static inline void ftrace_dump(enum ftrace_dump_mode oops_dump_mode) { }
@@ -2399,10 +2399,10 @@ index fd11fffdd3c3..af87dc6e56dd 100644
  LSM_HOOK(int, 0, perf_event_open, int type)
  LSM_HOOK(int, 0, perf_event_alloc, struct perf_event *event)
 diff --git a/include/linux/module.h b/include/linux/module.h
-index a845cc81cc87..b95f8074f7a7 100644
+index a7cac01d95e7..0fcd4edbac6d 100644
 --- a/include/linux/module.h
 +++ b/include/linux/module.h
-@@ -429,6 +429,7 @@ struct module {
+@@ -430,6 +430,7 @@ struct module {
  	struct module_attribute *modinfo_attrs;
  	const char *version;
  	const char *srcversion;
@@ -2410,7 +2410,7 @@ index a845cc81cc87..b95f8074f7a7 100644
  	struct kobject *holders_dir;
  
  	/* Exported symbols */
-@@ -1018,4 +1019,8 @@ static inline unsigned long find_kallsyms_symbol_value(struct module *mod,
+@@ -1019,6 +1020,10 @@ static inline unsigned long find_kallsyms_symbol_value(struct module *mod,
  
  #endif  /* CONFIG_MODULES && CONFIG_KALLSYMS */
  
@@ -2418,12 +2418,14 @@ index a845cc81cc87..b95f8074f7a7 100644
 +void module_rh_check_status(const char * module_name);
 +#endif
 +
- #endif /* _LINUX_MODULE_H */
+ /* Define __free(module_put) macro for struct module *. */
+ DEFINE_FREE(module_put, struct module *, if (_T) module_put(_T))
+ 
 diff --git a/include/linux/panic.h b/include/linux/panic.h
-index 8f2b5d92ac05..e5e782bb72b2 100644
+index 7be742628c25..83e62c186409 100644
 --- a/include/linux/panic.h
 +++ b/include/linux/panic.h
-@@ -71,7 +71,22 @@ static inline void set_arch_panic_timeout(int timeout, int arch_default_timeout)
+@@ -74,7 +74,22 @@ static inline void set_arch_panic_timeout(int timeout, int arch_default_timeout)
  #define TAINT_RANDSTRUCT		17
  #define TAINT_TEST			18
  #define TAINT_FWCTL			19
@@ -3166,7 +3168,7 @@ index f9f401b6fdfb..b8cdb6856e4f 100644
  		if (!strcmp(fn_name, entry->buf)) {
  			pr_debug("initcall %s blacklisted\n", fn_name);
 diff --git a/kernel/Makefile b/kernel/Makefile
-index 0ee9afd8b7cf..1bf1961213bf 100644
+index a89602a2a0ab..faa1e7585293 100644
 --- a/kernel/Makefile
 +++ b/kernel/Makefile
 @@ -12,6 +12,7 @@ obj-y     = fork.o exec_domain.o panic.o \
@@ -3174,14 +3176,14 @@ index 0ee9afd8b7cf..1bf1961213bf 100644
  	    async.o range.o smpboot.o ucount.o regset.o ksyms_common.o
  
 +obj-$(CONFIG_RHEL_DIFFERENCES) += rh_messages.o rh_flags.o rh_waived.o
- obj-$(CONFIG_USERMODE_DRIVER) += usermode_driver.o
  obj-$(CONFIG_MULTIUSER) += groups.o
  obj-$(CONFIG_VHOST_TASK) += vhost_task.o
+ 
 diff --git a/kernel/bpf/core.c b/kernel/bpf/core.c
-index dae281a1286d..8fc0616470ee 100644
+index 09dde5b00d0c..0dde52b26b0b 100644
 --- a/kernel/bpf/core.c
 +++ b/kernel/bpf/core.c
-@@ -571,7 +571,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
+@@ -575,7 +575,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
  /* All BPF JIT sysctl knobs here. */
  int bpf_jit_enable   __read_mostly = IS_BUILTIN(CONFIG_BPF_JIT_DEFAULT_ON);
  int bpf_jit_kallsyms __read_mostly = IS_BUILTIN(CONFIG_BPF_JIT_DEFAULT_ON);
@@ -3195,7 +3197,7 @@ index dae281a1286d..8fc0616470ee 100644
  long bpf_jit_limit_max __read_mostly;
  
 diff --git a/kernel/bpf/syscall.c b/kernel/bpf/syscall.c
-index dd5304c6ac3c..b38a64ce7b19 100644
+index e63039817af3..e4a257016f69 100644
 --- a/kernel/bpf/syscall.c
 +++ b/kernel/bpf/syscall.c
 @@ -26,6 +26,7 @@
@@ -3230,7 +3232,7 @@ index dd5304c6ac3c..b38a64ce7b19 100644
  int sysctl_unprivileged_bpf_disabled __read_mostly =
  	IS_BUILTIN(CONFIG_BPF_UNPRIV_DEFAULT_OFF) ? 2 : 0;
  
-@@ -6161,6 +6179,11 @@ static int bpf_unpriv_handler(const struct ctl_table *table, int write,
+@@ -6350,6 +6368,11 @@ static int bpf_unpriv_handler(const struct ctl_table *table, int write,
  	if (write && !ret) {
  		if (locked_state && unpriv_enable != 1)
  			return -EPERM;
@@ -3243,7 +3245,7 @@ index dd5304c6ac3c..b38a64ce7b19 100644
  	}
  
 diff --git a/kernel/module/main.c b/kernel/module/main.c
-index cdcc50a5353d..eaf25f9f3fd0 100644
+index 81f9df8859dc..98d2b1c62895 100644
 --- a/kernel/module/main.c
 +++ b/kernel/module/main.c
 @@ -65,6 +65,8 @@
@@ -3318,10 +3320,10 @@ index a2ff4242e623..f0d2be1ee4f1 100644
  
  int module_sig_check(struct load_info *info, int flags)
 diff --git a/kernel/panic.c b/kernel/panic.c
-index 64e58835086d..d46ed85bd2e0 100644
+index 43817111c979..faf1834ecb4f 100644
 --- a/kernel/panic.c
 +++ b/kernel/panic.c
-@@ -600,6 +600,18 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
+@@ -608,6 +608,18 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
  	TAINT_FLAG(RANDSTRUCT,			'T', ' ', true),
  	TAINT_FLAG(TEST,			'N', ' ', true),
  	TAINT_FLAG(FWCTL,			'J', ' ', true),
@@ -4455,10 +4457,10 @@ index cf83afa1d879..aba751e7abff 100644
  	LSM_HOOK_INIT(locked_down, lockdown_is_locked_down),
  };
 diff --git a/tools/testing/selftests/bpf/Makefile b/tools/testing/selftests/bpf/Makefile
-index 910d8d6402ef..5267287ba225 100644
+index 4863106034df..c787506dcfb3 100644
 --- a/tools/testing/selftests/bpf/Makefile
 +++ b/tools/testing/selftests/bpf/Makefile
-@@ -501,7 +501,7 @@ LSKELS := fentry_test.c fexit_test.c fexit_sleep.c atomics.c 		\
+@@ -502,7 +502,7 @@ LSKELS := fentry_test.c fexit_test.c fexit_sleep.c atomics.c 		\
  	test_ringbuf_n.c test_ringbuf_map_key.c test_ringbuf_write.c
  
  # Generate both light skeleton and libbpf skeleton for these
