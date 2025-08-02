@@ -162,13 +162,13 @@ Summary: The Linux kernel
 %define specrpmversion 6.15.9
 %define specversion 6.15.9
 %define patchversion 6.15
-%define pkgrelease 100
+%define pkgrelease 101
 %define kversion 6
 %define tarfile_release 6.15.9
 # This is needed to do merge window version magic
 %define patchlevel 15
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 100%{?buildid}%{?dist}
+%define specrelease 101%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.15.9
 
@@ -4261,6 +4261,9 @@ fi\
 #
 #
 %changelog
+* Sat Aug 02 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.15.9-101]
+- btrfs: fix log tree replay failure due to file with 0 links and extents (Filipe Manana)
+
 * Fri Aug 01 2025 Augusto Caringi <acaringi@redhat.com> [6.15.9-0]
 - Linux v6.15.9
 
