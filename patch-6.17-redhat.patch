@@ -192,7 +192,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 98ab3435fc8d..ec25cae5fea1 100644
+index 37e37565515e..850db6544710 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -355,6 +355,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -213,7 +213,7 @@ index 98ab3435fc8d..ec25cae5fea1 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1305,6 +1316,8 @@ uapi-asm-generic:
+@@ -1306,6 +1317,8 @@ uapi-asm-generic:
  # Generate some files
  # ---------------------------------------------------------------------------
  
@@ -222,7 +222,7 @@ index 98ab3435fc8d..ec25cae5fea1 100644
  # KERNELRELEASE can change from a few different places, meaning version.h
  # needs to be updated, so this check is forced on all builds
  
-@@ -1329,7 +1342,13 @@ define filechk_version.h
+@@ -1330,7 +1343,13 @@ define filechk_version.h
  	((c) > 255 ? 255 : (c)))';                                       \
  	echo \#define LINUX_VERSION_MAJOR $(VERSION);                    \
  	echo \#define LINUX_VERSION_PATCHLEVEL $(PATCHLEVEL);            \
@@ -237,7 +237,7 @@ index 98ab3435fc8d..ec25cae5fea1 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -1931,6 +1950,23 @@ endif
+@@ -1932,6 +1951,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -997,10 +997,10 @@ index fb1fe9f3b1a3..5a3312fc0ea0 100644
  	acpi_dev_get_resources(device, &resource_list,
  			       acpi_check_serial_bus_slave,
 diff --git a/drivers/ata/libahci.c b/drivers/ata/libahci.c
-index b335fb7e5cb4..1f9e113bf2cc 100644
+index c79abdfcd7a9..e23bfb7f94c7 100644
 --- a/drivers/ata/libahci.c
 +++ b/drivers/ata/libahci.c
-@@ -730,6 +730,24 @@ int ahci_stop_engine(struct ata_port *ap)
+@@ -731,6 +731,24 @@ int ahci_stop_engine(struct ata_port *ap)
  	tmp &= ~PORT_CMD_START;
  	writel(tmp, port_mmio + PORT_CMD);
  
@@ -2399,10 +2399,10 @@ index fd11fffdd3c3..af87dc6e56dd 100644
  LSM_HOOK(int, 0, perf_event_open, int type)
  LSM_HOOK(int, 0, perf_event_alloc, struct perf_event *event)
 diff --git a/include/linux/module.h b/include/linux/module.h
-index 313ecb8e5181..c8f1eb9d5b85 100644
+index 3319a5269d28..73329fb4711b 100644
 --- a/include/linux/module.h
 +++ b/include/linux/module.h
-@@ -413,6 +413,7 @@ struct module {
+@@ -410,6 +410,7 @@ struct module {
  	struct module_attribute *modinfo_attrs;
  	const char *version;
  	const char *srcversion;
@@ -2410,7 +2410,7 @@ index 313ecb8e5181..c8f1eb9d5b85 100644
  	struct kobject *holders_dir;
  
  	/* Exported symbols */
-@@ -1012,6 +1013,10 @@ static inline unsigned long find_kallsyms_symbol_value(struct module *mod,
+@@ -1009,6 +1010,10 @@ static inline unsigned long find_kallsyms_symbol_value(struct module *mod,
  
  #endif  /* CONFIG_MODULES && CONFIG_KALLSYMS */
  
@@ -3168,7 +3168,7 @@ index 0ee0ee7b7c2c..3f21a57c5c0e 100644
  		if (!strcmp(fn_name, entry->buf)) {
  			pr_debug("initcall %s blacklisted\n", fn_name);
 diff --git a/kernel/Makefile b/kernel/Makefile
-index 366987d9914a..07a52ac662b8 100644
+index c60623448235..b0e7910e2e68 100644
 --- a/kernel/Makefile
 +++ b/kernel/Makefile
 @@ -12,6 +12,7 @@ obj-y     = fork.o exec_domain.o panic.o \
@@ -3245,7 +3245,7 @@ index 0fbfa8532c39..c0e8792756fa 100644
  	}
  
 diff --git a/kernel/module/main.c b/kernel/module/main.c
-index 7f8bb51aedd4..f099a7a926ea 100644
+index c66b26184936..0eb08102db5b 100644
 --- a/kernel/module/main.c
 +++ b/kernel/module/main.c
 @@ -65,6 +65,8 @@
@@ -3273,7 +3273,7 @@ index 7f8bb51aedd4..f099a7a926ea 100644
  	&modinfo_initstate,
  	&modinfo_coresize,
  #ifdef CONFIG_ARCH_WANTS_MODULES_DATA_IN_VMALLOC
-@@ -3334,6 +3338,11 @@ static int early_mod_check(struct load_info *info, int flags)
+@@ -3325,6 +3329,11 @@ static int early_mod_check(struct load_info *info, int flags)
  		return -EPERM;
  	}
  
@@ -3285,7 +3285,7 @@ index 7f8bb51aedd4..f099a7a926ea 100644
  	err = rewrite_section_headers(info, flags);
  	if (err)
  		return err;
-@@ -3907,6 +3916,10 @@ void print_modules(void)
+@@ -3898,6 +3907,10 @@ void print_modules(void)
  		pr_cont(" [last unloaded: %s%s]", last_unloaded_module.name,
  			last_unloaded_module.taints);
  	pr_cont("\n");
