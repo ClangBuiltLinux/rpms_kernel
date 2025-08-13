@@ -1,5 +1,5 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/837dd6f2a3ba8451d89066f4453949807cf13301
- 837dd6f2a3ba8451d89066f4453949807cf13301 arm64: dts: qcom: x1e80100-lenovo-yoga-slim7x: add Bluetooth support
+https://gitlab.com/cki-project/kernel-ark/-/commit/d4a65eeb4c77966b2b1950aea112d07935d86faf
+ d4a65eeb4c77966b2b1950aea112d07935d86faf arm64: dts: qcom: x1e80100-lenovo-yoga-slim7x: add Bluetooth support
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/0299a0729cfba8d982f9484fefe4aeac1abc7aa3
  0299a0729cfba8d982f9484fefe4aeac1abc7aa3 selftests/bpf: Remove ksyms_weak_lskel test
