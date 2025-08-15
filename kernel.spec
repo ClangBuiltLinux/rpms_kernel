@@ -162,18 +162,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 6.16.0
-%define specversion 6.16.0
+%define specrpmversion 6.16.1
+%define specversion 6.16.1
 %define patchversion 6.16
 %define pkgrelease 200
 %define kversion 6
-%define tarfile_release 6.16
+%define tarfile_release 6.16.1
 # This is needed to do merge window version magic
 %define patchlevel 16
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 200%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 6.16.0
+%define kabiversion 6.16.1
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -3125,7 +3125,7 @@ fi
 %global perf_build_extra_opts CORESIGHT=1
 %endif
 %global perf_make \
-  %{__make} %{?make_opts} EXTRA_CFLAGS="${RPM_OPT_FLAGS}" EXTRA_CXXFLAGS="${RPM_OPT_FLAGS}" LDFLAGS="%{__global_ldflags} -Wl,-E" %{?cross_opts} -C tools/perf V=1 NO_PERF_READ_VDSO32=1 NO_PERF_READ_VDSOX32=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 LIBBPF_DYNAMIC=1 LIBTRACEEVENT_DYNAMIC=1 %{?perf_build_extra_opts} prefix=%{_prefix} PYTHON=%{__python3}
+  %{__make} %{?make_opts} EXTRA_CFLAGS="${RPM_OPT_FLAGS}" EXTRA_CXXFLAGS="${RPM_OPT_FLAGS}" LDFLAGS="%{__global_ldflags} -Wl,-E" %{?cross_opts} -C tools/perf V=1 NO_PERF_READ_VDSO32=1 NO_PERF_READ_VDSOX32=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 LIBTRACEEVENT_DYNAMIC=1 %{?perf_build_extra_opts} prefix=%{_prefix} PYTHON=%{__python3}
 %if %{with_perf}
 %{log_msg "Build perf"}
 # perf
@@ -4360,7 +4360,13 @@ fi\
 #
 #
 %changelog
-* Fri Aug 08 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.16.0-200]
+* Fri Aug 15 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.16.1-0]
+- Enable CONFIG_VHOST_ENABLE_FORK_OWNER_CONTROL (Justin M. Forbes)
+- Disable NOVA_CORE (Justin M. Forbes)
+- Turn off libbpf dynamic for perf (Justin M. Forbes)
+- Revert some RHEL only crypto changes (Justin M. Forbes)
+- HID: intel-thc-hid: intel-thc: Fix incorrect pointer arithmetic in I2C regs save (Aaron Ma)
+- HID: intel-thc-hid: intel-quicki2c: Fix ACPI dsd ICRS/ISUB length (Aaron Ma)
 - Initial setup for stable Fedora releases (Justin M. Forbes)
 - btrfs: fix log tree replay failure due to file with 0 links and extents (Filipe Manana)
 - Reset RHEL_RELEASE for the 6.17 cycle (Justin M. Forbes)
@@ -4368,6 +4374,7 @@ fi\
 - redhat/kernel.spec: fix uname_suffix call sites (Jan Stancek) [RHEL-104231]
 - redhat/configs: Add evaluate_configs.py and documentation (Prarit Bhargava)
 - redhat: Remove old evaluate_configs (Prarit Bhargava)
+- Linux v6.16.1
 
 * Mon Jul 28 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.16.0-64]
 - Linux v6.16.0
