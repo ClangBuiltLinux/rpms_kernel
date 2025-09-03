@@ -1,8 +1,8 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/7dd892092a085d040d2f2106dbbbac797f3b39c1
- 7dd892092a085d040d2f2106dbbbac797f3b39c1 soc: qcom: mdt_loader: Deal with zero e_shentsize
+https://gitlab.com/cki-project/kernel-ark/-/commit/8ac5ffb7092344fadb47e7f6ec099d2943313b39
+ 8ac5ffb7092344fadb47e7f6ec099d2943313b39 soc: qcom: mdt_loader: Deal with zero e_shentsize
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/c19e7b67c48d99f47c167faaa9c4b221233128b3
- c19e7b67c48d99f47c167faaa9c4b221233128b3 arm64: dts: qcom: x1e80100-lenovo-yoga-slim7x: add Bluetooth support
+https://gitlab.com/cki-project/kernel-ark/-/commit/76f2da1cb0238be707c210978b7cdc96fa774736
+ 76f2da1cb0238be707c210978b7cdc96fa774736 arm64: dts: qcom: x1e80100-lenovo-yoga-slim7x: add Bluetooth support
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/b9bf2d814fccb1676c09d2d85d965321be542783
  b9bf2d814fccb1676c09d2d85d965321be542783 arm64: add early lockdown for secure boot
