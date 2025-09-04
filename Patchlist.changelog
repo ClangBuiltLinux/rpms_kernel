@@ -1,8 +1,14 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/8ac5ffb7092344fadb47e7f6ec099d2943313b39
- 8ac5ffb7092344fadb47e7f6ec099d2943313b39 soc: qcom: mdt_loader: Deal with zero e_shentsize
+https://gitlab.com/cki-project/kernel-ark/-/commit/daebd06b0c0abaac5b4da23b1283de4ab2db9044
+ daebd06b0c0abaac5b4da23b1283de4ab2db9044 arm64: dts: qcom: x1e80100-lenovo-yoga-slim7x: add Bluetooth support
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/76f2da1cb0238be707c210978b7cdc96fa774736
- 76f2da1cb0238be707c210978b7cdc96fa774736 arm64: dts: qcom: x1e80100-lenovo-yoga-slim7x: add Bluetooth support
+https://gitlab.com/cki-project/kernel-ark/-/commit/572b35f16e61868ff02271ab7257d574e0a161d5
+ 572b35f16e61868ff02271ab7257d574e0a161d5 Revert "aacraid: Remove depreciated device and vendor PCI id's"
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/8e90d62945639098706be3a9370c039ccde881f8
+ 8e90d62945639098706be3a9370c039ccde881f8 rh_messages.h: add missing aacraid device
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/5e72d807811c158064e510741a763e4ad610a38e
+ 5e72d807811c158064e510741a763e4ad610a38e rh_messages.h: update unmaintained drivers
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/b9bf2d814fccb1676c09d2d85d965321be542783
  b9bf2d814fccb1676c09d2d85d965321be542783 arm64: add early lockdown for secure boot
