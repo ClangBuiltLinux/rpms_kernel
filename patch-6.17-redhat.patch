@@ -26,6 +26,7 @@
  drivers/char/ipmi/ipmi_dmi.c                       |  15 +
  drivers/char/ipmi/ipmi_msghandler.c                |  16 +-
  drivers/char/random.c                              | 126 ++++-
+ drivers/cpufreq/amd-pstate.c                       |   9 +-
  drivers/firmware/efi/Makefile                      |   1 +
  drivers/firmware/efi/efi.c                         | 124 +++--
  drivers/firmware/efi/libstub/fdt.c                 |   5 +
@@ -80,7 +81,7 @@
  security/lockdown/lockdown.c                       |  11 +
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
- 82 files changed, 2911 insertions(+), 243 deletions(-)
+ 83 files changed, 2916 insertions(+), 247 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index 747a55abf4946..75f583e28d1d5 100644
@@ -1527,6 +1528,29 @@ index b8b24b6ed3fe4..a38d31cb520d9 100644
  
  /********************************************************************
   *
+diff --git a/drivers/cpufreq/amd-pstate.c b/drivers/cpufreq/amd-pstate.c
+index bbc27ef9edf7b..8eca4707226b8 100644
+--- a/drivers/cpufreq/amd-pstate.c
++++ b/drivers/cpufreq/amd-pstate.c
+@@ -1626,13 +1626,14 @@ static int amd_pstate_suspend(struct cpufreq_policy *policy)
+ 	 * min_perf value across kexec reboots. If this CPU is just resumed back without kexec,
+ 	 * the limits, epp and desired perf will get reset to the cached values in cpudata struct
+ 	 */
+-	ret = amd_pstate_update_perf(policy, perf.bios_min_perf, 0U, 0U, 0U, false);
++	ret = amd_pstate_update_perf(policy, perf.bios_min_perf,
++				     FIELD_GET(AMD_CPPC_DES_PERF_MASK, cpudata->cppc_req_cached),
++				     FIELD_GET(AMD_CPPC_MAX_PERF_MASK, cpudata->cppc_req_cached),
++				     FIELD_GET(AMD_CPPC_EPP_PERF_MASK, cpudata->cppc_req_cached),
++				     false);
+ 	if (ret)
+ 		return ret;
+ 
+-	/* invalidate to ensure it's rewritten during resume */
+-	cpudata->cppc_req_cached = 0;
+-
+ 	/* set this flag to avoid setting core offline*/
+ 	cpudata->suspended = true;
+ 
 diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
 index 8efbcf699e4ff..96d5a1ca981df 100644
 --- a/drivers/firmware/efi/Makefile
