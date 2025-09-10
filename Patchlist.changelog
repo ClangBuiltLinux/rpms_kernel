@@ -1,8 +1,8 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/1240e0f0077be1baa35521a5c02bd8654058651a
- 1240e0f0077be1baa35521a5c02bd8654058651a cpufreq/amd-pstate: Fix a regression leading to EPP 0 after resume
+https://gitlab.com/cki-project/kernel-ark/-/commit/2ffea241391ee135e59e70a5c336d720bb2c3fca
+ 2ffea241391ee135e59e70a5c336d720bb2c3fca cpufreq/amd-pstate: Fix a regression leading to EPP 0 after resume
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/026b37fa46f4b6eb9b7390b074be5e557bb50417
- 026b37fa46f4b6eb9b7390b074be5e557bb50417 arm64: dts: qcom: x1e80100-lenovo-yoga-slim7x: add Bluetooth support
+https://gitlab.com/cki-project/kernel-ark/-/commit/68f3ad2cae375ebb2f50ff12dc1cc028b235a8b5
+ 68f3ad2cae375ebb2f50ff12dc1cc028b235a8b5 arm64: dts: qcom: x1e80100-lenovo-yoga-slim7x: add Bluetooth support
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/572b35f16e61868ff02271ab7257d574e0a161d5
  572b35f16e61868ff02271ab7257d574e0a161d5 Revert "aacraid: Remove depreciated device and vendor PCI id's"
