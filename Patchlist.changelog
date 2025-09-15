@@ -1,5 +1,5 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/7dc1682602abd4becb9fb9f6ab54a83f5ddce1be
- 7dc1682602abd4becb9fb9f6ab54a83f5ddce1be arm64: dts: qcom: x1e80100-lenovo-yoga-slim7x: add Bluetooth support
+https://gitlab.com/cki-project/kernel-ark/-/commit/8508768a5139fa95faef345dd596f2ae115df9ff
+ 8508768a5139fa95faef345dd596f2ae115df9ff arm64: dts: qcom: x1e80100-lenovo-yoga-slim7x: add Bluetooth support
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/572b35f16e61868ff02271ab7257d574e0a161d5
  572b35f16e61868ff02271ab7257d574e0a161d5 Revert "aacraid: Remove depreciated device and vendor PCI id's"

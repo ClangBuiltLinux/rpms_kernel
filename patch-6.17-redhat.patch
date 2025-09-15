@@ -195,7 +195,7 @@ index 0000000000000..85771d74c34f9
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index cf37b94078211..b537fe955bfcc 100644
+index 9771619ac596c..421972bfc2494 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -355,6 +355,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -2493,7 +2493,7 @@ index 02475d415d885..f96c698324ae4 100644
  
  error_proc:
 diff --git a/fs/erofs/super.c b/fs/erofs/super.c
-index 1b529ace4db0e..30c2e01864636 100644
+index db13b40a78e07..a0bd78303e1e1 100644
 --- a/fs/erofs/super.c
 +++ b/fs/erofs/super.c
 @@ -623,6 +623,9 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
