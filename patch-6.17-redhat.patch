@@ -38,6 +38,7 @@
  drivers/message/fusion/mptsas.c                    |   5 +
  drivers/message/fusion/mptspi.c                    |   5 +
  drivers/net/wireguard/main.c                       |   6 +
+ .../net/wireless/intel/iwlwifi/pcie/gen1_2/tx.c    |   2 +-
  drivers/pci/pci-driver.c                           |   9 +
  drivers/pci/quirks.c                               |  24 +
  drivers/scsi/hpsa.c                                |   4 +
@@ -80,7 +81,7 @@
  security/lockdown/lockdown.c                       |  11 +
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
- 82 files changed, 2911 insertions(+), 243 deletions(-)
+ 83 files changed, 2912 insertions(+), 244 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index 5a7a83c411e9c..bf40371c718ff 100644
@@ -2234,6 +2235,19 @@ index a00671b58701f..eeef2766b8b3d 100644
  	ret = wg_allowedips_slab_init();
  	if (ret < 0)
  		goto err_allowedips;
+diff --git a/drivers/net/wireless/intel/iwlwifi/pcie/gen1_2/tx.c b/drivers/net/wireless/intel/iwlwifi/pcie/gen1_2/tx.c
+index d912e709a92cb..bb03dad4a3006 100644
+--- a/drivers/net/wireless/intel/iwlwifi/pcie/gen1_2/tx.c
++++ b/drivers/net/wireless/intel/iwlwifi/pcie/gen1_2/tx.c
+@@ -2092,7 +2092,7 @@ static void iwl_txq_gen1_update_byte_cnt_tbl(struct iwl_trans *trans,
+ 		break;
+ 	}
+ 
+-	if (trans->mac_cfg->device_family >= IWL_DEVICE_FAMILY_9000 &&
++	if (trans->mac_cfg->device_family >= IWL_DEVICE_FAMILY_7000 &&
+ 	    trans->mac_cfg->device_family < IWL_DEVICE_FAMILY_AX210)
+ 		len = DIV_ROUND_UP(len, 4);
+ 
 diff --git a/drivers/pci/pci-driver.c b/drivers/pci/pci-driver.c
 index 63665240ae87f..f3c6a2c74ad03 100644
 --- a/drivers/pci/pci-driver.c
