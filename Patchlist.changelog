@@ -1,8 +1,8 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/eb0f4bc63e3ba2e2b8f65caaf6f1371bb0271e04
- eb0f4bc63e3ba2e2b8f65caaf6f1371bb0271e04 wifi: iwlwifi: pcie: fix byte count table for some devices
+https://gitlab.com/cki-project/kernel-ark/-/commit/ff19a99ceddd898c5ccfac882a2902a91cd0190a
+ ff19a99ceddd898c5ccfac882a2902a91cd0190a wifi: iwlwifi: pcie: fix byte count table for some devices
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/6cf6b9bdaa5fe5cdd3c133fe5c149c6ebb362591
- 6cf6b9bdaa5fe5cdd3c133fe5c149c6ebb362591 arm64: dts: qcom: x1e80100-lenovo-yoga-slim7x: add Bluetooth support
+https://gitlab.com/cki-project/kernel-ark/-/commit/d3a0098766f75cb3c40739caac4fb51c4a8c5334
+ d3a0098766f75cb3c40739caac4fb51c4a8c5334 arm64: dts: qcom: x1e80100-lenovo-yoga-slim7x: add Bluetooth support
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/572b35f16e61868ff02271ab7257d574e0a161d5
  572b35f16e61868ff02271ab7257d574e0a161d5 Revert "aacraid: Remove depreciated device and vendor PCI id's"
