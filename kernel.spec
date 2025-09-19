@@ -176,13 +176,13 @@ Summary: The Linux kernel
 %define specrpmversion 6.17.0
 %define specversion 6.17.0
 %define patchversion 6.17
-%define pkgrelease 0.rc6.250918g8b789f2b7602a.52
+%define pkgrelease 0.rc6.250919g097a6c336d008.53
 %define kversion 6
-%define tarfile_release 6.17-rc6-43-g8b789f2b7602a
+%define tarfile_release 6.17-rc6-143-g097a6c336d008
 # This is needed to do merge window version magic
 %define patchlevel 17
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 0.rc6.250918g8b789f2b7602a.52%{?buildid}%{?dist}
+%define specrelease 0.rc6.250919g097a6c336d008.53%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.17.0
 
@@ -736,7 +736,7 @@ Name: %{package_name}
 License: ((GPL-2.0-only WITH Linux-syscall-note) OR BSD-2-Clause) AND ((GPL-2.0-only WITH Linux-syscall-note) OR BSD-3-Clause) AND ((GPL-2.0-only WITH Linux-syscall-note) OR CDDL-1.0) AND ((GPL-2.0-only WITH Linux-syscall-note) OR Linux-OpenIB) AND ((GPL-2.0-only WITH Linux-syscall-note) OR MIT) AND ((GPL-2.0-or-later WITH Linux-syscall-note) OR BSD-3-Clause) AND ((GPL-2.0-or-later WITH Linux-syscall-note) OR MIT) AND 0BSD AND BSD-2-Clause AND (BSD-2-Clause OR Apache-2.0) AND BSD-3-Clause AND BSD-3-Clause-Clear AND CC0-1.0 AND GFDL-1.1-no-invariants-or-later AND GPL-1.0-or-later AND (GPL-1.0-or-later OR BSD-3-Clause) AND (GPL-1.0-or-later WITH Linux-syscall-note) AND GPL-2.0-only AND (GPL-2.0-only OR Apache-2.0) AND (GPL-2.0-only OR BSD-2-Clause) AND (GPL-2.0-only OR BSD-3-Clause) AND (GPL-2.0-only OR CDDL-1.0) AND (GPL-2.0-only OR GFDL-1.1-no-invariants-or-later) AND (GPL-2.0-only OR GFDL-1.2-no-invariants-only) AND (GPL-2.0-only OR GFDL-1.2-no-invariants-or-later) AND (GPL-2.0-only WITH Linux-syscall-note) AND GPL-2.0-or-later AND (GPL-2.0-or-later OR BSD-2-Clause) AND (GPL-2.0-or-later OR BSD-3-Clause) AND (GPL-2.0-or-later OR CC-BY-4.0) AND (GPL-2.0-or-later WITH GCC-exception-2.0) AND (GPL-2.0-or-later WITH Linux-syscall-note) AND ISC AND LGPL-2.0-or-later AND (LGPL-2.0-or-later OR BSD-2-Clause) AND (LGPL-2.0-or-later WITH Linux-syscall-note) AND LGPL-2.1-only AND (LGPL-2.1-only OR BSD-2-Clause) AND (LGPL-2.1-only WITH Linux-syscall-note) AND LGPL-2.1-or-later AND (LGPL-2.1-or-later WITH Linux-syscall-note) AND (Linux-OpenIB OR GPL-2.0-only) AND (Linux-OpenIB OR GPL-2.0-only OR BSD-2-Clause) AND Linux-man-pages-copyleft AND MIT AND (MIT OR Apache-2.0) AND (MIT OR GPL-2.0-only) AND (MIT OR GPL-2.0-or-later) AND (MIT OR LGPL-2.1-only) AND (MPL-1.1 OR GPL-2.0-only) AND (X11 OR GPL-2.0-only) AND (X11 OR GPL-2.0-or-later) AND Zlib AND (copyleft-next-0.3.1 OR GPL-2.0-or-later)
 URL: https://www.kernel.org/
 Version: %{specrpmversion}
-Release: %{pkg_release}.1
+Release: %{pkg_release}
 # DO NOT CHANGE THE 'ExclusiveArch' LINE TO TEMPORARILY EXCLUDE AN ARCHITECTURE BUILD.
 # SET %%nobuildarches (ABOVE) INSTEAD
 %if 0%{?fedora}
@@ -4395,16 +4395,17 @@ fi\
 #
 #
 %changelog
-* Fri Sep 19 2025 Python Maint <python-maint@redhat.com> - 6.17.0-0.rc6.250918g8b789f2b7602a.52.1
-- Rebuilt for Python 3.14.0rc3 bytecode
+* Fri Sep 19 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.17.0-0.rc6.250919g097a6c336d008.53]
+- Linux v6.17.0-0.rc6.250919g097a6c336d008
 
-* Thu Sep 18 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.17.0-0.rc6.250918g8b789f2b7602a.52]
-- Linux v6.17.0-0.rc6.250918g8b789f2b7602a
-
-* Thu Sep 18 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.17.0-0.rc6.8b789f2b7602.52]
-- wifi: iwlwifi: pcie: fix byte count table for some devices (Johannes Berg)
+* Fri Sep 19 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.17.0-0.rc6.097a6c336d00.53]
 - arm64: dts: qcom: x1e80100-lenovo-yoga-slim7x: add Bluetooth support (Jens Glathe)
 - redhat/configs: clang_lto: disable CONFIG_FORTIFY_KUNIT_TEST (Scott Weaver)
+
+* Fri Sep 19 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.17.0-0.rc6.097a6c336d00.52]
+- os-build: Remove dead CONFIG_SCHED_DEBUG files (Phil Auld)
+- redhat/configs: automotive: Disable COMPAT_32BIT_TIME SGETMASK_SYSCALL and IA32_EMULATION configs (Dorinda Bassey)
+- Linux v6.17.0-0.rc6.097a6c336d00
 
 * Thu Sep 18 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.17.0-0.rc6.8b789f2b7602.51]
 - Revert "redhat/configs: automotive: Disable NetLabel subsystem support" (Dorinda Bassey)
