@@ -1,5 +1,29 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/93f899294ed143c40c9266135d6277f61db95588
- 93f899294ed143c40c9266135d6277f61db95588 arm64: dts: qcom: x1e80100-lenovo-yoga-slim7x: add Bluetooth support
+https://gitlab.com/cki-project/kernel-ark/-/commit/c15fea2bf80a8241b321218f22357b03f0b12f41
+ c15fea2bf80a8241b321218f22357b03f0b12f41 powerpc/tools: drop `-o pipefail` in gcc check scripts
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/15ed578c7d1e7296ecf9f1983ee041a08445eedc
+ 15ed578c7d1e7296ecf9f1983ee041a08445eedc KVM/TDX: Explicitly do WBINVD when no more TDX SEAMCALLs
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/bfa68866267bf3ece438ce46ede36d6e47856db6
+ bfa68866267bf3ece438ce46ede36d6e47856db6 x86/virt/tdx: Update the kexec section in the TDX documentation
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/d121ab678f21408ef74a1630dd559b4339a59a8e
+ d121ab678f21408ef74a1630dd559b4339a59a8e x86/virt/tdx: Remove the !KEXEC_CORE dependency
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/456812ed2010866f89eb7f6676dbaaec30c9c3bc
+ 456812ed2010866f89eb7f6676dbaaec30c9c3bc x86/kexec: Disable kexec/kdump on platforms with TDX partial write erratum
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/a17deef3a2b5f8697fbc42a057999ef9f044becd
+ a17deef3a2b5f8697fbc42a057999ef9f044becd x86/virt/tdx: Mark memory cache state incoherent when making SEAMCALL
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/db27aa373645544c32e94663db4346c6faf67243
+ db27aa373645544c32e94663db4346c6faf67243 x86/sme: Use percpu boolean to control WBINVD during kexec
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/0b102e693d33444943a2a41492b0d447426d9d1f
+ 0b102e693d33444943a2a41492b0d447426d9d1f x86/kexec: Consolidate relocate_kernel() function parameters
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/bf476740a82231d9b80dc2056cd78c124e2e815e
+ bf476740a82231d9b80dc2056cd78c124e2e815e arm64: dts: qcom: x1e80100-lenovo-yoga-slim7x: add Bluetooth support
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/572b35f16e61868ff02271ab7257d574e0a161d5
  572b35f16e61868ff02271ab7257d574e0a161d5 Revert "aacraid: Remove depreciated device and vendor PCI id's"
