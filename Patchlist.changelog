@@ -1,29 +1,53 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/7412c8c4cea69227bd07615152e772559eea0750
- 7412c8c4cea69227bd07615152e772559eea0750 powerpc/tools: drop `-o pipefail` in gcc check scripts
+https://gitlab.com/cki-project/kernel-ark/-/commit/3a563f822f0f4ff600b9d7f613ce85d9da35c9d7
+ 3a563f822f0f4ff600b9d7f613ce85d9da35c9d7 i2c: Add Intel USBIO I2C driver
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/e3e33d115164f7a7da2ccaadf6ef6d2b1e5ff627
- e3e33d115164f7a7da2ccaadf6ef6d2b1e5ff627 KVM/TDX: Explicitly do WBINVD when no more TDX SEAMCALLs
+https://gitlab.com/cki-project/kernel-ark/-/commit/c4d22757f31c3d1f07a2be7ae9a6c13cddb8f5b2
+ c4d22757f31c3d1f07a2be7ae9a6c13cddb8f5b2 gpio: Add Intel USBIO GPIO driver
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/c97d5c95223f9f333b131999e53cd6967658314a
- c97d5c95223f9f333b131999e53cd6967658314a x86/virt/tdx: Update the kexec section in the TDX documentation
+https://gitlab.com/cki-project/kernel-ark/-/commit/8143a0fa886401a69b1c7debfa0f1f9e41df940c
+ 8143a0fa886401a69b1c7debfa0f1f9e41df940c usb: misc: Add Intel USBIO bridge driver
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/5b024da638787f92042d26030466e43b58accd27
- 5b024da638787f92042d26030466e43b58accd27 x86/virt/tdx: Remove the !KEXEC_CORE dependency
+https://gitlab.com/cki-project/kernel-ark/-/commit/44c4b50d332e0de7b3fe6cd87e1c64a5da203ec0
+ 44c4b50d332e0de7b3fe6cd87e1c64a5da203ec0 media: ov08x40: Fix the horizontal flip control
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/ef85f3204433472cc5399b754b0dd11bb5f5df49
- ef85f3204433472cc5399b754b0dd11bb5f5df49 x86/kexec: Disable kexec/kdump on platforms with TDX partial write erratum
+https://gitlab.com/cki-project/kernel-ark/-/commit/b4868c757fb22c0b8fb268bae8bedece0d982a29
+ b4868c757fb22c0b8fb268bae8bedece0d982a29 ACPI: scan: Add Intel CVS ACPI HIDs to acpi_ignore_dep_ids[]
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/70cc4c1735b08803d4775e21de0653ad070bef71
- 70cc4c1735b08803d4775e21de0653ad070bef71 x86/virt/tdx: Mark memory cache state incoherent when making SEAMCALL
+https://gitlab.com/cki-project/kernel-ark/-/commit/a2246ba74a624a7c755e7d2f3b6c793e74d34fe5
+ a2246ba74a624a7c755e7d2f3b6c793e74d34fe5 platform/x86: int3472: Increase ov08x40 handshake GPIO delay to 45 ms
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/96811f2e18c5f403f18fb89173f370d29868a818
- 96811f2e18c5f403f18fb89173f370d29868a818 x86/sme: Use percpu boolean to control WBINVD during kexec
+https://gitlab.com/cki-project/kernel-ark/-/commit/79a6b403b7010d4cd7826644dec7a646a84a98c5
+ 79a6b403b7010d4cd7826644dec7a646a84a98c5 platform/x86: int3472: Rework regulator enable-time handling
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/8d7551997aae24c2729239017b52721bdc54dac3
- 8d7551997aae24c2729239017b52721bdc54dac3 x86/kexec: Consolidate relocate_kernel() function parameters
+https://gitlab.com/cki-project/kernel-ark/-/commit/f286a163c2e81dcb601d1a1b7f7ee56bd9f11ce3
+ f286a163c2e81dcb601d1a1b7f7ee56bd9f11ce3 platform/x86: int3472: Convert int3472_gpio_map to use C99 initializers
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/c6697cc4c1f9c4c2d44e5c21d8ea020bb5f33fd5
- c6697cc4c1f9c4c2d44e5c21d8ea020bb5f33fd5 arm64: dts: qcom: x1e80100-lenovo-yoga-slim7x: add Bluetooth support
+https://gitlab.com/cki-project/kernel-ark/-/commit/31d249c4541d7c79a88d04ecad194500cc805fe6
+ 31d249c4541d7c79a88d04ecad194500cc805fe6 powerpc/tools: drop `-o pipefail` in gcc check scripts
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/d5e3260851d1358c789f107dfb0782a142988f71
+ d5e3260851d1358c789f107dfb0782a142988f71 KVM/TDX: Explicitly do WBINVD when no more TDX SEAMCALLs
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/24bc85f810d3b627d24b4dacfc453d6c224c7d08
+ 24bc85f810d3b627d24b4dacfc453d6c224c7d08 x86/virt/tdx: Update the kexec section in the TDX documentation
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/cd3d251fdd2c5e22b69557c1b98aed7e95a44a3a
+ cd3d251fdd2c5e22b69557c1b98aed7e95a44a3a x86/virt/tdx: Remove the !KEXEC_CORE dependency
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/2f13bc5b0c40e30ece976c50a259fde62c24946a
+ 2f13bc5b0c40e30ece976c50a259fde62c24946a x86/kexec: Disable kexec/kdump on platforms with TDX partial write erratum
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/b6ccfb93030908323c1b894cb2f85fabc767ad91
+ b6ccfb93030908323c1b894cb2f85fabc767ad91 x86/virt/tdx: Mark memory cache state incoherent when making SEAMCALL
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/4676976102acb75d89886aada33d1480f7416e62
+ 4676976102acb75d89886aada33d1480f7416e62 x86/sme: Use percpu boolean to control WBINVD during kexec
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/7691abcbbbd30e4d49ce4c4680ed928b76ebd3e8
+ 7691abcbbbd30e4d49ce4c4680ed928b76ebd3e8 x86/kexec: Consolidate relocate_kernel() function parameters
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/37a8e3ce54524b177a0f964a0d6bfa8a3cfb7738
+ 37a8e3ce54524b177a0f964a0d6bfa8a3cfb7738 arm64: dts: qcom: x1e80100-lenovo-yoga-slim7x: add Bluetooth support
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/572b35f16e61868ff02271ab7257d574e0a161d5
  572b35f16e61868ff02271ab7257d574e0a161d5 Revert "aacraid: Remove depreciated device and vendor PCI id's"
