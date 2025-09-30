@@ -164,7 +164,7 @@ Summary: The Linux kernel
 #  kernel release. (This includes prepatch or "rc" releases.)
 # Set released_kernel to 0 when the upstream source tarball contains an
 #  unreleased kernel development snapshot.
-%global released_kernel 0
+%global released_kernel 1
 # Set debugbuildsenabled to 1 to build separate base and debug kernels
 #  (on supported architectures). The kernel-debug-* subpackages will
 #  contain the debug kernel.
@@ -176,13 +176,13 @@ Summary: The Linux kernel
 %define specrpmversion 6.17.0
 %define specversion 6.17.0
 %define patchversion 6.17
-%define pkgrelease 63
+%define pkgrelease 300
 %define kversion 6
 %define tarfile_release 6.17
 # This is needed to do merge window version magic
 %define patchlevel 17
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 63%{?buildid}%{?dist}
+%define specrelease 300%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.17.0
 
@@ -2149,14 +2149,6 @@ cat imaca.pem >> ../certs/rhel.pem
 for i in *.config; do
   sed -i 's@CONFIG_SYSTEM_TRUSTED_KEYS=""@CONFIG_SYSTEM_TRUSTED_KEYS="certs/rhel.pem"@' $i
   sed -i 's@CONFIG_EFI_SBAT_FILE=""@CONFIG_EFI_SBAT_FILE="kernel.sbat"@' $i
-done
-%endif
-
-# Adjust FIPS module name for RHEL
-%if 0%{?rhel}
-%{log_msg "Adjust FIPS module name for RHEL"}
-for i in *.config; do
-  sed -i 's/CONFIG_CRYPTO_FIPS_NAME=.*/CONFIG_CRYPTO_FIPS_NAME="Red Hat Enterprise Linux %{rhel} - Kernel Cryptographic API"/' $i
 done
 %endif
 
@@ -4391,7 +4383,10 @@ fi\
 #
 #
 %changelog
-* Mon Sep 29 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.17.0-63]
+* Tue Sep 30 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.17.0-300]
+- usb: typec: ucsi: Handle incorrect num_connectors capability (Mark Pearson)
+- Initial setup for stable Fedora releases (Justin M. Forbes)
+- arm64: dts: qcom: x1e80100-lenovo-yoga-slim7x: add Bluetooth support (Jens Glathe)
 - redhat: config: Enable USBIO modules (Hans de Goede)
 - i2c: Add Intel USBIO I2C driver (Israel Cepeda)
 - gpio: Add Intel USBIO GPIO driver (Israel Cepeda)
@@ -4410,8 +4405,11 @@ fi\
 - x86/virt/tdx: Mark memory cache state incoherent when making SEAMCALL (Kai Huang)
 - x86/sme: Use percpu boolean to control WBINVD during kexec (Kai Huang)
 - x86/kexec: Consolidate relocate_kernel() function parameters (Kai Huang)
-- arm64: dts: qcom: x1e80100-lenovo-yoga-slim7x: add Bluetooth support (Jens Glathe)
-- redhat/configs: clang_lto: disable CONFIG_FORTIFY_KUNIT_TEST (Scott Weaver)
+
+* Mon Sep 29 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.17.0-1]
+- Reset RHEL_RELEASE for the 6.18 cycle (Justin M. Forbes)
+- Turn on USB_FUNCTIONFS for Fedora (Justin M. Forbes)
+- redhat/configs: Disable CONFIG_EFI_MIXED in RHEL (Lenny Szubowicz)
 
 * Mon Sep 29 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.17.0-62]
 - Linux v6.17.0
