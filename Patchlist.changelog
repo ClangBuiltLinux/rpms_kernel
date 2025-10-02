@@ -1,29 +1,26 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/1bbc82da4657e64f0a7c390600126f96231bb5ab
- 1bbc82da4657e64f0a7c390600126f96231bb5ab powerpc/tools: drop `-o pipefail` in gcc check scripts
+https://gitlab.com/cki-project/kernel-ark/-/commit/5b146bee7cc6caa1f1a5089220f7fa35bd2c46f6
+ 5b146bee7cc6caa1f1a5089220f7fa35bd2c46f6 powerpc/tools: drop `-o pipefail` in gcc check scripts
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/0373736d5ce38490759fbaee60597370221905e8
- 0373736d5ce38490759fbaee60597370221905e8 KVM/TDX: Explicitly do WBINVD when no more TDX SEAMCALLs
+https://gitlab.com/cki-project/kernel-ark/-/commit/b07989b02adbeb94afe01c652e9a370363ac1092
+ b07989b02adbeb94afe01c652e9a370363ac1092 KVM/TDX: Explicitly do WBINVD when no more TDX SEAMCALLs
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/7cd5b3595597ba8e3fde29d26b17d1385477bfc6
- 7cd5b3595597ba8e3fde29d26b17d1385477bfc6 x86/virt/tdx: Update the kexec section in the TDX documentation
+https://gitlab.com/cki-project/kernel-ark/-/commit/6155b4e5859c589f7e476ccc825491a441f04984
+ 6155b4e5859c589f7e476ccc825491a441f04984 x86/virt/tdx: Update the kexec section in the TDX documentation
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/77a4adf06005626c4b6dab2a2acec6a19b490d06
- 77a4adf06005626c4b6dab2a2acec6a19b490d06 x86/virt/tdx: Remove the !KEXEC_CORE dependency
+https://gitlab.com/cki-project/kernel-ark/-/commit/633ca7a225761c9996a89f744e28442c68a59a26
+ 633ca7a225761c9996a89f744e28442c68a59a26 x86/virt/tdx: Remove the !KEXEC_CORE dependency
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/870f5118ffdd502837800160dfc658c7eb41a30b
- 870f5118ffdd502837800160dfc658c7eb41a30b x86/kexec: Disable kexec/kdump on platforms with TDX partial write erratum
+https://gitlab.com/cki-project/kernel-ark/-/commit/6d17c5376ef09af1a7581174420466231ce884fd
+ 6d17c5376ef09af1a7581174420466231ce884fd x86/kexec: Disable kexec/kdump on platforms with TDX partial write erratum
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/820335ff453321e90bf68ec9155254541883f84f
- 820335ff453321e90bf68ec9155254541883f84f x86/virt/tdx: Mark memory cache state incoherent when making SEAMCALL
+https://gitlab.com/cki-project/kernel-ark/-/commit/3c447a1c6985ddef4b763b02ca8f4cd27ccb827d
+ 3c447a1c6985ddef4b763b02ca8f4cd27ccb827d x86/virt/tdx: Mark memory cache state incoherent when making SEAMCALL
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/c6d3fef030b4dc0a61ffcb628752e8399e4b9424
- c6d3fef030b4dc0a61ffcb628752e8399e4b9424 x86/sme: Use percpu boolean to control WBINVD during kexec
+https://gitlab.com/cki-project/kernel-ark/-/commit/ec2350cb835a4b40448894628ac7004789590690
+ ec2350cb835a4b40448894628ac7004789590690 x86/sme: Use percpu boolean to control WBINVD during kexec
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/1e1c7cf96a04528a0c15c6941e50bf0af2d82b57
- 1e1c7cf96a04528a0c15c6941e50bf0af2d82b57 x86/kexec: Consolidate relocate_kernel() function parameters
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/b8d2d242274578667cea1486302b79ae8f78437e
- b8d2d242274578667cea1486302b79ae8f78437e arm64: dts: qcom: x1e80100-lenovo-yoga-slim7x: add Bluetooth support
+https://gitlab.com/cki-project/kernel-ark/-/commit/62cfb66c660eb028e3c4fa1943c88b58d70fd458
+ 62cfb66c660eb028e3c4fa1943c88b58d70fd458 x86/kexec: Consolidate relocate_kernel() function parameters
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/0a4dabe8b3739bf6f0b403a25b785f864d4f3985
  0a4dabe8b3739bf6f0b403a25b785f864d4f3985 rh_messages.h: add missing aacraid device
