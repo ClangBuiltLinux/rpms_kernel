@@ -95,7 +95,7 @@
  94 files changed, 2936 insertions(+), 292 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index e019db1633fd..c059aed5916b 100644
+index 74ca438d2d6d..4cfa9a758c0c 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
 @@ -6403,6 +6403,17 @@
@@ -325,7 +325,7 @@ index 2a124c92e4f6..8bb58acaf7da 100644
  	  The VM uses one page of physical memory for each page table.
  	  For systems with a lot of processes, this can use a lot of
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index ab4160d33340..a11e531dd7e9 100644
+index 6663ffd23f25..b2e4aa83a696 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
 @@ -1432,7 +1432,7 @@ endchoice
@@ -461,10 +461,10 @@ index 7b529868789f..c054a407afa6 100644
  	/* boot_command_line has been already set up in early.c */
  	*cmdline_p = boot_command_line;
 diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-index 75f3de70df51..35c5e561bd37 100644
+index e3cccf4256ca..9d034a987c6e 100644
 --- a/arch/x86/Kconfig
 +++ b/arch/x86/Kconfig
-@@ -1903,7 +1903,6 @@ config INTEL_TDX_HOST
+@@ -1902,7 +1902,6 @@ config INTEL_TDX_HOST
  	depends on X86_X2APIC
  	select ARCH_KEEP_MEMBLOCK
  	depends on CONTIG_ALLOC
@@ -2768,7 +2768,7 @@ index d4b484c0fd9d..4e5bb4cce484 100644
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2271) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2261) },
 diff --git a/drivers/scsi/sd.c b/drivers/scsi/sd.c
-index 5b8668accf8e..35351d7efc86 100644
+index 00ad574ce61c..1d32b133e83e 100644
 --- a/drivers/scsi/sd.c
 +++ b/drivers/scsi/sd.c
 @@ -121,6 +121,14 @@ static const char *sd_cache_types[] = {
@@ -2962,10 +2962,10 @@ index a98cc39e7aaa..00f31eefd0c5 100644
  enum efi_secureboot_mode efi_get_secureboot_mode(efi_get_variable_t *get_var)
  {
 diff --git a/include/linux/kernel.h b/include/linux/kernel.h
-index 989315dabb86..db38a0b1f379 100644
+index 5b46924fdff5..ffd5e38d3cb7 100644
 --- a/include/linux/kernel.h
 +++ b/include/linux/kernel.h
-@@ -390,4 +390,20 @@ static inline void ftrace_dump(enum ftrace_dump_mode oops_dump_mode) { }
+@@ -403,4 +403,20 @@ static inline void ftrace_dump(enum ftrace_dump_mode oops_dump_mode) { }
  	 /* OTHER_WRITABLE?  Generally considered a bad idea. */		\
  	 BUILD_BUG_ON_ZERO((perms) & 2) +					\
  	 (perms))
@@ -3022,10 +3022,10 @@ index e135cc79acee..51621863f459 100644
  DEFINE_FREE(module_put, struct module *, if (_T) module_put(_T))
  
 diff --git a/include/linux/panic.h b/include/linux/panic.h
-index 7be742628c25..83e62c186409 100644
+index 6f972a66c13e..d484940c73bd 100644
 --- a/include/linux/panic.h
 +++ b/include/linux/panic.h
-@@ -74,7 +74,22 @@ static inline void set_arch_panic_timeout(int timeout, int arch_default_timeout)
+@@ -80,7 +80,22 @@ static inline void set_arch_panic_timeout(int timeout, int arch_default_timeout)
  #define TAINT_RANDSTRUCT		17
  #define TAINT_TEST			18
  #define TAINT_FWCTL			19
@@ -3743,10 +3743,10 @@ index bd33f194c94a..f33e1c6daf12 100644
 +
  #endif /* ! __LINUX_SECURITY_H */
 diff --git a/init/main.c b/init/main.c
-index fab4f599c035..94fe06a060b4 100644
+index 07a3116811c5..ea319de7dff9 100644
 --- a/init/main.c
 +++ b/init/main.c
-@@ -1160,8 +1160,10 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
+@@ -1172,8 +1172,10 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
  	char fn_name[KSYM_SYMBOL_LEN];
  	unsigned long addr;
  
@@ -3757,7 +3757,7 @@ index fab4f599c035..94fe06a060b4 100644
  
  	addr = (unsigned long) dereference_function_descriptor(fn);
  	sprint_symbol_no_offset(fn_name, addr);
-@@ -1172,6 +1174,9 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
+@@ -1184,6 +1186,9 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
  	 */
  	strreplace(fn_name, ' ', '\0');
  
@@ -3768,7 +3768,7 @@ index fab4f599c035..94fe06a060b4 100644
  		if (!strcmp(fn_name, entry->buf)) {
  			pr_debug("initcall %s blacklisted\n", fn_name);
 diff --git a/kernel/Makefile b/kernel/Makefile
-index 41751834e764..b05e2a491fa6 100644
+index df3dd8291bb6..21daf9c1590f 100644
 --- a/kernel/Makefile
 +++ b/kernel/Makefile
 @@ -12,6 +12,8 @@ obj-y     = fork.o exec_domain.o panic.o \
@@ -3798,7 +3798,7 @@ index d595fe512498..362eb90a9bbe 100644
  long bpf_jit_limit_max __read_mostly;
  
 diff --git a/kernel/bpf/syscall.c b/kernel/bpf/syscall.c
-index a48fa86f82a7..8b5f52a3378d 100644
+index 2a9456a3e730..d2297dcc5901 100644
 --- a/kernel/bpf/syscall.c
 +++ b/kernel/bpf/syscall.c
 @@ -27,6 +27,7 @@
@@ -3921,10 +3921,10 @@ index a2ff4242e623..f0d2be1ee4f1 100644
  
  int module_sig_check(struct load_info *info, int flags)
 diff --git a/kernel/panic.c b/kernel/panic.c
-index 72fcbb5a071b..5e26af68e42c 100644
+index 24cc3eec1805..57b4bbc3231f 100644
 --- a/kernel/panic.c
 +++ b/kernel/panic.c
-@@ -600,6 +600,18 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
+@@ -660,6 +660,18 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
  	TAINT_FLAG(RANDSTRUCT,			'T', ' ', true),
  	TAINT_FLAG(TEST,			'N', ' ', true),
  	TAINT_FLAG(FWCTL,			'J', ' ', true),
