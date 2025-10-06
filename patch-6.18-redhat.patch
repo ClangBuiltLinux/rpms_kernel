@@ -1,6 +1,5 @@
  Documentation/admin-guide/kernel-parameters.txt    |  20 +
  Documentation/admin-guide/rh-waived-features.rst   |  21 +
- Documentation/arch/x86/tdx.rst                     |  14 +-
  Kconfig                                            |   2 +
  Kconfig.redhat                                     |  31 ++
  Makefile                                           |  38 +-
@@ -12,18 +11,8 @@
  arch/s390/include/asm/ipl.h                        |   1 +
  arch/s390/kernel/ipl.c                             |   5 +
  arch/s390/kernel/setup.c                           |   4 +
- arch/x86/Kconfig                                   |   1 -
- arch/x86/include/asm/kexec.h                       |  12 +-
- arch/x86/include/asm/processor.h                   |   2 +
- arch/x86/include/asm/tdx.h                         |  31 +-
- arch/x86/kernel/cpu/amd.c                          |  17 +
  arch/x86/kernel/cpu/common.c                       |   1 +
- arch/x86/kernel/machine_kexec_64.c                 |  44 +-
- arch/x86/kernel/process.c                          |  24 +-
- arch/x86/kernel/relocate_kernel_64.S               |  36 +-
  arch/x86/kernel/setup.c                            | 101 +++-
- arch/x86/kvm/vmx/tdx.c                             |  10 +
- arch/x86/virt/vmx/tdx/tdx.c                        |  23 +-
  crypto/akcipher.c                                  |   3 +-
  crypto/dh.c                                        |  25 +
  crypto/drbg.c                                      |  18 +-
@@ -92,10 +81,10 @@
  security/lockdown/lockdown.c                       |  11 +
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
- 94 files changed, 2936 insertions(+), 292 deletions(-)
+ 83 files changed, 2769 insertions(+), 245 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 74ca438d2d6d..4cfa9a758c0c 100644
+index 3edc5ce0e2a3..1ba7490264b9 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
 @@ -6403,6 +6403,17 @@
@@ -159,38 +148,6 @@ index 000000000000..45caec7fbae6
 +List of Red Hat Waived Features
 +===============================
 +
-diff --git a/Documentation/arch/x86/tdx.rst b/Documentation/arch/x86/tdx.rst
-index 719043cd8b46..61670e7df2f7 100644
---- a/Documentation/arch/x86/tdx.rst
-+++ b/Documentation/arch/x86/tdx.rst
-@@ -142,13 +142,6 @@ but depends on the BIOS to behave correctly.
- Note TDX works with CPU logical online/offline, thus the kernel still
- allows to offline logical CPU and online it again.
- 
--Kexec()
--~~~~~~~
--
--TDX host support currently lacks the ability to handle kexec.  For
--simplicity only one of them can be enabled in the Kconfig.  This will be
--fixed in the future.
--
- Erratum
- ~~~~~~~
- 
-@@ -171,6 +164,13 @@ If the platform has such erratum, the kernel prints additional message in
- machine check handler to tell user the machine check may be caused by
- kernel bug on TDX private memory.
- 
-+Kexec
-+~~~~~~~
-+
-+Currently kexec doesn't work on the TDX platforms with the aforementioned
-+erratum.  It fails when loading the kexec kernel image.  Otherwise it
-+works normally.
-+
- Interaction vs S3 and deeper states
- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- 
 diff --git a/Kconfig b/Kconfig
 index 307e581144de..11e93e479ce4 100644
 --- a/Kconfig
@@ -239,7 +196,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index d37dca7850b3..36905e026b70 100644
+index 6f88b1d3b40d..e2d5b34589c6 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -355,6 +355,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -284,7 +241,7 @@ index d37dca7850b3..36905e026b70 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -1930,6 +1949,23 @@ endif
+@@ -1931,6 +1950,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -460,148 +417,6 @@ index 7b529868789f..c054a407afa6 100644
  	/* Have one command line that is parsed and saved in /proc/cmdline */
  	/* boot_command_line has been already set up in early.c */
  	*cmdline_p = boot_command_line;
-diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-index e3cccf4256ca..9d034a987c6e 100644
---- a/arch/x86/Kconfig
-+++ b/arch/x86/Kconfig
-@@ -1902,7 +1902,6 @@ config INTEL_TDX_HOST
- 	depends on X86_X2APIC
- 	select ARCH_KEEP_MEMBLOCK
- 	depends on CONTIG_ALLOC
--	depends on !KEXEC_CORE
- 	depends on X86_MCE
- 	help
- 	  Intel Trust Domain Extensions (TDX) protects guest VMs from malicious
-diff --git a/arch/x86/include/asm/kexec.h b/arch/x86/include/asm/kexec.h
-index f2ad77929d6e..5cfb27f26583 100644
---- a/arch/x86/include/asm/kexec.h
-+++ b/arch/x86/include/asm/kexec.h
-@@ -13,6 +13,15 @@
- # define KEXEC_DEBUG_EXC_HANDLER_SIZE	6 /* PUSHI, PUSHI, 2-byte JMP */
- #endif
- 
-+#ifdef CONFIG_X86_64
-+
-+#include <linux/bits.h>
-+
-+#define RELOC_KERNEL_PRESERVE_CONTEXT	BIT(0)
-+#define RELOC_KERNEL_CACHE_INCOHERENT	BIT(1)
-+
-+#endif
-+
- # define KEXEC_CONTROL_PAGE_SIZE	4096
- # define KEXEC_CONTROL_CODE_MAX_SIZE	2048
- 
-@@ -121,8 +130,7 @@ typedef unsigned long
- relocate_kernel_fn(unsigned long indirection_page,
- 		   unsigned long pa_control_page,
- 		   unsigned long start_address,
--		   unsigned int preserve_context,
--		   unsigned int host_mem_enc_active);
-+		   unsigned int flags);
- #endif
- extern relocate_kernel_fn relocate_kernel;
- #define ARCH_HAS_KIMAGE_ARCH
-diff --git a/arch/x86/include/asm/processor.h b/arch/x86/include/asm/processor.h
-index bde58f6510ac..a24c7805acdb 100644
---- a/arch/x86/include/asm/processor.h
-+++ b/arch/x86/include/asm/processor.h
-@@ -731,6 +731,8 @@ void __noreturn stop_this_cpu(void *dummy);
- void microcode_check(struct cpuinfo_x86 *prev_info);
- void store_cpu_caps(struct cpuinfo_x86 *info);
- 
-+DECLARE_PER_CPU(bool, cache_state_incoherent);
-+
- enum l1tf_mitigations {
- 	L1TF_MITIGATION_OFF,
- 	L1TF_MITIGATION_AUTO,
-diff --git a/arch/x86/include/asm/tdx.h b/arch/x86/include/asm/tdx.h
-index 7ddef3a69866..913199b1954b 100644
---- a/arch/x86/include/asm/tdx.h
-+++ b/arch/x86/include/asm/tdx.h
-@@ -102,10 +102,31 @@ u64 __seamcall_ret(u64 fn, struct tdx_module_args *args);
- u64 __seamcall_saved_ret(u64 fn, struct tdx_module_args *args);
- void tdx_init(void);
- 
-+#include <linux/preempt.h>
- #include <asm/archrandom.h>
-+#include <asm/processor.h>
- 
- typedef u64 (*sc_func_t)(u64 fn, struct tdx_module_args *args);
- 
-+static __always_inline u64 __seamcall_dirty_cache(sc_func_t func, u64 fn,
-+						  struct tdx_module_args *args)
-+{
-+	lockdep_assert_preemption_disabled();
-+
-+	/*
-+	 * SEAMCALLs are made to the TDX module and can generate dirty
-+	 * cachelines of TDX private memory.  Mark cache state incoherent
-+	 * so that the cache can be flushed during kexec.
-+	 *
-+	 * This needs to be done before actually making the SEAMCALL,
-+	 * because kexec-ing CPU could send NMI to stop remote CPUs,
-+	 * in which case even disabling IRQ won't help here.
-+	 */
-+	this_cpu_write(cache_state_incoherent, true);
-+
-+	return func(fn, args);
-+}
-+
- static __always_inline u64 sc_retry(sc_func_t func, u64 fn,
- 			   struct tdx_module_args *args)
- {
-@@ -113,7 +134,9 @@ static __always_inline u64 sc_retry(sc_func_t func, u64 fn,
- 	u64 ret;
- 
- 	do {
--		ret = func(fn, args);
-+		preempt_disable();
-+		ret = __seamcall_dirty_cache(func, fn, args);
-+		preempt_enable();
- 	} while (ret == TDX_RND_NO_ENTROPY && --retry);
- 
- 	return ret;
-@@ -203,5 +226,11 @@ static inline const char *tdx_dump_mce_info(struct mce *m) { return NULL; }
- static inline const struct tdx_sys_info *tdx_get_sysinfo(void) { return NULL; }
- #endif	/* CONFIG_INTEL_TDX_HOST */
- 
-+#ifdef CONFIG_KEXEC_CORE
-+void tdx_cpu_flush_cache_for_kexec(void);
-+#else
-+static inline void tdx_cpu_flush_cache_for_kexec(void) { }
-+#endif
-+
- #endif /* !__ASSEMBLER__ */
- #endif /* _ASM_X86_TDX_H */
-diff --git a/arch/x86/kernel/cpu/amd.c b/arch/x86/kernel/cpu/amd.c
-index a6f88ca1a6b4..5398db4dedb4 100644
---- a/arch/x86/kernel/cpu/amd.c
-+++ b/arch/x86/kernel/cpu/amd.c
-@@ -545,6 +545,23 @@ static void early_detect_mem_encrypt(struct cpuinfo_x86 *c)
- {
- 	u64 msr;
- 
-+	/*
-+	 * Mark using WBINVD is needed during kexec on processors that
-+	 * support SME. This provides support for performing a successful
-+	 * kexec when going from SME inactive to SME active (or vice-versa).
-+	 *
-+	 * The cache must be cleared so that if there are entries with the
-+	 * same physical address, both with and without the encryption bit,
-+	 * they don't race each other when flushed and potentially end up
-+	 * with the wrong entry being committed to memory.
-+	 *
-+	 * Test the CPUID bit directly because with mem_encrypt=off the
-+	 * BSP will clear the X86_FEATURE_SME bit and the APs will not
-+	 * see it set after that.
-+	 */
-+	if (c->extended_cpuid_level >= 0x8000001f && (cpuid_eax(0x8000001f) & BIT(0)))
-+		__this_cpu_write(cache_state_incoherent, true);
-+
- 	/*
- 	 * BIOS support is required for SME and SEV.
- 	 *   For SME: If BIOS has enabled SME then adjust x86_phys_bits by
 diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
 index c7d3512914ca..3ad1a183d539 100644
 --- a/arch/x86/kernel/cpu/common.c
@@ -614,243 +429,6 @@ index c7d3512914ca..3ad1a183d539 100644
  		setup_force_cpu_cap(X86_FEATURE_CPUID);
  		get_cpu_address_sizes(c);
  		cpu_parse_early_param();
-diff --git a/arch/x86/kernel/machine_kexec_64.c b/arch/x86/kernel/machine_kexec_64.c
-index 697fb99406e6..15088d14904f 100644
---- a/arch/x86/kernel/machine_kexec_64.c
-+++ b/arch/x86/kernel/machine_kexec_64.c
-@@ -29,6 +29,7 @@
- #include <asm/set_memory.h>
- #include <asm/cpu.h>
- #include <asm/efi.h>
-+#include <asm/processor.h>
- 
- #ifdef CONFIG_ACPI
- /*
-@@ -346,6 +347,22 @@ int machine_kexec_prepare(struct kimage *image)
- 	unsigned long reloc_end = (unsigned long)__relocate_kernel_end;
- 	int result;
- 
-+	/*
-+	 * Some early TDX-capable platforms have an erratum.  A kernel
-+	 * partial write (a write transaction of less than cacheline
-+	 * lands at memory controller) to TDX private memory poisons that
-+	 * memory, and a subsequent read triggers a machine check.
-+	 *
-+	 * On those platforms the old kernel must reset TDX private
-+	 * memory before jumping to the new kernel otherwise the new
-+	 * kernel may see unexpected machine check.  For simplicity
-+	 * just fail kexec/kdump on those platforms.
-+	 */
-+	if (boot_cpu_has_bug(X86_BUG_TDX_PW_MCE)) {
-+		pr_info_once("Not allowed on platform with tdx_pw_mce bug\n");
-+		return -EOPNOTSUPP;
-+	}
-+
- 	/* Setup the identity mapped 64bit page table */
- 	result = init_pgtable(image, __pa(control_page));
- 	if (result)
-@@ -384,16 +401,10 @@ void __nocfi machine_kexec(struct kimage *image)
- {
- 	unsigned long reloc_start = (unsigned long)__relocate_kernel_start;
- 	relocate_kernel_fn *relocate_kernel_ptr;
--	unsigned int host_mem_enc_active;
-+	unsigned int relocate_kernel_flags;
- 	int save_ftrace_enabled;
- 	void *control_page;
- 
--	/*
--	 * This must be done before load_segments() since if call depth tracking
--	 * is used then GS must be valid to make any function calls.
--	 */
--	host_mem_enc_active = cc_platform_has(CC_ATTR_HOST_MEM_ENCRYPT);
--
- #ifdef CONFIG_KEXEC_JUMP
- 	if (image->preserve_context)
- 		save_processor_state();
-@@ -427,6 +438,17 @@ void __nocfi machine_kexec(struct kimage *image)
- 	 */
- 	relocate_kernel_ptr = control_page + (unsigned long)relocate_kernel - reloc_start;
- 
-+	relocate_kernel_flags = 0;
-+	if (image->preserve_context)
-+		relocate_kernel_flags |= RELOC_KERNEL_PRESERVE_CONTEXT;
-+
-+	/*
-+	 * This must be done before load_segments() since it resets
-+	 * GS to 0 and percpu data needs the correct GS to work.
-+	 */
-+	if (this_cpu_read(cache_state_incoherent))
-+		relocate_kernel_flags |= RELOC_KERNEL_CACHE_INCOHERENT;
-+
- 	/*
- 	 * The segment registers are funny things, they have both a
- 	 * visible and an invisible part.  Whenever the visible part is
-@@ -436,6 +458,11 @@ void __nocfi machine_kexec(struct kimage *image)
- 	 *
- 	 * Take advantage of this here by force loading the segments,
- 	 * before the GDT is zapped with an invalid value.
-+	 *
-+	 * load_segments() resets GS to 0.  Don't make any function call
-+	 * after here since call depth tracking uses percpu variables to
-+	 * operate (relocate_kernel() is explicitly ignored by call depth
-+	 * tracking).
- 	 */
- 	load_segments();
- 
-@@ -443,8 +470,7 @@ void __nocfi machine_kexec(struct kimage *image)
- 	image->start = relocate_kernel_ptr((unsigned long)image->head,
- 					   virt_to_phys(control_page),
- 					   image->start,
--					   image->preserve_context,
--					   host_mem_enc_active);
-+					   relocate_kernel_flags);
- 
- #ifdef CONFIG_KEXEC_JUMP
- 	if (image->preserve_context)
-diff --git a/arch/x86/kernel/process.c b/arch/x86/kernel/process.c
-index e3a3987b0c4f..4c718f8adc59 100644
---- a/arch/x86/kernel/process.c
-+++ b/arch/x86/kernel/process.c
-@@ -88,6 +88,16 @@ EXPORT_PER_CPU_SYMBOL(cpu_tss_rw);
- DEFINE_PER_CPU(bool, __tss_limit_invalid);
- EXPORT_PER_CPU_SYMBOL_GPL(__tss_limit_invalid);
- 
-+/*
-+ * The cache may be in an incoherent state and needs flushing during kexec.
-+ * E.g., on SME/TDX platforms, dirty cacheline aliases with and without
-+ * encryption bit(s) can coexist and the cache needs to be flushed before
-+ * booting to the new kernel to avoid the silent memory corruption due to
-+ * dirty cachelines with different encryption property being written back
-+ * to the memory.
-+ */
-+DEFINE_PER_CPU(bool, cache_state_incoherent);
-+
- /*
-  * this gets called so that we can store lazy state into memory and copy the
-  * current task into the new thread.
-@@ -827,19 +837,7 @@ void __noreturn stop_this_cpu(void *dummy)
- 	disable_local_APIC();
- 	mcheck_cpu_clear(c);
- 
--	/*
--	 * Use wbinvd on processors that support SME. This provides support
--	 * for performing a successful kexec when going from SME inactive
--	 * to SME active (or vice-versa). The cache must be cleared so that
--	 * if there are entries with the same physical address, both with and
--	 * without the encryption bit, they don't race each other when flushed
--	 * and potentially end up with the wrong entry being committed to
--	 * memory.
--	 *
--	 * Test the CPUID bit directly because the machine might've cleared
--	 * X86_FEATURE_SME due to cmdline options.
--	 */
--	if (c->extended_cpuid_level >= 0x8000001f && (cpuid_eax(0x8000001f) & BIT(0)))
-+	if (this_cpu_read(cache_state_incoherent))
- 		wbinvd();
- 
- 	/*
-diff --git a/arch/x86/kernel/relocate_kernel_64.S b/arch/x86/kernel/relocate_kernel_64.S
-index ea604f4d0b52..11e20bb13aca 100644
---- a/arch/x86/kernel/relocate_kernel_64.S
-+++ b/arch/x86/kernel/relocate_kernel_64.S
-@@ -66,8 +66,7 @@ SYM_CODE_START_NOALIGN(relocate_kernel)
- 	 * %rdi indirection_page
- 	 * %rsi pa_control_page
- 	 * %rdx start address
--	 * %rcx preserve_context
--	 * %r8  host_mem_enc_active
-+	 * %rcx flags: RELOC_KERNEL_*
- 	 */
- 
- 	/* Save the CPU context, used for jumping back */
-@@ -111,7 +110,7 @@ SYM_CODE_START_NOALIGN(relocate_kernel)
- 	/* save indirection list for jumping back */
- 	movq	%rdi, pa_backup_pages_map(%rip)
- 
--	/* Save the preserve_context to %r11 as swap_pages clobbers %rcx. */
-+	/* Save the flags to %r11 as swap_pages clobbers %rcx. */
- 	movq	%rcx, %r11
- 
- 	/* setup a new stack at the end of the physical control page */
-@@ -129,9 +128,8 @@ SYM_CODE_START_LOCAL_NOALIGN(identity_mapped)
- 	/*
- 	 * %rdi	indirection page
- 	 * %rdx start address
--	 * %r8 host_mem_enc_active
- 	 * %r9 page table page
--	 * %r11 preserve_context
-+	 * %r11 flags: RELOC_KERNEL_*
- 	 * %r13 original CR4 when relocate_kernel() was invoked
- 	 */
- 
-@@ -200,14 +198,21 @@ SYM_CODE_START_LOCAL_NOALIGN(identity_mapped)
- 	movq	%r9, %cr3
- 
- 	/*
-+	 * If the memory cache is in incoherent state, e.g., due to
-+	 * memory encryption, do WBINVD to flush cache.
-+	 *
- 	 * If SME is active, there could be old encrypted cache line
- 	 * entries that will conflict with the now unencrypted memory
- 	 * used by kexec. Flush the caches before copying the kernel.
-+	 *
-+	 * Note SME sets this flag to true when the platform supports
-+	 * SME, so the WBINVD is performed even SME is not activated
-+	 * by the kernel.  But this has no harm.
- 	 */
--	testq	%r8, %r8
--	jz .Lsme_off
-+	testb	$RELOC_KERNEL_CACHE_INCOHERENT, %r11b
-+	jz .Lnowbinvd
- 	wbinvd
--.Lsme_off:
-+.Lnowbinvd:
- 
- 	call	swap_pages
- 
-@@ -220,7 +225,7 @@ SYM_CODE_START_LOCAL_NOALIGN(identity_mapped)
- 	movq	%cr3, %rax
- 	movq	%rax, %cr3
- 
--	testq	%r11, %r11	/* preserve_context */
-+	testb	$RELOC_KERNEL_PRESERVE_CONTEXT, %r11b
- 	jnz .Lrelocate
- 
- 	/*
-@@ -273,7 +278,13 @@ SYM_CODE_START_LOCAL_NOALIGN(identity_mapped)
- 	ANNOTATE_NOENDBR
- 	andq	$PAGE_MASK, %r8
- 	lea	PAGE_SIZE(%r8), %rsp
--	movl	$1, %r11d	/* Ensure preserve_context flag is set */
-+	/*
-+	 * Ensure RELOC_KERNEL_PRESERVE_CONTEXT flag is set so that
-+	 * swap_pages() can swap pages correctly.  Note all other
-+	 * RELOC_KERNEL_* flags passed to relocate_kernel() are not
-+	 * restored.
-+	 */
-+	movl	$RELOC_KERNEL_PRESERVE_CONTEXT, %r11d
- 	call	swap_pages
- 	movq	kexec_va_control_page(%rip), %rax
- 0:	addq	$virtual_mapped - 0b, %rax
-@@ -321,7 +332,7 @@ SYM_CODE_START_LOCAL_NOALIGN(swap_pages)
- 	UNWIND_HINT_END_OF_STACK
- 	/*
- 	 * %rdi indirection page
--	 * %r11 preserve_context
-+	 * %r11 flags: RELOC_KERNEL_*
- 	 */
- 	movq	%rdi, %rcx	/* Put the indirection_page in %rcx */
- 	xorl	%edi, %edi
-@@ -357,7 +368,8 @@ SYM_CODE_START_LOCAL_NOALIGN(swap_pages)
- 	movq	%rdi, %rdx    /* Save destination page to %rdx */
- 	movq	%rsi, %rax    /* Save source page to %rax */
- 
--	testq	%r11, %r11    /* Only actually swap for ::preserve_context */
-+	/* Only actually swap for ::preserve_context */
-+	testb	$RELOC_KERNEL_PRESERVE_CONTEXT, %r11b
- 	jz	.Lnoswap
- 
- 	/* copy source page to swap page */
 diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
 index 1b2edd07a3e1..201705bc317a 100644
 --- a/arch/x86/kernel/setup.c
@@ -998,72 +576,6 @@ index 1b2edd07a3e1..201705bc317a 100644
  	unwind_init();
  }
  
-diff --git a/arch/x86/kvm/vmx/tdx.c b/arch/x86/kvm/vmx/tdx.c
-index 66744f5768c8..de39c2e267b1 100644
---- a/arch/x86/kvm/vmx/tdx.c
-+++ b/arch/x86/kvm/vmx/tdx.c
-@@ -442,6 +442,16 @@ void tdx_disable_virtualization_cpu(void)
- 		tdx_flush_vp(&arg);
- 	}
- 	local_irq_restore(flags);
-+
-+	/*
-+	 * Flush cache now if kexec is possible: this is necessary to avoid
-+	 * having dirty private memory cachelines when the new kernel boots,
-+	 * but WBINVD is a relatively expensive operation and doing it during
-+	 * kexec can exacerbate races in native_stop_other_cpus().  Do it
-+	 * now, since this is a safe moment and there is going to be no more
-+	 * TDX activity on this CPU from this point on.
-+	 */
-+	tdx_cpu_flush_cache_for_kexec();
- }
- 
- #define TDX_SEAMCALL_RETRIES 10000
-diff --git a/arch/x86/virt/vmx/tdx/tdx.c b/arch/x86/virt/vmx/tdx/tdx.c
-index c7a9a087ccaf..458cb109f61a 100644
---- a/arch/x86/virt/vmx/tdx/tdx.c
-+++ b/arch/x86/virt/vmx/tdx/tdx.c
-@@ -1266,7 +1266,7 @@ static bool paddr_is_tdx_private(unsigned long phys)
- 		return false;
- 
- 	/* Get page type from the TDX module */
--	sret = __seamcall_ret(TDH_PHYMEM_PAGE_RDMD, &args);
-+	sret = __seamcall_dirty_cache(__seamcall_ret, TDH_PHYMEM_PAGE_RDMD, &args);
- 
- 	/*
- 	 * The SEAMCALL will not return success unless there is a
-@@ -1522,7 +1522,7 @@ noinstr __flatten u64 tdh_vp_enter(struct tdx_vp *td, struct tdx_module_args *ar
- {
- 	args->rcx = tdx_tdvpr_pa(td);
- 
--	return __seamcall_saved_ret(TDH_VP_ENTER, args);
-+	return __seamcall_dirty_cache(__seamcall_saved_ret, TDH_VP_ENTER, args);
- }
- EXPORT_SYMBOL_GPL(tdh_vp_enter);
- 
-@@ -1870,3 +1870,22 @@ u64 tdh_phymem_page_wbinvd_hkid(u64 hkid, struct page *page)
- 	return seamcall(TDH_PHYMEM_PAGE_WBINVD, &args);
- }
- EXPORT_SYMBOL_GPL(tdh_phymem_page_wbinvd_hkid);
-+
-+#ifdef CONFIG_KEXEC_CORE
-+void tdx_cpu_flush_cache_for_kexec(void)
-+{
-+	lockdep_assert_preemption_disabled();
-+
-+	if (!this_cpu_read(cache_state_incoherent))
-+		return;
-+
-+	/*
-+	 * Private memory cachelines need to be clean at the time of
-+	 * kexec.  Write them back now, as the caller promises that
-+	 * there should be no more SEAMCALLs on this CPU.
-+	 */
-+	wbinvd();
-+	this_cpu_write(cache_state_incoherent, false);
-+}
-+EXPORT_SYMBOL_GPL(tdx_cpu_flush_cache_for_kexec);
-+#endif
 diff --git a/crypto/akcipher.c b/crypto/akcipher.c
 index a36f50c83827..f4f421e6cff2 100644
 --- a/crypto/akcipher.c
@@ -1545,10 +1057,10 @@ index 76a856c32c4d..f2d25d95811c 100644
  	return ctx.rc;
  }
 diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index 880a544d73cd..39cef3f62732 100644
+index ef16d58b2949..a3119cc4a9a9 100644
 --- a/drivers/acpi/scan.c
 +++ b/drivers/acpi/scan.c
-@@ -1796,6 +1796,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
+@@ -1802,6 +1802,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
  	if (!acpi_match_device_ids(device, ignore_serial_bus_ids))
  		return false;
  
@@ -2221,10 +1733,10 @@ index d4af17fdba46..154f0403cbf4 100644
  	data->xport.ops = &hid_rmi_ops;
  
 diff --git a/drivers/hwtracing/coresight/coresight-etm4x-core.c b/drivers/hwtracing/coresight/coresight-etm4x-core.c
-index 42e5d37403ad..87b0c6c936b1 100644
+index 020f070bf17d..c4bfe2c080cf 100644
 --- a/drivers/hwtracing/coresight/coresight-etm4x-core.c
 +++ b/drivers/hwtracing/coresight/coresight-etm4x-core.c
-@@ -11,6 +11,7 @@
+@@ -12,6 +12,7 @@
  #include <linux/init.h>
  #include <linux/types.h>
  #include <linux/device.h>
@@ -2232,7 +1744,7 @@ index 42e5d37403ad..87b0c6c936b1 100644
  #include <linux/io.h>
  #include <linux/err.h>
  #include <linux/fs.h>
-@@ -2446,6 +2447,16 @@ static const struct amba_id etm4_ids[] = {
+@@ -2448,6 +2449,16 @@ static const struct amba_id etm4_ids[] = {
  	{},
  };
  
@@ -2249,7 +1761,7 @@ index 42e5d37403ad..87b0c6c936b1 100644
  MODULE_DEVICE_TABLE(amba, etm4_ids);
  
  static struct amba_driver etm4x_amba_driver = {
-@@ -2514,6 +2525,11 @@ static int __init etm4x_init(void)
+@@ -2522,6 +2533,11 @@ static int __init etm4x_init(void)
  {
  	int ret;
  
@@ -2261,7 +1773,7 @@ index 42e5d37403ad..87b0c6c936b1 100644
  	ret = etm4_pm_setup();
  
  	/* etm4_pm_setup() does its own cleanup - exit on error */
-@@ -2540,6 +2556,9 @@ static int __init etm4x_init(void)
+@@ -2548,6 +2564,9 @@ static int __init etm4x_init(void)
  
  static void __exit etm4x_exit(void)
  {
@@ -2464,7 +1976,7 @@ index 2168b6cd7167..5d7cda175a0c 100644
  	if (data->f01_container->dev.driver) {
  		/* Driver already bound, so enable ATTN now. */
 diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
-index 060ebe330ee1..2dfed8d43967 100644
+index 59244c744eab..183f4eaab6e2 100644
 --- a/drivers/iommu/iommu.c
 +++ b/drivers/iommu/iommu.c
 @@ -8,6 +8,7 @@
@@ -2475,7 +1987,7 @@ index 060ebe330ee1..2dfed8d43967 100644
  #include <linux/kernel.h>
  #include <linux/bits.h>
  #include <linux/bug.h>
-@@ -2941,6 +2942,27 @@ int iommu_fwspec_add_ids(struct device *dev, const u32 *ids, int num_ids)
+@@ -2967,6 +2968,27 @@ int iommu_fwspec_add_ids(struct device *dev, const u32 *ids, int num_ids)
  }
  EXPORT_SYMBOL_GPL(iommu_fwspec_add_ids);
  
@@ -2601,7 +2113,7 @@ index 63665240ae87..f3c6a2c74ad0 100644
  		return rc;
  	if (rc < 0) {
 diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
-index d97335a40193..3b0c24a0bf32 100644
+index 17315a825674..c86dcabd040e 100644
 --- a/drivers/pci/quirks.c
 +++ b/drivers/pci/quirks.c
 @@ -4450,6 +4450,30 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_BROADCOM, 0x9000,
@@ -2636,7 +2148,7 @@ index d97335a40193..3b0c24a0bf32 100644
   * Intersil/Techwell TW686[4589]-based video capture cards have an empty (zero)
   * class code.  Fix it.
 diff --git a/drivers/scsi/hpsa.c b/drivers/scsi/hpsa.c
-index c73a71ac3c29..9e7e41288a7a 100644
+index 3654b12c5d5a..9bc907e146a5 100644
 --- a/drivers/scsi/hpsa.c
 +++ b/drivers/scsi/hpsa.c
 @@ -82,7 +82,9 @@ MODULE_DESCRIPTION("Driver for HP Smart Array Controller version " \
@@ -2737,10 +2249,10 @@ index 0b1616e93cf4..85fc52038a82 100644
  		PCI_ANY_ID, PCI_ANY_ID, },
  	{PCI_VENDOR_ID_EMULEX, PCI_DEVICE_ID_LANCER_G7_FC,
 diff --git a/drivers/scsi/qla2xxx/qla_os.c b/drivers/scsi/qla2xxx/qla_os.c
-index d4b484c0fd9d..4e5bb4cce484 100644
+index 98a5c105fdfd..baa50b2597a8 100644
 --- a/drivers/scsi/qla2xxx/qla_os.c
 +++ b/drivers/scsi/qla2xxx/qla_os.c
-@@ -8105,6 +8105,7 @@ static const struct pci_error_handlers qla2xxx_err_handler = {
+@@ -8106,6 +8106,7 @@ static const struct pci_error_handlers qla2xxx_err_handler = {
  };
  
  static const struct pci_device_id qla2xxx_pci_tbl[] = {
@@ -2748,7 +2260,7 @@ index d4b484c0fd9d..4e5bb4cce484 100644
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2100) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2200) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2300) },
-@@ -8117,13 +8118,18 @@ static const struct pci_device_id qla2xxx_pci_tbl[] = {
+@@ -8118,13 +8119,18 @@ static const struct pci_device_id qla2xxx_pci_tbl[] = {
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP8432) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP5422) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP5432) },
@@ -2768,7 +2280,7 @@ index d4b484c0fd9d..4e5bb4cce484 100644
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2271) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2261) },
 diff --git a/drivers/scsi/sd.c b/drivers/scsi/sd.c
-index 00ad574ce61c..1d32b133e83e 100644
+index 0252d3f6bed1..ec711e8a38b8 100644
 --- a/drivers/scsi/sd.c
 +++ b/drivers/scsi/sd.c
 @@ -121,6 +121,14 @@ static const char *sd_cache_types[] = {
@@ -2786,7 +2298,7 @@ index 00ad574ce61c..1d32b133e83e 100644
  static void sd_set_flush_flag(struct scsi_disk *sdkp,
  		struct queue_limits *lim)
  {
-@@ -4373,6 +4381,11 @@ static int __init init_sd(void)
+@@ -4375,6 +4383,11 @@ static int __init init_sd(void)
  		goto err_out_class;
  	}
  
@@ -2858,10 +2370,10 @@ index f3f8d8c066e4..ab1e9251ede5 100644
  }
  
 diff --git a/fs/ext4/super.c b/fs/ext4/super.c
-index 7f2d4014d128..3e62578475d6 100644
+index 33e7c08c9529..1cf7f4750f70 100644
 --- a/fs/ext4/super.c
 +++ b/fs/ext4/super.c
-@@ -5645,6 +5645,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
+@@ -5647,6 +5647,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
  	atomic_set(&sbi->s_warning_count, 0);
  	atomic_set(&sbi->s_msg_count, 0);
  
@@ -2987,7 +2499,7 @@ index 5b46924fdff5..ffd5e38d3cb7 100644
 +
  #endif
 diff --git a/include/linux/lsm_hook_defs.h b/include/linux/lsm_hook_defs.h
-index adbe234a6f6c..dc9b6b67b1d4 100644
+index 8c42b4bde09c..694ce5c5bcd4 100644
 --- a/include/linux/lsm_hook_defs.h
 +++ b/include/linux/lsm_hook_defs.h
 @@ -446,6 +446,7 @@ LSM_HOOK(int, 0, bpf_token_capable, const struct bpf_token *token, int cap)
@@ -3725,7 +3237,7 @@ index ab7eea01ab42..fff7c5f737fc 100644
  
  int rmi_register_transport_device(struct rmi_transport_dev *xport);
 diff --git a/include/linux/security.h b/include/linux/security.h
-index bd33f194c94a..f33e1c6daf12 100644
+index 92ac3f27b973..d9efb9b50aed 100644
 --- a/include/linux/security.h
 +++ b/include/linux/security.h
 @@ -2407,4 +2407,13 @@ static inline void security_initramfs_populated(void)

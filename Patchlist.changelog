@@ -1,26 +1,5 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/b373f78313f8f2b5e7873cb9d3eeab66064425c5
- b373f78313f8f2b5e7873cb9d3eeab66064425c5 powerpc/tools: drop `-o pipefail` in gcc check scripts
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/c8d5175a5e41aa007c1ed80c3a0fe5987a3624c2
- c8d5175a5e41aa007c1ed80c3a0fe5987a3624c2 KVM/TDX: Explicitly do WBINVD when no more TDX SEAMCALLs
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/8c6f24550806659588588e0f0d0cc4f5f19963a8
- 8c6f24550806659588588e0f0d0cc4f5f19963a8 x86/virt/tdx: Update the kexec section in the TDX documentation
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/de66105298024d9a2ebfe0c0ef6f3638476247f4
- de66105298024d9a2ebfe0c0ef6f3638476247f4 x86/virt/tdx: Remove the !KEXEC_CORE dependency
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/972d9f2d17570c4265fcdbe2c3e186ab7cd5eff4
- 972d9f2d17570c4265fcdbe2c3e186ab7cd5eff4 x86/kexec: Disable kexec/kdump on platforms with TDX partial write erratum
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/b93365df3d7f80c7b7f21237cfc51e368435ee0d
- b93365df3d7f80c7b7f21237cfc51e368435ee0d x86/virt/tdx: Mark memory cache state incoherent when making SEAMCALL
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/b40f96bf34e8678f9d5e6602fce7fecf2177dae1
- b40f96bf34e8678f9d5e6602fce7fecf2177dae1 x86/sme: Use percpu boolean to control WBINVD during kexec
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/bcab626c301e071f77a0935f31a0fa942b8f6d2b
- bcab626c301e071f77a0935f31a0fa942b8f6d2b x86/kexec: Consolidate relocate_kernel() function parameters
+https://gitlab.com/cki-project/kernel-ark/-/commit/9a443919b1bc0be69f2f2f50a25b817025b766b7
+ 9a443919b1bc0be69f2f2f50a25b817025b766b7 powerpc/tools: drop `-o pipefail` in gcc check scripts
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/0a4dabe8b3739bf6f0b403a25b785f864d4f3985
  0a4dabe8b3739bf6f0b403a25b785f864d4f3985 rh_messages.h: add missing aacraid device
