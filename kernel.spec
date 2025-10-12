@@ -173,18 +173,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 6.17.1
-%define specversion 6.17.1
+%define specrpmversion 6.17.2
+%define specversion 6.17.2
 %define patchversion 6.17
 %define pkgrelease 300
 %define kversion 6
-%define tarfile_release 6.17.1
+%define tarfile_release 6.17.2
 # This is needed to do merge window version magic
 %define patchlevel 17
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 300%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 6.17.1
+%define kabiversion 6.17.2
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4383,6 +4383,11 @@ fi\
 #
 #
 %changelog
+* Sun Oct 12 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.17.2-1]
+- fedora: aarch64: Enable arm MHUv2 driver (Peter Robinson)
+- fedora: arm: Enable the NVMEM_IMX_OCOTP_ELE module (Peter Robinson)
+- Linux v6.17.2
+
 * Mon Oct 06 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.17.1-1]
 - Add Bug to BugsFixed (Justin M. Forbes)
 - gpio: usbio: Add ACPI device-id for MTL-CVF devices (Hans de Goede)
