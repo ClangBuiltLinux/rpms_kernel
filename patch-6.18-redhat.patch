@@ -74,7 +74,6 @@
  kernel/rh_messages.h                               | 333 +++++++++++++
  kernel/rh_waived.c                                 | 104 ++++
  scripts/Makefile.lib                               |   3 +
- scripts/Makefile.vmlinux                           |   2 +-
  scripts/mod/modpost.c                              |   8 +
  scripts/tags.sh                                    |   2 +
  security/integrity/platform_certs/load_uefi.c      |   6 +-
@@ -82,13 +81,13 @@
  security/lockdown/lockdown.c                       |  11 +
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
- 84 files changed, 2770 insertions(+), 246 deletions(-)
+ 83 files changed, 2769 insertions(+), 245 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index a51ab46568544..04e222d09f51a 100644
+index 6c42061ca20e5..3b4011b7d5b79 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -6424,6 +6424,17 @@
+@@ -6442,6 +6442,17 @@
  		2	The "airplane mode" button toggles between everything
  			blocked and everything unblocked.
  
@@ -106,7 +105,7 @@ index a51ab46568544..04e222d09f51a 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -7798,6 +7809,15 @@
+@@ -7816,6 +7827,15 @@
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -197,7 +196,7 @@ index 0000000000000..85771d74c34f9
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 6f88b1d3b40d9..e2d5b34589c67 100644
+index 17cfa11ca7163..0cdffff94693b 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -355,6 +355,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -2250,10 +2249,10 @@ index 0b1616e93cf47..85fc52038a825 100644
  		PCI_ANY_ID, PCI_ANY_ID, },
  	{PCI_VENDOR_ID_EMULEX, PCI_DEVICE_ID_LANCER_G7_FC,
 diff --git a/drivers/scsi/qla2xxx/qla_os.c b/drivers/scsi/qla2xxx/qla_os.c
-index cb56d2af6cfaf..5812a2947d6aa 100644
+index 5ffd945866527..fb913ed9f0d1a 100644
 --- a/drivers/scsi/qla2xxx/qla_os.c
 +++ b/drivers/scsi/qla2xxx/qla_os.c
-@@ -8101,6 +8101,7 @@ static const struct pci_error_handlers qla2xxx_err_handler = {
+@@ -8100,6 +8100,7 @@ static const struct pci_error_handlers qla2xxx_err_handler = {
  };
  
  static const struct pci_device_id qla2xxx_pci_tbl[] = {
@@ -2261,7 +2260,7 @@ index cb56d2af6cfaf..5812a2947d6aa 100644
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2100) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2200) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2300) },
-@@ -8113,13 +8114,18 @@ static const struct pci_device_id qla2xxx_pci_tbl[] = {
+@@ -8112,13 +8113,18 @@ static const struct pci_device_id qla2xxx_pci_tbl[] = {
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP8432) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP5422) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP5432) },
@@ -4461,19 +4460,6 @@ index 1d581ba5df66f..7826803444df9 100644
  
  objtool-args = $(objtool-args-y)					\
  	$(if $(delay-objtool), --link)					\
-diff --git a/scripts/Makefile.vmlinux b/scripts/Makefile.vmlinux
-index 7c6ae9886f8f7..5b46ff4b306af 100644
---- a/scripts/Makefile.vmlinux
-+++ b/scripts/Makefile.vmlinux
-@@ -84,7 +84,7 @@ endif
- remove-section-y                                   := .modinfo
- remove-section-$(CONFIG_ARCH_VMLINUX_NEEDS_RELOCS) += '.rel*'
- 
--remove-symbols := -w --strip-symbol='__mod_device_table__*'
-+remove-symbols := -w --strip-unneeded-symbol='__mod_device_table__*'
- 
- # To avoid warnings: "empty loadable segment detected at ..." from GNU objcopy,
- # it is necessary to remove the PT_LOAD flag from the segment.
 diff --git a/scripts/mod/modpost.c b/scripts/mod/modpost.c
 index 47c8aa2a69392..de98c5afa921e 100644
 --- a/scripts/mod/modpost.c

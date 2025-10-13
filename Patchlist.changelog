@@ -1,8 +1,5 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/8db968d8d1c6faf7a4a37f603af4ac5ae8f47e7d
- 8db968d8d1c6faf7a4a37f603af4ac5ae8f47e7d Only strip unneeded symbols
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/69f3819bd9421403d522f00db675d8809a27bdce
- 69f3819bd9421403d522f00db675d8809a27bdce powerpc/tools: drop `-o pipefail` in gcc check scripts
+https://gitlab.com/cki-project/kernel-ark/-/commit/7c6efba7ef7c8b5b1a29f962c0cba813c8b4d184
+ 7c6efba7ef7c8b5b1a29f962c0cba813c8b4d184 powerpc/tools: drop `-o pipefail` in gcc check scripts
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/0a4dabe8b3739bf6f0b403a25b785f864d4f3985
  0a4dabe8b3739bf6f0b403a25b785f864d4f3985 rh_messages.h: add missing aacraid device
