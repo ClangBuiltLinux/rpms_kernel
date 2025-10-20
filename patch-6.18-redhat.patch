@@ -196,7 +196,7 @@ index 0000000000000..85771d74c34f9
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 17cfa11ca7163..0cdffff94693b 100644
+index d14824792227b..b2750e4f1375e 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -355,6 +355,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -3310,7 +3310,7 @@ index d595fe512498c..362eb90a9bbe5 100644
  long bpf_jit_limit_max __read_mostly;
  
 diff --git a/kernel/bpf/syscall.c b/kernel/bpf/syscall.c
-index 2a9456a3e7304..d2297dcc59010 100644
+index 8a129746bd6cc..cf8d472fa999a 100644
 --- a/kernel/bpf/syscall.c
 +++ b/kernel/bpf/syscall.c
 @@ -27,6 +27,7 @@
@@ -3345,7 +3345,7 @@ index 2a9456a3e7304..d2297dcc59010 100644
  int sysctl_unprivileged_bpf_disabled __read_mostly =
  	IS_BUILTIN(CONFIG_BPF_UNPRIV_DEFAULT_OFF) ? 2 : 0;
  
-@@ -6462,6 +6480,11 @@ static int bpf_unpriv_handler(const struct ctl_table *table, int write,
+@@ -6477,6 +6495,11 @@ static int bpf_unpriv_handler(const struct ctl_table *table, int write,
  	if (write && !ret) {
  		if (locked_state && unpriv_enable != 1)
  			return -EPERM;
