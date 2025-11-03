@@ -1,3 +1,9 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/f8f85178684e10cf8efb6919816ad183bdad7c61
+ f8f85178684e10cf8efb6919816ad183bdad7c61 rust: kbuild: workaround `rustdoc` doctests modifier bug
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/cfdba2cece7131840002897d05120274ef2979ec
+ cfdba2cece7131840002897d05120274ef2979ec rust: kbuild: treat `build_error` and `rustdoc` as kernel objects
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/cfb1b82c60365cb2aeb407555ab9a2c3bfc79bd3
  cfb1b82c60365cb2aeb407555ab9a2c3bfc79bd3 powerpc/tools: drop `-o pipefail` in gcc check scripts
 

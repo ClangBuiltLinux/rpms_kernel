@@ -4500,6 +4500,10 @@ fi\
 #
 #
 %changelog
+* Mon Nov 03 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.18.0-0.rc4.37]
+- rust: kbuild: workaround `rustdoc` doctests modifier bug (Miguel Ojeda)
+- rust: kbuild: treat `build_error` and `rustdoc` as kernel objects (Miguel Ojeda)
+
 * Mon Nov 03 2025 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.18.0-0.rc4.37]
 - powerpc/tools: drop `-o pipefail` in gcc check scripts (Jan Stancek)
 - redhat/configs: clang_lto: disable CONFIG_FORTIFY_KUNIT_TEST (Scott Weaver)
