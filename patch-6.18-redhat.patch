@@ -73,7 +73,6 @@
  kernel/rh_messages.c                               | 414 ++++++++++++++++
  kernel/rh_messages.h                               | 333 +++++++++++++
  kernel/rh_waived.c                                 | 147 ++++++
- rust/Makefile                                      |  15 +-
  scripts/Makefile.lib                               |   3 +
  scripts/mod/modpost.c                              |   8 +
  scripts/tags.sh                                    |   2 +
@@ -82,7 +81,7 @@
  security/lockdown/lockdown.c                       |  11 +
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
- 84 files changed, 2837 insertions(+), 246 deletions(-)
+ 83 files changed, 2823 insertions(+), 245 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index 6c42061ca20e5..88db6c8c0453c 100644
@@ -4500,63 +4499,6 @@ index 0000000000000..20966f7c7277f
 +	return 0;
 +}
 +late_initcall(__add_rh_flag);
-diff --git a/rust/Makefile b/rust/Makefile
-index 23c7ae905bd2f..ce6d9c9d97274 100644
---- a/rust/Makefile
-+++ b/rust/Makefile
-@@ -69,6 +69,9 @@ core-edition := $(if $(call rustc-min-version,108700),2024,2021)
- # the time being (https://github.com/rust-lang/rust/issues/144521).
- rustdoc_modifiers_workaround := $(if $(call rustc-min-version,108800),-Cunsafe-allow-abi-mismatch=fixed-x18)
- 
-+# Similarly, for doctests (https://github.com/rust-lang/rust/issues/146465).
-+doctests_modifiers_workaround := $(rustdoc_modifiers_workaround)$(if $(call rustc-min-version,109100),$(comma)sanitizer)
-+
- # `rustc` recognizes `--remap-path-prefix` since 1.26.0, but `rustdoc` only
- # since Rust 1.81.0. Moreover, `rustdoc` ICEs on out-of-tree builds since Rust
- # 1.82.0 (https://github.com/rust-lang/rust/issues/138520). Thus workaround both
-@@ -127,9 +130,14 @@ rustdoc-core: private rustc_target_flags = --edition=$(core-edition) $(core-cfgs
- rustdoc-core: $(RUST_LIB_SRC)/core/src/lib.rs rustdoc-clean FORCE
- 	+$(call if_changed,rustdoc)
- 
-+# Even if `rustdoc` targets are not kernel objects, they should still be
-+# treated as such so that we pass the same flags. Otherwise, for instance,
-+# `rustc` will complain about missing sanitizer flags causing an ABI mismatch.
-+rustdoc-compiler_builtins: private is-kernel-object := y
- rustdoc-compiler_builtins: $(src)/compiler_builtins.rs rustdoc-core FORCE
- 	+$(call if_changed,rustdoc)
- 
-+rustdoc-ffi: private is-kernel-object := y
- rustdoc-ffi: $(src)/ffi.rs rustdoc-core FORCE
- 	+$(call if_changed,rustdoc)
- 
-@@ -147,6 +155,7 @@ rustdoc-pin_init: $(src)/pin-init/src/lib.rs rustdoc-pin_init_internal \
-     rustdoc-macros FORCE
- 	+$(call if_changed,rustdoc)
- 
-+rustdoc-kernel: private is-kernel-object := y
- rustdoc-kernel: private rustc_target_flags = --extern ffi --extern pin_init \
-     --extern build_error --extern macros \
-     --extern bindings --extern uapi
-@@ -230,7 +239,7 @@ quiet_cmd_rustdoc_test_kernel = RUSTDOC TK $<
- 		--extern bindings --extern uapi \
- 		--no-run --crate-name kernel -Zunstable-options \
- 		--sysroot=/dev/null \
--		$(rustdoc_modifiers_workaround) \
-+		$(doctests_modifiers_workaround) \
- 		--test-builder $(objtree)/scripts/rustdoc_test_builder \
- 		$< $(rustdoc_test_kernel_quiet); \
- 	$(objtree)/scripts/rustdoc_test_gen
-@@ -522,6 +531,10 @@ $(obj)/pin_init.o: $(src)/pin-init/src/lib.rs $(obj)/compiler_builtins.o \
-     $(obj)/$(libpin_init_internal_name) $(obj)/$(libmacros_name) FORCE
- 	+$(call if_changed_rule,rustc_library)
- 
-+# Even if normally `build_error` is not a kernel object, it should still be
-+# treated as such so that we pass the same flags. Otherwise, for instance,
-+# `rustc` will complain about missing sanitizer flags causing an ABI mismatch.
-+$(obj)/build_error.o: private is-kernel-object := y
- $(obj)/build_error.o: private skip_gendwarfksyms = 1
- $(obj)/build_error.o: $(src)/build_error.rs $(obj)/compiler_builtins.o FORCE
- 	+$(call if_changed_rule,rustc_library)
 diff --git a/scripts/Makefile.lib b/scripts/Makefile.lib
 index 1d581ba5df66f..7826803444df9 100644
 --- a/scripts/Makefile.lib

@@ -1,11 +1,5 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/6b0ff63b5d459c2abf7bb1455b71a0c4be1e4875
- 6b0ff63b5d459c2abf7bb1455b71a0c4be1e4875 rust: kbuild: workaround `rustdoc` doctests modifier bug
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/c86901f320b4b2a2dbcfe5ccaf9ba629b37d8d15
- c86901f320b4b2a2dbcfe5ccaf9ba629b37d8d15 rust: kbuild: treat `build_error` and `rustdoc` as kernel objects
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/d81ef4b23d5416f4fc5ceab3fadf10d84a1f9791
- d81ef4b23d5416f4fc5ceab3fadf10d84a1f9791 powerpc/tools: drop `-o pipefail` in gcc check scripts
+https://gitlab.com/cki-project/kernel-ark/-/commit/281d7e59c8b771bf6fec95fa3ffd86f8802435a4
+ 281d7e59c8b771bf6fec95fa3ffd86f8802435a4 powerpc/tools: drop `-o pipefail` in gcc check scripts
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/77bb95c34bd75769a4e4d1c706cee2521bf7c455
  77bb95c34bd75769a4e4d1c706cee2521bf7c455 kernel: extend rh_waived to cope better with the CVE mitigations case
