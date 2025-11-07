@@ -1,5 +1,5 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/281d7e59c8b771bf6fec95fa3ffd86f8802435a4
- 281d7e59c8b771bf6fec95fa3ffd86f8802435a4 powerpc/tools: drop `-o pipefail` in gcc check scripts
+https://gitlab.com/cki-project/kernel-ark/-/commit/c501c9e604c97ee50a5298fd6e2b37f198529a22
+ c501c9e604c97ee50a5298fd6e2b37f198529a22 powerpc/tools: drop `-o pipefail` in gcc check scripts
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/77bb95c34bd75769a4e4d1c706cee2521bf7c455
  77bb95c34bd75769a4e4d1c706cee2521bf7c455 kernel: extend rh_waived to cope better with the CVE mitigations case

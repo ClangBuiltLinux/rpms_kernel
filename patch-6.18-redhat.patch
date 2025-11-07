@@ -277,10 +277,10 @@ index 088565edc911c..66a1e368ffeba 100644
  	@:
  
 diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index 2e3f93b690f47..3724e38d896a7 100644
+index 4fb985b76e97f..ed23eedf6c2d6 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
-@@ -1212,9 +1212,9 @@ config HIGHMEM
+@@ -1214,9 +1214,9 @@ config HIGHMEM
  	  If unsure, say n.
  
  config HIGHPTE
