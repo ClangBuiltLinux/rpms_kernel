@@ -1,8 +1,8 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/e89ece067f2993c0ccba60d1ff359403d9eee1ac
- e89ece067f2993c0ccba60d1ff359403d9eee1ac Only rust/bindings.o build fail on rust-1.91.0
+https://gitlab.com/cki-project/kernel-ark/-/commit/0dad064f729fabe1359821bf358af5d648080244
+ 0dad064f729fabe1359821bf358af5d648080244 Only rust/bindings.o build fail on rust-1.91.0
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/9367b7646097f56f67d2f967be06de53c14afe44
- 9367b7646097f56f67d2f967be06de53c14afe44 powerpc/tools: drop `-o pipefail` in gcc check scripts
+https://gitlab.com/cki-project/kernel-ark/-/commit/42ec4dd790d442e6f588f8786e091de679537538
+ 42ec4dd790d442e6f588f8786e091de679537538 powerpc/tools: drop `-o pipefail` in gcc check scripts
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/77bb95c34bd75769a4e4d1c706cee2521bf7c455
  77bb95c34bd75769a4e4d1c706cee2521bf7c455 kernel: extend rh_waived to cope better with the CVE mitigations case

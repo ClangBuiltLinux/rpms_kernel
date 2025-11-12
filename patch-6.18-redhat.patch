@@ -3294,7 +3294,7 @@ index 07a3116811c5d..ea319de7dff9c 100644
  		if (!strcmp(fn_name, entry->buf)) {
  			pr_debug("initcall %s blacklisted\n", fn_name);
 diff --git a/kernel/Makefile b/kernel/Makefile
-index df3dd8291bb60..21daf9c1590fa 100644
+index 9fe722305c9be..7c2f153f0e08e 100644
 --- a/kernel/Makefile
 +++ b/kernel/Makefile
 @@ -12,6 +12,8 @@ obj-y     = fork.o exec_domain.o panic.o \
