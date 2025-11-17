@@ -1,8 +1,5 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/54f43ab689bb165ca1f66d137cecf21ad6e5927c
- 54f43ab689bb165ca1f66d137cecf21ad6e5927c gendwarfksyms: Skip files with no exports
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/f9a46a75d30a9d745313ad63d4750fa1b1fbacf2
- f9a46a75d30a9d745313ad63d4750fa1b1fbacf2 powerpc/tools: drop `-o pipefail` in gcc check scripts
+https://gitlab.com/cki-project/kernel-ark/-/commit/dac13f95bc6d0d13f5a8f17edc9885db53cc4ada
+ dac13f95bc6d0d13f5a8f17edc9885db53cc4ada powerpc/tools: drop `-o pipefail` in gcc check scripts
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/77bb95c34bd75769a4e4d1c706cee2521bf7c455
  77bb95c34bd75769a4e4d1c706cee2521bf7c455 kernel: extend rh_waived to cope better with the CVE mitigations case
