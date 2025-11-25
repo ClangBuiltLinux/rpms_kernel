@@ -1,5 +1,5 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/5762346e1722a7931820a25c0decc4b396135989
- 5762346e1722a7931820a25c0decc4b396135989 powerpc/tools: drop `-o pipefail` in gcc check scripts
+https://gitlab.com/cki-project/kernel-ark/-/commit/26a19ec95b0dfd6ce1bf885ce354295a72f1576e
+ 26a19ec95b0dfd6ce1bf885ce354295a72f1576e powerpc/tools: drop `-o pipefail` in gcc check scripts
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/075333ca6db3758e1c6b6002180d72acae994901
  075333ca6db3758e1c6b6002180d72acae994901 Revert "Removing Obsolete hba pci-ids from rhel8"
