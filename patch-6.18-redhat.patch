@@ -78,9 +78,10 @@
  security/integrity/platform_certs/load_uefi.c      |   6 +-
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |  11 +
+ tools/lib/bpf/Makefile                             |   1 +
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
- 82 files changed, 2813 insertions(+), 245 deletions(-)
+ 83 files changed, 2814 insertions(+), 245 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index 6c42061ca20e..88db6c8c0453 100644
@@ -4557,6 +4558,18 @@ index cf83afa1d879..aba751e7abff 100644
  static struct security_hook_list lockdown_hooks[] __ro_after_init = {
  	LSM_HOOK_INIT(locked_down, lockdown_is_locked_down),
  };
+diff --git a/tools/lib/bpf/Makefile b/tools/lib/bpf/Makefile
+index 168140f8e646..5e24714c22e7 100644
+--- a/tools/lib/bpf/Makefile
++++ b/tools/lib/bpf/Makefile
+@@ -85,6 +85,7 @@ override CFLAGS += $(INCLUDES)
+ override CFLAGS += -fvisibility=hidden
+ override CFLAGS += -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
+ override CFLAGS += $(CLANG_CROSS_FLAGS)
++override CFLAGS += -Wno-error=discarded-qualifiers
+ 
+ # flags specific for shared library
+ SHLIB_FLAGS := -DSHARED -fPIC
 diff --git a/tools/testing/selftests/bpf/Makefile b/tools/testing/selftests/bpf/Makefile
 index f00587d4ede6..fa62443daade 100644
 --- a/tools/testing/selftests/bpf/Makefile
