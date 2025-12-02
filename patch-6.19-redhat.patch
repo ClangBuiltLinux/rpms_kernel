@@ -207,7 +207,7 @@ index 0000000000000..85771d74c34f9
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index a082a1d7c7d9b..3e052691d3811 100644
+index 6f0e72ff4d0cd..e39730b54b2b8 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -355,6 +355,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -228,7 +228,7 @@ index a082a1d7c7d9b..3e052691d3811 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1304,6 +1315,8 @@ uapi-asm-generic:
+@@ -1307,6 +1318,8 @@ uapi-asm-generic:
  # Generate some files
  # ---------------------------------------------------------------------------
  
@@ -237,7 +237,7 @@ index a082a1d7c7d9b..3e052691d3811 100644
  # KERNELRELEASE can change from a few different places, meaning version.h
  # needs to be updated, so this check is forced on all builds
  
-@@ -1328,7 +1341,13 @@ define filechk_version.h
+@@ -1331,7 +1344,13 @@ define filechk_version.h
  	((c) > 255 ? 255 : (c)))';                                       \
  	echo \#define LINUX_VERSION_MAJOR $(VERSION);                    \
  	echo \#define LINUX_VERSION_PATCHLEVEL $(PATCHLEVEL);            \
@@ -252,7 +252,7 @@ index a082a1d7c7d9b..3e052691d3811 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -1931,6 +1950,23 @@ endif
+@@ -1934,6 +1953,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -2448,10 +2448,10 @@ index 8c42b4bde09c0..694ce5c5bcd43 100644
  LSM_HOOK(int, 0, perf_event_open, int type)
  LSM_HOOK(int, 0, perf_event_alloc, struct perf_event *event)
 diff --git a/include/linux/module.h b/include/linux/module.h
-index e135cc79aceea..51621863f4590 100644
+index d80c3ea574726..662dff7438d75 100644
 --- a/include/linux/module.h
 +++ b/include/linux/module.h
-@@ -418,6 +418,7 @@ struct module {
+@@ -419,6 +419,7 @@ struct module {
  	struct module_attribute *modinfo_attrs;
  	const char *version;
  	const char *srcversion;
@@ -2459,7 +2459,7 @@ index e135cc79aceea..51621863f4590 100644
  	struct kobject *holders_dir;
  
  	/* Exported symbols */
-@@ -1017,6 +1018,10 @@ static inline unsigned long find_kallsyms_symbol_value(struct module *mod,
+@@ -1018,6 +1019,10 @@ static inline unsigned long find_kallsyms_symbol_value(struct module *mod,
  
  #endif  /* CONFIG_MODULES && CONFIG_KALLSYMS */
  
@@ -3370,7 +3370,7 @@ index a2ff4242e623d..f0d2be1ee4f1c 100644
  
  int module_sig_check(struct load_info *info, int flags)
 diff --git a/kernel/panic.c b/kernel/panic.c
-index 24cc3eec1805f..57b4bbc3231f1 100644
+index b2f2470af7e57..ba62a3b787e90 100644
 --- a/kernel/panic.c
 +++ b/kernel/panic.c
 @@ -660,6 +660,18 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
@@ -4428,7 +4428,7 @@ index 0000000000000..20966f7c7277f
 +}
 +late_initcall(__add_rh_flag);
 diff --git a/scripts/Makefile.lib b/scripts/Makefile.lib
-index 1d581ba5df66f..7826803444df9 100644
+index 28a1c08e3b221..3126a6fa63282 100644
 --- a/scripts/Makefile.lib
 +++ b/scripts/Makefile.lib
 @@ -191,7 +191,10 @@ objtool-args-$(CONFIG_HAVE_STATIC_CALL_INLINE)		+= --static-call
@@ -4437,13 +4437,13 @@ index 1d581ba5df66f..7826803444df9 100644
  objtool-args-$(CONFIG_PREFIX_SYMBOLS)			+= --prefix=$(CONFIG_FUNCTION_PADDING_BYTES)
 +# RHEL-only: don't enforce OBJTOOL_WERROR for out of tree modules
 +ifeq ($(KBUILD_EXTMOD),)
- objtool-args-$(CONFIG_OBJTOOL_WERROR)			+= --Werror
+ objtool-args-$(CONFIG_OBJTOOL_WERROR)			+= --werror
 +endif
  
  objtool-args = $(objtool-args-y)					\
  	$(if $(delay-objtool), --link)					\
 diff --git a/scripts/mod/modpost.c b/scripts/mod/modpost.c
-index 47c8aa2a69392..de98c5afa921e 100644
+index 755b842f1f9b7..af9188ed4ff06 100644
 --- a/scripts/mod/modpost.c
 +++ b/scripts/mod/modpost.c
 @@ -27,6 +27,7 @@
@@ -4454,7 +4454,7 @@ index 47c8aa2a69392..de98c5afa921e 100644
  
  #define MODULE_NS_PREFIX "module:"
  
-@@ -2029,6 +2030,12 @@ static void write_buf(struct buffer *b, const char *fname)
+@@ -2034,6 +2035,12 @@ static void write_buf(struct buffer *b, const char *fname)
  	}
  }
  
@@ -4467,7 +4467,7 @@ index 47c8aa2a69392..de98c5afa921e 100644
  static void write_if_changed(struct buffer *b, const char *fname)
  {
  	char *tmp;
-@@ -2113,6 +2120,7 @@ static void write_mod_c_file(struct module *mod)
+@@ -2118,6 +2125,7 @@ static void write_mod_c_file(struct module *mod)
  	}
  
  	add_srcversion(&buf, mod);
