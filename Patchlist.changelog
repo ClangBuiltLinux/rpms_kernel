@@ -1,8 +1,8 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/4d099abac4c1d1b8ed8459a5a7a5ff3bc12b3fbf
- 4d099abac4c1d1b8ed8459a5a7a5ff3bc12b3fbf disable a compiler warning for libbpf
+https://gitlab.com/cki-project/kernel-ark/-/commit/049d96aa6a8a7a6cc3c6bd8d2fae04a9d9b91ce2
+ 049d96aa6a8a7a6cc3c6bd8d2fae04a9d9b91ce2 disable a compiler warning for libbpf
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/df2e2663f2b670f80afc13e12a33145035859129
- df2e2663f2b670f80afc13e12a33145035859129 powerpc/tools: drop `-o pipefail` in gcc check scripts
+https://gitlab.com/cki-project/kernel-ark/-/commit/a508d79c3b051fe3c95989e8fab9bffe6928318f
+ a508d79c3b051fe3c95989e8fab9bffe6928318f powerpc/tools: drop `-o pipefail` in gcc check scripts
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/fe3e9e24af806d756edbda922103b1fa95d9b89b
  fe3e9e24af806d756edbda922103b1fa95d9b89b Revert "Removing Obsolete hba pci-ids from rhel8"

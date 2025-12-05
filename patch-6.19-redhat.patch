@@ -84,10 +84,10 @@
  83 files changed, 2814 insertions(+), 245 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 2b465eab41a19..f53e62bc859e2 100644
+index 1e89d122f0841..2dc9e448fca21 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -6452,6 +6452,20 @@
+@@ -6550,6 +6550,20 @@ Kernel parameters
  		2	The "airplane mode" button toggles between everything
  			blocked and everything unblocked.
  
@@ -108,7 +108,7 @@ index 2b465eab41a19..f53e62bc859e2 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -7830,6 +7844,15 @@
+@@ -7928,6 +7942,15 @@ Kernel parameters
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -207,7 +207,7 @@ index 0000000000000..85771d74c34f9
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 6f0e72ff4d0cd..e39730b54b2b8 100644
+index e61f1300fea0d..5c5444491e316 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -355,6 +355,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -228,7 +228,7 @@ index 6f0e72ff4d0cd..e39730b54b2b8 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1307,6 +1318,8 @@ uapi-asm-generic:
+@@ -1316,6 +1327,8 @@ uapi-asm-generic:
  # Generate some files
  # ---------------------------------------------------------------------------
  
@@ -237,7 +237,7 @@ index 6f0e72ff4d0cd..e39730b54b2b8 100644
  # KERNELRELEASE can change from a few different places, meaning version.h
  # needs to be updated, so this check is forced on all builds
  
-@@ -1331,7 +1344,13 @@ define filechk_version.h
+@@ -1340,7 +1353,13 @@ define filechk_version.h
  	((c) > 255 ? 255 : (c)))';                                       \
  	echo \#define LINUX_VERSION_MAJOR $(VERSION);                    \
  	echo \#define LINUX_VERSION_PATCHLEVEL $(PATCHLEVEL);            \
@@ -252,7 +252,7 @@ index 6f0e72ff4d0cd..e39730b54b2b8 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -1934,6 +1953,23 @@ endif
+@@ -1951,6 +1970,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -642,10 +642,10 @@ index 8250eeeebd0fe..01f0f3963a740 100644
  	}
  
 diff --git a/crypto/drbg.c b/crypto/drbg.c
-index dbe4c8bb5ceb7..02d7b74a4bd0a 100644
+index 1d433dae99557..c9899547752c6 100644
 --- a/crypto/drbg.c
 +++ b/crypto/drbg.c
-@@ -1495,13 +1495,14 @@ static int drbg_generate(struct drbg_state *drbg,
+@@ -1280,13 +1280,14 @@ static int drbg_generate(struct drbg_state *drbg,
   * Wrapper around drbg_generate which can pull arbitrary long strings
   * from the DRBG without hitting the maximum request limitation.
   *
@@ -662,7 +662,7 @@ index dbe4c8bb5ceb7..02d7b74a4bd0a 100644
  {
  	unsigned int len = 0;
  	unsigned int slice = 0;
-@@ -1511,6 +1512,8 @@ static int drbg_generate_long(struct drbg_state *drbg,
+@@ -1296,6 +1297,8 @@ static int drbg_generate_long(struct drbg_state *drbg,
  		slice = ((buflen - len) / drbg_max_request_bytes(drbg));
  		chunk = slice ? drbg_max_request_bytes(drbg) : (buflen - len);
  		mutex_lock(&drbg->drbg_mutex);
@@ -671,7 +671,7 @@ index dbe4c8bb5ceb7..02d7b74a4bd0a 100644
  		err = drbg_generate(drbg, buf + len, chunk, addtl);
  		mutex_unlock(&drbg->drbg_mutex);
  		if (0 > err)
-@@ -1937,6 +1940,7 @@ static int drbg_kcapi_random(struct crypto_rng *tfm,
+@@ -1697,6 +1700,7 @@ static int drbg_kcapi_random(struct crypto_rng *tfm,
  	struct drbg_state *drbg = crypto_rng_ctx(tfm);
  	struct drbg_string *addtl = NULL;
  	struct drbg_string string;
@@ -679,7 +679,7 @@ index dbe4c8bb5ceb7..02d7b74a4bd0a 100644
  
  	if (slen) {
  		/* linked list variable is now local to allow modification */
-@@ -1944,7 +1948,15 @@ static int drbg_kcapi_random(struct crypto_rng *tfm,
+@@ -1704,7 +1708,15 @@ static int drbg_kcapi_random(struct crypto_rng *tfm,
  		addtl = &string;
  	}
  
@@ -969,10 +969,10 @@ index beba745b64057..fd41f6d3abf9a 100644
  		alg->verify = sig_default_verify;
  	if (!alg->set_priv_key)
 diff --git a/crypto/testmgr.c b/crypto/testmgr.c
-index 6fb53978df112..784989da47014 100644
+index a302be53896d3..ade6307dbf899 100644
 --- a/crypto/testmgr.c
 +++ b/crypto/testmgr.c
-@@ -3934,7 +3934,7 @@ static int test_akcipher_one(struct crypto_akcipher *tfm,
+@@ -3843,7 +3843,7 @@ static int test_akcipher_one(struct crypto_akcipher *tfm,
  	 * Don't invoke decrypt test which requires a private key
  	 * for vectors with only a public key.
  	 */
@@ -981,7 +981,7 @@ index 6fb53978df112..784989da47014 100644
  		err = 0;
  		goto free_all;
  	}
-@@ -4070,7 +4070,7 @@ static int test_sig_one(struct crypto_sig *tfm, const struct sig_testvec *vecs)
+@@ -3979,7 +3979,7 @@ static int test_sig_one(struct crypto_sig *tfm, const struct sig_testvec *vecs)
  	 * Don't invoke sign test (which requires a private key)
  	 * for vectors with only a public key.
  	 */
@@ -990,7 +990,7 @@ index 6fb53978df112..784989da47014 100644
  		return 0;
  
  	sig_size = crypto_sig_maxsize(tfm);
-@@ -4932,14 +4932,12 @@ static const struct alg_test_desc alg_test_descs[] = {
+@@ -4835,14 +4835,12 @@ static const struct alg_test_desc alg_test_descs[] = {
  	}, {
  		.alg = "ecdh-nist-p256",
  		.test = alg_test_kpp,
@@ -2280,7 +2280,7 @@ index e6bb8237db989..68fcbaf74e601 100644
  
  error_proc:
 diff --git a/fs/erofs/super.c b/fs/erofs/super.c
-index f3f8d8c066e4e..ab1e9251ede5a 100644
+index 937a215f626c1..7a067fc56e525 100644
 --- a/fs/erofs/super.c
 +++ b/fs/erofs/super.c
 @@ -630,6 +630,9 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
@@ -2293,7 +2293,7 @@ index f3f8d8c066e4e..ab1e9251ede5a 100644
  	int err;
  
  	sb->s_magic = EROFS_SUPER_MAGIC;
-@@ -744,6 +747,12 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
+@@ -760,6 +763,12 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
  
  	sbi->dir_ra_bytes = EROFS_DIR_RA_BYTES;
  	erofs_info(sb, "mounted with root inode @ nid %llu.", sbi->root_nid);
@@ -2307,10 +2307,10 @@ index f3f8d8c066e4e..ab1e9251ede5a 100644
  }
  
 diff --git a/fs/ext4/super.c b/fs/ext4/super.c
-index 33e7c08c9529c..1cf7f4750f70c 100644
+index 87205660c5d02..d4b8483a57228 100644
 --- a/fs/ext4/super.c
 +++ b/fs/ext4/super.c
-@@ -5647,6 +5647,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
+@@ -5688,6 +5688,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
  	atomic_set(&sbi->s_warning_count, 0);
  	atomic_set(&sbi->s_msg_count, 0);
  
@@ -3174,10 +3174,10 @@ index ab7eea01ab427..fff7c5f737fc8 100644
  
  int rmi_register_transport_device(struct rmi_transport_dev *xport);
 diff --git a/include/linux/security.h b/include/linux/security.h
-index 92ac3f27b9733..d9efb9b50aed9 100644
+index eb36451ce41fa..c5c0c664db980 100644
 --- a/include/linux/security.h
 +++ b/include/linux/security.h
-@@ -2407,4 +2407,13 @@ static inline void security_initramfs_populated(void)
+@@ -2406,4 +2406,13 @@ static inline void security_initramfs_populated(void)
  }
  #endif /* CONFIG_SECURITY */
  
@@ -3230,7 +3230,7 @@ index 9fe722305c9be..7c2f153f0e08e 100644
  obj-$(CONFIG_VHOST_TASK) += vhost_task.o
  
 diff --git a/kernel/bpf/core.c b/kernel/bpf/core.c
-index d595fe512498c..362eb90a9bbe5 100644
+index c8ae6ab316510..0ad86be256445 100644
 --- a/kernel/bpf/core.c
 +++ b/kernel/bpf/core.c
 @@ -543,7 +543,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
@@ -3247,7 +3247,7 @@ index d595fe512498c..362eb90a9bbe5 100644
  long bpf_jit_limit_max __read_mostly;
  
 diff --git a/kernel/bpf/syscall.c b/kernel/bpf/syscall.c
-index 6cde6a46babf0..0fd72c12ce41e 100644
+index 6589acc89ef8d..5919dbcc311b1 100644
 --- a/kernel/bpf/syscall.c
 +++ b/kernel/bpf/syscall.c
 @@ -27,6 +27,7 @@
@@ -3282,7 +3282,7 @@ index 6cde6a46babf0..0fd72c12ce41e 100644
  int sysctl_unprivileged_bpf_disabled __read_mostly =
  	IS_BUILTIN(CONFIG_BPF_UNPRIV_DEFAULT_OFF) ? 2 : 0;
  
-@@ -6477,6 +6495,11 @@ static int bpf_unpriv_handler(const struct ctl_table *table, int write,
+@@ -6492,6 +6510,11 @@ static int bpf_unpriv_handler(const struct ctl_table *table, int write,
  	if (write && !ret) {
  		if (locked_state && unpriv_enable != 1)
  			return -EPERM;
@@ -3295,7 +3295,7 @@ index 6cde6a46babf0..0fd72c12ce41e 100644
  	}
  
 diff --git a/kernel/module/main.c b/kernel/module/main.c
-index c66b261849362..0eb08102db5bc 100644
+index 7b3ec2fa6e7c0..ffa91e3cc23b1 100644
 --- a/kernel/module/main.c
 +++ b/kernel/module/main.c
 @@ -65,6 +65,8 @@
@@ -3335,7 +3335,7 @@ index c66b261849362..0eb08102db5bc 100644
  	err = rewrite_section_headers(info, flags);
  	if (err)
  		return err;
-@@ -3898,6 +3907,10 @@ void print_modules(void)
+@@ -3909,6 +3918,10 @@ void print_modules(void)
  		pr_cont(" [last unloaded: %s%s]", last_unloaded_module.name,
  			last_unloaded_module.taints);
  	pr_cont("\n");
@@ -4537,7 +4537,7 @@ index e84ddf4840101..d0501353a4b95 100644
  	prompt "Kernel default lockdown mode"
  	default LOCK_DOWN_KERNEL_FORCE_NONE
 diff --git a/security/lockdown/lockdown.c b/security/lockdown/lockdown.c
-index cf83afa1d879a..aba751e7abffe 100644
+index 8d46886d2cca0..14a9cdff942b9 100644
 --- a/security/lockdown/lockdown.c
 +++ b/security/lockdown/lockdown.c
 @@ -72,6 +72,17 @@ static int lockdown_is_locked_down(enum lockdown_reason what)
@@ -4571,10 +4571,10 @@ index 168140f8e6461..5e24714c22e75 100644
  # flags specific for shared library
  SHLIB_FLAGS := -DSHARED -fPIC
 diff --git a/tools/testing/selftests/bpf/Makefile b/tools/testing/selftests/bpf/Makefile
-index f00587d4ede68..fa62443daadeb 100644
+index b7030a6e2e763..bf383fa3fdd63 100644
 --- a/tools/testing/selftests/bpf/Makefile
 +++ b/tools/testing/selftests/bpf/Makefile
-@@ -503,7 +503,7 @@ LSKELS := fexit_sleep.c trace_printk.c trace_vprintk.c map_ptr_kern.c 	\
+@@ -490,7 +490,7 @@ LSKELS := fexit_sleep.c trace_printk.c trace_vprintk.c map_ptr_kern.c 	\
  LSKELS_SIGNED := fentry_test.c fexit_test.c atomics.c
  
  # Generate both light skeleton and libbpf skeleton for these
