@@ -394,10 +394,10 @@ index b0d00032479d..afb9544fb007 100644
  /*
   * DIAG 308 support
 diff --git a/arch/s390/kernel/ipl.c b/arch/s390/kernel/ipl.c
-index 961a3d60a4dd..927ba8a7b3ac 100644
+index dcdc7e274848..6b2fc225fa18 100644
 --- a/arch/s390/kernel/ipl.c
 +++ b/arch/s390/kernel/ipl.c
-@@ -2497,3 +2497,8 @@ int ipl_report_free(struct ipl_report *report)
+@@ -2521,3 +2521,8 @@ int ipl_report_free(struct ipl_report *report)
  }
  
  #endif
@@ -3230,7 +3230,7 @@ index e83669841b8c..8ae573420fdb 100644
  obj-$(CONFIG_VHOST_TASK) += vhost_task.o
  
 diff --git a/kernel/bpf/core.c b/kernel/bpf/core.c
-index c8ae6ab31651..0ad86be25644 100644
+index 1b9b18e5b03c..475b9cd8641d 100644
 --- a/kernel/bpf/core.c
 +++ b/kernel/bpf/core.c
 @@ -543,7 +543,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
@@ -4571,10 +4571,10 @@ index 168140f8e646..5e24714c22e7 100644
  # flags specific for shared library
  SHLIB_FLAGS := -DSHARED -fPIC
 diff --git a/tools/testing/selftests/bpf/Makefile b/tools/testing/selftests/bpf/Makefile
-index b7030a6e2e76..bf383fa3fdd6 100644
+index 4aa60e83ff19..eaceb09e4029 100644
 --- a/tools/testing/selftests/bpf/Makefile
 +++ b/tools/testing/selftests/bpf/Makefile
-@@ -490,7 +490,7 @@ LSKELS := fexit_sleep.c trace_printk.c trace_vprintk.c map_ptr_kern.c 	\
+@@ -492,7 +492,7 @@ LSKELS := fexit_sleep.c trace_printk.c trace_vprintk.c map_ptr_kern.c 	\
  LSKELS_SIGNED := fentry_test.c fexit_test.c atomics.c
  
  # Generate both light skeleton and libbpf skeleton for these
