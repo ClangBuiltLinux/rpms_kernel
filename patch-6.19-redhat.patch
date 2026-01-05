@@ -6,8 +6,6 @@
  arch/arm/Kconfig                                   |   4 +-
  arch/arm64/Kconfig                                 |   2 +-
  arch/arm64/kernel/setup.c                          |  27 +
- .../tools/gcc-check-fpatchable-function-entry.sh   |   1 -
- arch/powerpc/tools/gcc-check-mprofile-kernel.sh    |   1 -
  arch/s390/include/asm/ipl.h                        |   1 +
  arch/s390/kernel/ipl.c                             |   5 +
  arch/s390/kernel/setup.c                           |   4 +
@@ -78,10 +76,9 @@
  security/integrity/platform_certs/load_uefi.c      |   6 +-
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |  11 +
- tools/lib/bpf/Makefile                             |   1 +
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
- 83 files changed, 2814 insertions(+), 245 deletions(-)
+ 80 files changed, 2813 insertions(+), 243 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index a8d0afde7f85..aa9ec10c59e5 100644
@@ -207,7 +204,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 3cd00b62cde9..ce6282f77877 100644
+index 665b79aa21b8..9b76de07ec4f 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -355,6 +355,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -357,30 +354,6 @@ index 23c05dc7a8f2..d7b7b2f39e16 100644
  	}
  
  	arm64_memblock_init();
-diff --git a/arch/powerpc/tools/gcc-check-fpatchable-function-entry.sh b/arch/powerpc/tools/gcc-check-fpatchable-function-entry.sh
-index 06706903503b..baed467a016b 100755
---- a/arch/powerpc/tools/gcc-check-fpatchable-function-entry.sh
-+++ b/arch/powerpc/tools/gcc-check-fpatchable-function-entry.sh
-@@ -2,7 +2,6 @@
- # SPDX-License-Identifier: GPL-2.0
- 
- set -e
--set -o pipefail
- 
- # To debug, uncomment the following line
- # set -x
-diff --git a/arch/powerpc/tools/gcc-check-mprofile-kernel.sh b/arch/powerpc/tools/gcc-check-mprofile-kernel.sh
-index 73e331e7660e..6193b0ed0c77 100755
---- a/arch/powerpc/tools/gcc-check-mprofile-kernel.sh
-+++ b/arch/powerpc/tools/gcc-check-mprofile-kernel.sh
-@@ -2,7 +2,6 @@
- # SPDX-License-Identifier: GPL-2.0
- 
- set -e
--set -o pipefail
- 
- # To debug, uncomment the following line
- # set -x
 diff --git a/arch/s390/include/asm/ipl.h b/arch/s390/include/asm/ipl.h
 index b0d00032479d..afb9544fb007 100644
 --- a/arch/s390/include/asm/ipl.h
@@ -922,10 +895,10 @@ index ee1768c5a400..05ec1f0fca47 100644
  MODULE_LICENSE("GPL");
  MODULE_DESCRIPTION("Random Number Generator");
 diff --git a/crypto/seqiv.c b/crypto/seqiv.c
-index 2bae99e33526..a6dca30b28f2 100644
+index 678bb4145d78..fcc059e7d3db 100644
 --- a/crypto/seqiv.c
 +++ b/crypto/seqiv.c
-@@ -121,6 +121,19 @@ static int seqiv_aead_decrypt(struct aead_request *req)
+@@ -123,6 +123,19 @@ static int seqiv_aead_decrypt(struct aead_request *req)
  	return crypto_aead_decrypt(subreq);
  }
  
@@ -945,7 +918,7 @@ index 2bae99e33526..a6dca30b28f2 100644
  static int seqiv_aead_create(struct crypto_template *tmpl, struct rtattr **tb)
  {
  	struct aead_instance *inst;
-@@ -138,7 +151,7 @@ static int seqiv_aead_create(struct crypto_template *tmpl, struct rtattr **tb)
+@@ -140,7 +153,7 @@ static int seqiv_aead_create(struct crypto_template *tmpl, struct rtattr **tb)
  	inst->alg.encrypt = seqiv_aead_encrypt;
  	inst->alg.decrypt = seqiv_aead_decrypt;
  
@@ -1401,7 +1374,7 @@ index 8efbcf699e4f..96d5a1ca981d 100644
  obj-$(CONFIG_EFI_RCI2_TABLE)		+= rci2-table.o
  obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
 diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index a9070d00b833..49c9d07d22de 100644
+index 55452e61af31..425a8fcf13d7 100644
 --- a/drivers/firmware/efi/efi.c
 +++ b/drivers/firmware/efi/efi.c
 @@ -33,6 +33,7 @@
@@ -1412,7 +1385,7 @@ index a9070d00b833..49c9d07d22de 100644
  
  #include <asm/early_ioremap.h>
  
-@@ -1019,40 +1020,101 @@ int efi_mem_type(unsigned long phys_addr)
+@@ -1020,40 +1021,101 @@ int efi_mem_type(unsigned long phys_addr)
  	return -EINVAL;
  }
  
@@ -4558,18 +4531,6 @@ index 8d46886d2cca..14a9cdff942b 100644
  static struct security_hook_list lockdown_hooks[] __ro_after_init = {
  	LSM_HOOK_INIT(locked_down, lockdown_is_locked_down),
  };
-diff --git a/tools/lib/bpf/Makefile b/tools/lib/bpf/Makefile
-index 168140f8e646..5e24714c22e7 100644
---- a/tools/lib/bpf/Makefile
-+++ b/tools/lib/bpf/Makefile
-@@ -85,6 +85,7 @@ override CFLAGS += $(INCLUDES)
- override CFLAGS += -fvisibility=hidden
- override CFLAGS += -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
- override CFLAGS += $(CLANG_CROSS_FLAGS)
-+override CFLAGS += -Wno-error=discarded-qualifiers
- 
- # flags specific for shared library
- SHLIB_FLAGS := -DSHARED -fPIC
 diff --git a/tools/testing/selftests/bpf/Makefile b/tools/testing/selftests/bpf/Makefile
 index 4aa60e83ff19..eaceb09e4029 100644
 --- a/tools/testing/selftests/bpf/Makefile
