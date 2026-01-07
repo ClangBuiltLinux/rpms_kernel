@@ -70,6 +70,7 @@
  kernel/rh_messages.c                               | 414 ++++++++++++++++
  kernel/rh_messages.h                               | 335 +++++++++++++
  kernel/rh_waived.c                                 | 147 ++++++
+ rust/Makefile                                      |   1 +
  scripts/Makefile.lib                               |   3 +
  scripts/mod/modpost.c                              |   8 +
  scripts/tags.sh                                    |   2 +
@@ -78,7 +79,7 @@
  security/lockdown/lockdown.c                       |  11 +
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
- 80 files changed, 2813 insertions(+), 243 deletions(-)
+ 81 files changed, 2814 insertions(+), 243 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index a8d0afde7f85..aa9ec10c59e5 100644
@@ -4400,6 +4401,18 @@ index 000000000000..20966f7c7277
 +	return 0;
 +}
 +late_initcall(__add_rh_flag);
+diff --git a/rust/Makefile b/rust/Makefile
+index 5d357dce1704..4dcc2eff51cb 100644
+--- a/rust/Makefile
++++ b/rust/Makefile
+@@ -383,6 +383,7 @@ bindgen_skip_c_flags := -mno-fp-ret-in-387 -mpreferred-stack-boundary=% \
+ 	-fno-inline-functions-called-once -fsanitize=bounds-strict \
+ 	-fstrict-flex-arrays=% -fmin-function-alignment=% \
+ 	-fzero-init-padding-bits=% -mno-fdpic \
++	-fdiagnostics-show-context -fdiagnostics-show-context=% \
+ 	--param=% --param asan-% -fno-isolate-erroneous-paths-dereference
+ 
+ # Derived from `scripts/Makefile.clang`.
 diff --git a/scripts/Makefile.lib b/scripts/Makefile.lib
 index 28a1c08e3b22..3126a6fa6328 100644
 --- a/scripts/Makefile.lib
