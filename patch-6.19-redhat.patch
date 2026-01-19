@@ -82,10 +82,10 @@
  81 files changed, 2814 insertions(+), 243 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index a8d0afde7f85a..aa9ec10c59e55 100644
+index 1058f2a6d6a8c..dba9b4f0605b9 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -6560,6 +6560,20 @@ Kernel parameters
+@@ -6595,6 +6595,20 @@ Kernel parameters
  		2	The "airplane mode" button toggles between everything
  			blocked and everything unblocked.
  
@@ -106,7 +106,7 @@ index a8d0afde7f85a..aa9ec10c59e55 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -7941,6 +7955,15 @@ Kernel parameters
+@@ -7976,6 +7990,15 @@ Kernel parameters
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -205,7 +205,7 @@ index 0000000000000..85771d74c34f9
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 9d38125263fb0..1b08e56161671 100644
+index 1465f715786da..9e8596a50642a 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -355,6 +355,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -1375,7 +1375,7 @@ index 8efbcf699e4ff..96d5a1ca981df 100644
  obj-$(CONFIG_EFI_RCI2_TABLE)		+= rci2-table.o
  obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
 diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 55452e61af31d..425a8fcf13d7c 100644
+index f5ff6e84a9b7d..ff8d38094cc80 100644
 --- a/drivers/firmware/efi/efi.c
 +++ b/drivers/firmware/efi/efi.c
 @@ -33,6 +33,7 @@
@@ -1386,7 +1386,7 @@ index 55452e61af31d..425a8fcf13d7c 100644
  
  #include <asm/early_ioremap.h>
  
-@@ -1020,40 +1021,101 @@ int efi_mem_type(unsigned long phys_addr)
+@@ -1021,40 +1022,101 @@ int efi_mem_type(unsigned long phys_addr)
  	return -EINVAL;
  }
  
@@ -2473,7 +2473,7 @@ index a00bc0937698c..7cce62f1c50b5 100644
  
  struct taint_flag {
 diff --git a/include/linux/pci.h b/include/linux/pci.h
-index 864775651c6fa..4c2c19dbff840 100644
+index b5cc0c2b99065..5f39e3063372d 100644
 --- a/include/linux/pci.h
 +++ b/include/linux/pci.h
 @@ -1682,6 +1682,7 @@ int pci_add_dynid(struct pci_driver *drv,
@@ -2484,7 +2484,7 @@ index 864775651c6fa..4c2c19dbff840 100644
  int pci_scan_bridge(struct pci_bus *bus, struct pci_dev *dev, int max,
  		    int pass);
  
-@@ -2812,6 +2813,10 @@ static inline bool pci_is_thunderbolt_attached(struct pci_dev *pdev)
+@@ -2816,6 +2817,10 @@ static inline bool pci_is_thunderbolt_attached(struct pci_dev *pdev)
  	return false;
  }
  
