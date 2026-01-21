@@ -1375,7 +1375,7 @@ index 8efbcf699e4ff..96d5a1ca981df 100644
  obj-$(CONFIG_EFI_RCI2_TABLE)		+= rci2-table.o
  obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
 diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index f5ff6e84a9b7d..ff8d38094cc80 100644
+index 17b5f3415465e..af28c702f94c0 100644
 --- a/drivers/firmware/efi/efi.c
 +++ b/drivers/firmware/efi/efi.c
 @@ -33,6 +33,7 @@
@@ -3344,10 +3344,10 @@ index a2ff4242e623d..f0d2be1ee4f1c 100644
  
  int module_sig_check(struct load_info *info, int flags)
 diff --git a/kernel/panic.c b/kernel/panic.c
-index 0d52210a9e2bc..4a4d3631b8c74 100644
+index 0c20fcaae98ae..60d48ec1fadda 100644
 --- a/kernel/panic.c
 +++ b/kernel/panic.c
-@@ -662,6 +662,18 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
+@@ -663,6 +663,18 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
  	TAINT_FLAG(RANDSTRUCT,			'T', ' '),
  	TAINT_FLAG(TEST,			'N', ' '),
  	TAINT_FLAG(FWCTL,			'J', ' '),
@@ -4612,4 +4612,17 @@ index 1d7a2f1e07317..b22f3a9cb8b80 100644
 -
  	if (test__start_subtest("write_check1"))
  		test_write_check(true);
+ 
+diff --git a/arch/x86/include/asm/vmware.h b/arch/x86/include/asm/vmware.h
+index c9cf43d5ef23..c4fb95b2dcf5 100644
+--- a/arch/x86/include/asm/vmware.h
++++ b/arch/x86/include/asm/vmware.h
+@@ -165,7 +165,7 @@ unsigned long vmware_hypercall4(unsigned long cmd, unsigned long in1,
+ 		  "b" (in1),
+ 		  "c" (cmd),
+ 		  "d" (0)
+-		: "cc", "memory");
++		: "cc", "memory", "di", "si");
+ 	return out0;
+ }
  

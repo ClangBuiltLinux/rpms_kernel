@@ -1,5 +1,5 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/ea3c1a93f090a88d6b6baf93c435abd07158ffe1
- ea3c1a93f090a88d6b6baf93c435abd07158ffe1 rust: Add -fdiagnostics-show-context to bindgen_skip_c_flags
+https://gitlab.com/cki-project/kernel-ark/-/commit/8ec0669c562d4be1840fb28a7363fbeb7c51826e
+ 8ec0669c562d4be1840fb28a7363fbeb7c51826e rust: Add -fdiagnostics-show-context to bindgen_skip_c_flags
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/fe3e9e24af806d756edbda922103b1fa95d9b89b
  fe3e9e24af806d756edbda922103b1fa95d9b89b Revert "Removing Obsolete hba pci-ids from rhel8"
