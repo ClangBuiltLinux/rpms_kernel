@@ -9,6 +9,7 @@
  arch/s390/include/asm/ipl.h                        |   1 +
  arch/s390/kernel/ipl.c                             |   5 +
  arch/s390/kernel/setup.c                           |   4 +
+ arch/x86/include/asm/vmware.h                      |  72 ++-
  arch/x86/kernel/cpu/common.c                       |   1 +
  arch/x86/kernel/setup.c                            | 101 +++-
  crypto/akcipher.c                                  |   3 +-
@@ -79,7 +80,7 @@
  security/lockdown/lockdown.c                       |  11 +
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
- 81 files changed, 2814 insertions(+), 243 deletions(-)
+ 82 files changed, 2848 insertions(+), 281 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index 1058f2a6d6a8c..dba9b4f0605b9 100644
@@ -402,6 +403,189 @@ index c1fe0b53c5ac5..8e17bfe788cb9 100644
  	/* Have one command line that is parsed and saved in /proc/cmdline */
  	/* boot_command_line has been already set up in early.c */
  	*cmdline_p = boot_command_line;
+diff --git a/arch/x86/include/asm/vmware.h b/arch/x86/include/asm/vmware.h
+index c9cf43d5ef238..372173d4ea27b 100644
+--- a/arch/x86/include/asm/vmware.h
++++ b/arch/x86/include/asm/vmware.h
+@@ -98,7 +98,7 @@ extern unsigned long vmware_tdx_hypercall(unsigned long cmd,
+ static inline
+ unsigned long vmware_hypercall1(unsigned long cmd, unsigned long in1)
+ {
+-	unsigned long out0;
++	unsigned long out0, tmp = 0;
+ 
+ 	if (cpu_feature_enabled(X86_FEATURE_TDX_GUEST))
+ 		return vmware_tdx_hypercall(cmd, in1, 0, 0, 0,
+@@ -109,13 +109,11 @@ unsigned long vmware_hypercall1(unsigned long cmd, unsigned long in1)
+ 					     NULL, NULL, NULL, NULL, NULL);
+ 
+ 	asm_inline volatile (VMWARE_HYPERCALL
+-		: "=a" (out0)
++		: "=a" (out0), "+b" (in1), "+c" (cmd), "+d" (tmp)
+ 		: [port] "i" (VMWARE_HYPERVISOR_PORT),
+-		  "a" (VMWARE_HYPERVISOR_MAGIC),
+-		  "b" (in1),
+-		  "c" (cmd),
+-		  "d" (0)
+-		: "cc", "memory");
++		  "a" (VMWARE_HYPERVISOR_MAGIC)
++		: "di", "si", "cc", "memory");
++
+ 	return out0;
+ }
+ 
+@@ -123,7 +121,7 @@ static inline
+ unsigned long vmware_hypercall3(unsigned long cmd, unsigned long in1,
+ 				u32 *out1, u32 *out2)
+ {
+-	unsigned long out0;
++	unsigned long out0, tmp = 0;
+ 
+ 	if (cpu_feature_enabled(X86_FEATURE_TDX_GUEST))
+ 		return vmware_tdx_hypercall(cmd, in1, 0, 0, 0,
+@@ -134,13 +132,13 @@ unsigned long vmware_hypercall3(unsigned long cmd, unsigned long in1,
+ 					     out1, out2, NULL, NULL, NULL);
+ 
+ 	asm_inline volatile (VMWARE_HYPERCALL
+-		: "=a" (out0), "=b" (*out1), "=c" (*out2)
++		: "=a" (out0), "=b" (*out1), "=c" (*out2), "+d" (tmp)
+ 		: [port] "i" (VMWARE_HYPERVISOR_PORT),
+ 		  "a" (VMWARE_HYPERVISOR_MAGIC),
+ 		  "b" (in1),
+-		  "c" (cmd),
+-		  "d" (0)
+-		: "cc", "memory");
++		  "c" (cmd)
++		: "di", "si", "cc", "memory");
++
+ 	return out0;
+ }
+ 
+@@ -165,7 +163,8 @@ unsigned long vmware_hypercall4(unsigned long cmd, unsigned long in1,
+ 		  "b" (in1),
+ 		  "c" (cmd),
+ 		  "d" (0)
+-		: "cc", "memory");
++		: "di", "si", "cc", "memory");
++
+ 	return out0;
+ }
+ 
+@@ -185,15 +184,13 @@ unsigned long vmware_hypercall5(unsigned long cmd, unsigned long in1,
+ 					     NULL, out2, NULL, NULL, NULL);
+ 
+ 	asm_inline volatile (VMWARE_HYPERCALL
+-		: "=a" (out0), "=c" (*out2)
++		: "=a" (out0), "+b" (in1), "=c" (*out2), "+d" (in3),
++		  "+S" (in4), "+D" (in5)
+ 		: [port] "i" (VMWARE_HYPERVISOR_PORT),
+ 		  "a" (VMWARE_HYPERVISOR_MAGIC),
+-		  "b" (in1),
+-		  "c" (cmd),
+-		  "d" (in3),
+-		  "S" (in4),
+-		  "D" (in5)
++		  "c" (cmd)
+ 		: "cc", "memory");
++
+ 	return out0;
+ }
+ 
+@@ -213,14 +210,14 @@ unsigned long vmware_hypercall6(unsigned long cmd, unsigned long in1,
+ 					     NULL, out2, out3, out4, out5);
+ 
+ 	asm_inline volatile (VMWARE_HYPERCALL
+-		: "=a" (out0), "=c" (*out2), "=d" (*out3), "=S" (*out4),
+-		  "=D" (*out5)
++		: "=a" (out0), "+b" (in1), "=c" (*out2), "=d" (*out3),
++		  "=S" (*out4), "=D" (*out5)
+ 		: [port] "i" (VMWARE_HYPERVISOR_PORT),
+ 		  "a" (VMWARE_HYPERVISOR_MAGIC),
+-		  "b" (in1),
+ 		  "c" (cmd),
+ 		  "d" (in3)
+ 		: "cc", "memory");
++
+ 	return out0;
+ }
+ 
+@@ -241,15 +238,15 @@ unsigned long vmware_hypercall7(unsigned long cmd, unsigned long in1,
+ 					     out1, out2, out3, NULL, NULL);
+ 
+ 	asm_inline volatile (VMWARE_HYPERCALL
+-		: "=a" (out0), "=b" (*out1), "=c" (*out2), "=d" (*out3)
++		: "=a" (out0), "=b" (*out1), "=c" (*out2), "=d" (*out3),
++		  "+S" (in4), "+D" (in5)
+ 		: [port] "i" (VMWARE_HYPERVISOR_PORT),
+ 		  "a" (VMWARE_HYPERVISOR_MAGIC),
+ 		  "b" (in1),
+ 		  "c" (cmd),
+-		  "d" (in3),
+-		  "S" (in4),
+-		  "D" (in5)
++		  "d" (in3)
+ 		: "cc", "memory");
++
+ 	return out0;
+ }
+ 
+@@ -272,7 +269,9 @@ unsigned long vmware_hypercall_hb_out(unsigned long cmd, unsigned long in2,
+ 				      unsigned long in5, unsigned long in6,
+ 				      u32 *out1)
+ {
+-	unsigned long out0;
++	unsigned long out0, port;
++
++	port = in3 | VMWARE_HYPERVISOR_PORT_HB;
+ 
+ 	asm_inline volatile (
+ 		UNWIND_HINT_SAVE
+@@ -282,15 +281,13 @@ unsigned long vmware_hypercall_hb_out(unsigned long cmd, unsigned long in2,
+ 		"rep outsb\n\t"
+ 		"pop %%" _ASM_BP "\n\t"
+ 		UNWIND_HINT_RESTORE
+-		: "=a" (out0), "=b" (*out1)
++		: "=a" (out0), "=b" (*out1), "+c" (in2), "+d" (port),
++		  "+S" (in4), "+D" (in5)
+ 		: "a" (VMWARE_HYPERVISOR_MAGIC),
+ 		  "b" (cmd),
+-		  "c" (in2),
+-		  "d" (in3 | VMWARE_HYPERVISOR_PORT_HB),
+-		  "S" (in4),
+-		  "D" (in5),
+ 		  [in6] VMW_BP_CONSTRAINT (in6)
+ 		: "cc", "memory");
++
+ 	return out0;
+ }
+ 
+@@ -300,7 +297,9 @@ unsigned long vmware_hypercall_hb_in(unsigned long cmd, unsigned long in2,
+ 				     unsigned long in5, unsigned long in6,
+ 				     u32 *out1)
+ {
+-	unsigned long out0;
++	unsigned long out0, port;
++
++	port = in3 | VMWARE_HYPERVISOR_PORT_HB;
+ 
+ 	asm_inline volatile (
+ 		UNWIND_HINT_SAVE
+@@ -310,13 +309,10 @@ unsigned long vmware_hypercall_hb_in(unsigned long cmd, unsigned long in2,
+ 		"rep insb\n\t"
+ 		"pop %%" _ASM_BP "\n\t"
+ 		UNWIND_HINT_RESTORE
+-		: "=a" (out0), "=b" (*out1)
++		: "=a" (out0), "=b" (*out1), "+c" (in2), "+d" (port),
++		  "+S" (in4), "+D" (in5)
+ 		: "a" (VMWARE_HYPERVISOR_MAGIC),
+ 		  "b" (cmd),
+-		  "c" (in2),
+-		  "d" (in3 | VMWARE_HYPERVISOR_PORT_HB),
+-		  "S" (in4),
+-		  "D" (in5),
+ 		  [in6] VMW_BP_CONSTRAINT (in6)
+ 		: "cc", "memory");
+ 	return out0;
 diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
 index e7ab22fce3b57..0860d1eb51c7c 100644
 --- a/arch/x86/kernel/cpu/common.c
@@ -4612,17 +4796,4 @@ index 1d7a2f1e07317..b22f3a9cb8b80 100644
 -
  	if (test__start_subtest("write_check1"))
  		test_write_check(true);
- 
-diff --git a/arch/x86/include/asm/vmware.h b/arch/x86/include/asm/vmware.h
-index c9cf43d5ef23..c4fb95b2dcf5 100644
---- a/arch/x86/include/asm/vmware.h
-+++ b/arch/x86/include/asm/vmware.h
-@@ -165,7 +165,7 @@ unsigned long vmware_hypercall4(unsigned long cmd, unsigned long in1,
- 		  "b" (in1),
- 		  "c" (cmd),
- 		  "d" (0)
--		: "cc", "memory");
-+		: "cc", "memory", "di", "si");
- 	return out0;
- }
  

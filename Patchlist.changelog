@@ -1,5 +1,8 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/8ec0669c562d4be1840fb28a7363fbeb7c51826e
- 8ec0669c562d4be1840fb28a7363fbeb7c51826e rust: Add -fdiagnostics-show-context to bindgen_skip_c_flags
+https://gitlab.com/cki-project/kernel-ark/-/commit/fd4bd9e212d8be34836b4de11f76744b0689b2a2
+ fd4bd9e212d8be34836b4de11f76744b0689b2a2 x86/vmware: Fix hypercall clobbers
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/9080dc8a7783e1aeacaaea995e0bc5bfb75383ba
+ 9080dc8a7783e1aeacaaea995e0bc5bfb75383ba rust: Add -fdiagnostics-show-context to bindgen_skip_c_flags
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/fe3e9e24af806d756edbda922103b1fa95d9b89b
  fe3e9e24af806d756edbda922103b1fa95d9b89b Revert "Removing Obsolete hba pci-ids from rhel8"
