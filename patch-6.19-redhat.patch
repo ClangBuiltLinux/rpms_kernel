@@ -71,7 +71,6 @@
  kernel/rh_messages.c                               | 414 ++++++++++++++++
  kernel/rh_messages.h                               | 335 +++++++++++++
  kernel/rh_waived.c                                 | 147 ++++++
- rust/Makefile                                      |   1 +
  scripts/Makefile.lib                               |   3 +
  scripts/mod/modpost.c                              |   8 +
  scripts/tags.sh                                    |   2 +
@@ -80,7 +79,7 @@
  security/lockdown/lockdown.c                       |  11 +
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
- 82 files changed, 2848 insertions(+), 281 deletions(-)
+ 81 files changed, 2847 insertions(+), 281 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index 1058f2a6d6a8c..dba9b4f0605b9 100644
@@ -206,7 +205,7 @@ index 0000000000000..85771d74c34f9
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 3373308d2217c..c542551cc9786 100644
+index bde507d5c03db..503aefe27c517 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -355,6 +355,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -251,7 +250,7 @@ index 3373308d2217c..c542551cc9786 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -1975,6 +1994,23 @@ endif
+@@ -1976,6 +1995,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -1559,7 +1558,7 @@ index 8efbcf699e4ff..96d5a1ca981df 100644
  obj-$(CONFIG_EFI_RCI2_TABLE)		+= rci2-table.o
  obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
 diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 17b5f3415465e..af28c702f94c0 100644
+index 17b5f3415465e..82cb3de35cf1d 100644
 --- a/drivers/firmware/efi/efi.c
 +++ b/drivers/firmware/efi/efi.c
 @@ -33,6 +33,7 @@
@@ -1681,7 +1680,7 @@ index 17b5f3415465e..af28c702f94c0 100644
  
 -	return err;
 +	found = bsearch((void *)(uintptr_t)status, efi_error_codes,
-+			sizeof(struct efi_error_code), num,
++			num, sizeof(struct efi_error_code),
 +			efi_status_cmp_bsearch);
 +	if (!found)
 +		return -EINVAL;
@@ -1695,7 +1694,7 @@ index 17b5f3415465e..af28c702f94c0 100644
 +	size_t num = sizeof(efi_error_codes) / sizeof(struct efi_error_code);
 +
 +	found = bsearch((void *)(uintptr_t)status, efi_error_codes,
-+			sizeof(struct efi_error_code), num,
++			num, sizeof(struct efi_error_code),
 +			efi_status_cmp_bsearch);
 +	if (!found)
 +		return "Unknown error code";
@@ -2344,7 +2343,7 @@ index 3654b12c5d5a7..9bc907e146a5d 100644
  };
  
 diff --git a/drivers/scsi/qla2xxx/qla_os.c b/drivers/scsi/qla2xxx/qla_os.c
-index 16a44c0917e18..bea8b29bc7be3 100644
+index e939bc88e1519..3992159a106f3 100644
 --- a/drivers/scsi/qla2xxx/qla_os.c
 +++ b/drivers/scsi/qla2xxx/qla_os.c
 @@ -8130,6 +8130,7 @@ static const struct pci_error_handlers qla2xxx_err_handler = {
@@ -4585,18 +4584,6 @@ index 0000000000000..20966f7c7277f
 +	return 0;
 +}
 +late_initcall(__add_rh_flag);
-diff --git a/rust/Makefile b/rust/Makefile
-index 5d357dce1704d..4dcc2eff51cb2 100644
---- a/rust/Makefile
-+++ b/rust/Makefile
-@@ -383,6 +383,7 @@ bindgen_skip_c_flags := -mno-fp-ret-in-387 -mpreferred-stack-boundary=% \
- 	-fno-inline-functions-called-once -fsanitize=bounds-strict \
- 	-fstrict-flex-arrays=% -fmin-function-alignment=% \
- 	-fzero-init-padding-bits=% -mno-fdpic \
-+	-fdiagnostics-show-context -fdiagnostics-show-context=% \
- 	--param=% --param asan-% -fno-isolate-erroneous-paths-dereference
- 
- # Derived from `scripts/Makefile.clang`.
 diff --git a/scripts/Makefile.lib b/scripts/Makefile.lib
 index 28a1c08e3b221..3126a6fa63282 100644
 --- a/scripts/Makefile.lib

@@ -1,6 +1,23 @@
-* Thu Jan 29 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.19.0-0.rc7.8dfce8991b95.50]
+* Mon Feb 02 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.19.0-0.rc8.54]
 - x86/vmware: Fix hypercall clobbers (Josh Poimboeuf)
-- rust: Add -fdiagnostics-show-context to bindgen_skip_c_flags (Siddhesh Poyarekar)
+Resolves: 
+
+* Mon Feb 02 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.19.0-0.rc8.53]
+- [gitlab-ci] tag-cki-gating: refactor to use GIT_STRATEGY=empty (Patrick Talbert)
+- efi: Fix swapped arguments to bsearch() in efi_status_to_*() (Dongdong Tao)
+- Linux v6.19.0-0.rc8
+Resolves: 
+
+* Sun Feb 01 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.19.0-0.rc7.162b42445b58.52]
+- Linux v6.19.0-0.rc7.162b42445b58
+Resolves: 
+
+* Sat Jan 31 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.19.0-0.rc7.ad9a728a3388.51]
+- Linux v6.19.0-0.rc7.ad9a728a3388
+Resolves: 
+
+* Fri Jan 30 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.19.0-0.rc7.4d310797262f.50]
+- Linux v6.19.0-0.rc7.4d310797262f
 Resolves: 
 
 * Thu Jan 29 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.19.0-0.rc7.8dfce8991b95.49]
