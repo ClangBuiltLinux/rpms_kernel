@@ -1,5 +1,5 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/670b6c529daaef0f4f7c600ebf21c576f3dbfc95
- 670b6c529daaef0f4f7c600ebf21c576f3dbfc95 x86/vmware: Fix hypercall clobbers
+https://gitlab.com/cki-project/kernel-ark/-/commit/08e0b218d9f4d8fda97cab8ef897ffae12a72314
+ 08e0b218d9f4d8fda97cab8ef897ffae12a72314 x86/vmware: Fix hypercall clobbers
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/49bcc48074ba1f9c772b5c7ae11123a8ed3e0ac1
  49bcc48074ba1f9c772b5c7ae11123a8ed3e0ac1 efi: Fix swapped arguments to bsearch() in efi_status_to_*()
