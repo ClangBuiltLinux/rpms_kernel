@@ -187,13 +187,13 @@ Summary: The Linux kernel
 %define specrpmversion 6.19.0
 %define specversion 6.19.0
 %define patchversion 6.19
-%define pkgrelease 300
+%define pkgrelease 301
 %define kversion 6
 %define tarfile_release 6.19
 # This is needed to do merge window version magic
 %define patchlevel 19
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 300%{?buildid}%{?dist}
+%define specrelease 301%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.19.0
 
@@ -781,6 +781,8 @@ Requires: %{name}-core-uname-r = %{KVERREL}
 Requires: %{name}-modules-uname-r = %{KVERREL}
 Requires: %{name}-modules-core-uname-r = %{KVERREL}
 Requires: ((%{name}-modules-extra-uname-r = %{KVERREL}) if %{name}-modules-extra-matched)
+# Prefer the plain kernel-core pkg as core-uname-r provider
+Suggests: %{name}-core = %{specversion}-%{release}
 Provides: installonlypkg(kernel)
 %endif
 
@@ -1760,6 +1762,8 @@ Requires: %{name}-%{1}-core-uname-r = %{KVERREL}%{uname_suffix %{1}}\
 Requires: %{name}-%{1}-modules-uname-r = %{KVERREL}%{uname_suffix %{1}}\
 Requires: %{name}-%{1}-modules-core-uname-r = %{KVERREL}%{uname_suffix %{1}}\
 Requires: ((%{name}-%{1}-modules-extra-uname-r = %{KVERREL}%{uname_suffix %{1}}) if %{name}-modules-extra-matched)\
+# Prefer the plain kernel-<subpackage>-core pkg as core-uname-r provider\
+Suggests: %{name}-%{1}-core = %{specversion}-%{release}\
 %if "%{1}" == "rt" || "%{1}" == "rt-debug" || "%{1}" == "rt-64k" || "%{1}" == "rt-64k-debug"\
 Requires: realtime-setup\
 %endif\
@@ -1828,6 +1832,7 @@ Requires(pre): systemd >= 254-1\
 Summary: %{variant_summary} with systemd-stub for auto DTB loading\
 Provides: installonlypkg(kernel)\
 Provides: %{name}-uname-r = %{KVERREL}%{uname_suffix %{?1}}\
+Provides: %{name}%{?1:-%{1}}-core-uname-r = %{KVERREL}%{uname_suffix %{?1}}\
 Requires: %{name}%{?1:-%{1}}-modules-core-uname-r = %{KVERREL}%{uname_suffix %{?1}}\
 Requires(pre): %{kernel_prereq}\
 # "kernel-install add ..." treats this as a regular kernel, which is what we want.\
@@ -4806,7 +4811,11 @@ fi\
 #
 #
 %changelog
-* Tue Feb 10 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.0-300]
+* Thu Feb 12 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.0-301]
+- Turn on ASUS_ARMOURY driver, fixes RHBZ 2433246 (Justin M. Forbes)
+- redhat/kernel.spec.template: Make -uki-dtbloader provide kernel-core-uname-r (Hans de Goede)
+
+* Tue Feb 10 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.0-0]
 - redhat/kernel.spec.template: Add kernel-uki-dtbloader sub-package (Hans de Goede)
 - redhat/kernel.spec.template: Simplify uki-virt signing (Hans de Goede)
 - redhat/kernel.spec.template: Fix indentation of uki-virt generation code (Hans de Goede)
