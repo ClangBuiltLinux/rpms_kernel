@@ -1,3 +1,6 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/3e5d384b4025050b2532d833a380ae9cc9eaea5e
+ 3e5d384b4025050b2532d833a380ae9cc9eaea5e Fix up merge from master
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/20bcb89a11b9ccbe2137c2cb9ba808ea157724e4
  20bcb89a11b9ccbe2137c2cb9ba808ea157724e4 efi: Fix swapped arguments to bsearch() in efi_status_to_*()
 
