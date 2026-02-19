@@ -205,7 +205,7 @@ index 0000000000000..85771d74c34f9
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 13107aa0a5fb1..1955ce47cec6e 100644
+index df471d4212cc3..916f705f1cde3 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -356,6 +356,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -250,7 +250,7 @@ index 13107aa0a5fb1..1955ce47cec6e 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -2013,6 +2032,23 @@ endif
+@@ -2022,6 +2041,23 @@ endif
  
  ifdef CONFIG_MODULES
  
