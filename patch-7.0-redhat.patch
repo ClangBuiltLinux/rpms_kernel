@@ -59,7 +59,6 @@
  include/linux/rh_waived.h                          |  19 +
  include/linux/rmi.h                                |   1 +
  include/linux/security.h                           |   9 +
- include/rv/da_monitor.h                            |  16 +-
  init/main.c                                        |   5 +
  kernel/Makefile                                    |   2 +
  kernel/bpf/core.c                                  |   5 +
@@ -79,7 +78,7 @@
  security/lockdown/lockdown.c                       |  11 +
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
- 81 files changed, 2823 insertions(+), 248 deletions(-)
+ 80 files changed, 2812 insertions(+), 243 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index cb850e5290c2b..921ae17e312f2 100644
@@ -205,7 +204,7 @@ index 0000000000000..85771d74c34f9
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index df471d4212cc3..916f705f1cde3 100644
+index e944c6e71e81f..3e4704598247f 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -356,6 +356,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -275,10 +274,10 @@ index df471d4212cc3..916f705f1cde3 100644
  	@:
  
 diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index fc9b5b7016c37..cdd4534fd367a 100644
+index ec33376f8e2ba..255679ba53510 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
-@@ -1212,9 +1212,9 @@ config HIGHMEM
+@@ -1213,9 +1213,9 @@ config HIGHMEM
  	  If unsure, say n.
  
  config HIGHPTE
@@ -616,7 +615,7 @@ index 8250eeeebd0fe..01f0f3963a740 100644
  	}
  
 diff --git a/crypto/drbg.c b/crypto/drbg.c
-index 5e7ed5f5c192c..0f28588b62640 100644
+index 1ed209e5d5ddc..6a4e52faf3600 100644
 --- a/crypto/drbg.c
 +++ b/crypto/drbg.c
 @@ -1270,13 +1270,14 @@ static int drbg_generate(struct drbg_state *drbg,
@@ -943,7 +942,7 @@ index beba745b64057..fd41f6d3abf9a 100644
  		alg->verify = sig_default_verify;
  	if (!alg->set_priv_key)
 diff --git a/crypto/testmgr.c b/crypto/testmgr.c
-index b940721447fa1..7727d8b88fcb1 100644
+index 49b607f65f636..87928a50ed26e 100644
 --- a/crypto/testmgr.c
 +++ b/crypto/testmgr.c
 @@ -3843,7 +3843,7 @@ static int test_akcipher_one(struct crypto_akcipher *tfm,
@@ -1042,10 +1041,10 @@ index d1595156c86a4..9485212f1a6d6 100644
  	return ctx.rc;
  }
 diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index 565a84a7d7bc8..8fcf3a4c5ba17 100644
+index dfdd004fb1a9c..2ae3959f08560 100644
 --- a/drivers/acpi/scan.c
 +++ b/drivers/acpi/scan.c
-@@ -1792,6 +1792,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
+@@ -1791,6 +1791,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
  	if (!acpi_match_device_ids(device, ignore_serial_bus_ids))
  		return false;
  
@@ -1091,7 +1090,7 @@ index c79abdfcd7a9b..e23bfb7f94c72 100644
  	tmp = ata_wait_register(ap, port_mmio + PORT_CMD,
  				PORT_CMD_LIST_ON, PORT_CMD_LIST_ON, 1, 500);
 diff --git a/drivers/char/ipmi/ipmi_dmi.c b/drivers/char/ipmi/ipmi_dmi.c
-index bbf7029e224be..cf7faa970dd65 100644
+index 505e32911c34c..26f7ee0ccf406 100644
 --- a/drivers/char/ipmi/ipmi_dmi.c
 +++ b/drivers/char/ipmi/ipmi_dmi.c
 @@ -215,6 +215,21 @@ static int __init scan_for_dmi_ipmi(void)
@@ -1117,7 +1116,7 @@ index bbf7029e224be..cf7faa970dd65 100644
  		dmi_decode_ipmi((const struct dmi_header *) dev->device_data);
  
 diff --git a/drivers/char/ipmi/ipmi_msghandler.c b/drivers/char/ipmi/ipmi_msghandler.c
-index 3f48fc6ab596d..7b7b1abe02ec4 100644
+index c530966c4e070..db44f3a13f09c 100644
 --- a/drivers/char/ipmi/ipmi_msghandler.c
 +++ b/drivers/char/ipmi/ipmi_msghandler.c
 @@ -34,6 +34,7 @@
@@ -1128,7 +1127,7 @@ index 3f48fc6ab596d..7b7b1abe02ec4 100644
  #include <linux/delay.h>
  
  #define IPMI_DRIVER_VERSION "39.2"
-@@ -5596,8 +5597,21 @@ static int __init ipmi_init_msghandler_mod(void)
+@@ -5594,8 +5595,21 @@ static int __init ipmi_init_msghandler_mod(void)
  {
  	int rv;
  
@@ -1152,7 +1151,7 @@ index 3f48fc6ab596d..7b7b1abe02ec4 100644
  	rv = ipmi_register_driver();
  	mutex_unlock(&ipmi_interfaces_mutex);
 diff --git a/drivers/char/random.c b/drivers/char/random.c
-index bab03c7c4194a..1eb70c54d122b 100644
+index dcd002e1b890d..750e765408403 100644
 --- a/drivers/char/random.c
 +++ b/drivers/char/random.c
 @@ -51,9 +51,11 @@
@@ -1375,7 +1374,7 @@ index 8efbcf699e4ff..96d5a1ca981df 100644
  obj-$(CONFIG_EFI_RCI2_TABLE)		+= rci2-table.o
  obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
 diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 111e87a618e5f..4127d894b0950 100644
+index b2fb92a4bbd11..533e132e1bd8a 100644
 --- a/drivers/firmware/efi/efi.c
 +++ b/drivers/firmware/efi/efi.c
 @@ -33,6 +33,7 @@
@@ -1961,7 +1960,7 @@ index ccd9338a44dbe..5c54e522e8a47 100644
  	if (data->f01_container->dev.driver) {
  		/* Driver already bound, so enable ATTN now. */
 diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
-index 4926a43118e6f..9a92802ca8257 100644
+index 35db517809540..f2665cc236e59 100644
 --- a/drivers/iommu/iommu.c
 +++ b/drivers/iommu/iommu.c
 @@ -8,6 +8,7 @@
@@ -2001,10 +2000,10 @@ index 4926a43118e6f..9a92802ca8257 100644
   * iommu_setup_default_domain - Set the default_domain for the group
   * @group: Group to change
 diff --git a/drivers/message/fusion/mptsas.c b/drivers/message/fusion/mptsas.c
-index 5276bdb7acc27..684da1f2a0e5b 100644
+index c362f09a8c555..bcda62d89ecdb 100644
 --- a/drivers/message/fusion/mptsas.c
 +++ b/drivers/message/fusion/mptsas.c
-@@ -5378,6 +5378,10 @@ static void mptsas_remove(struct pci_dev *pdev)
+@@ -5377,6 +5377,10 @@ static void mptsas_remove(struct pci_dev *pdev)
  }
  
  static const struct pci_device_id mptsas_pci_table[] = {
@@ -2015,7 +2014,7 @@ index 5276bdb7acc27..684da1f2a0e5b 100644
  	{ PCI_VENDOR_ID_LSI_LOGIC, MPI_MANUFACTPAGE_DEVID_SAS1064,
  		PCI_ANY_ID, PCI_ANY_ID },
  	{ PCI_VENDOR_ID_LSI_LOGIC, MPI_MANUFACTPAGE_DEVID_SAS1068,
-@@ -5390,6 +5394,7 @@ static const struct pci_device_id mptsas_pci_table[] = {
+@@ -5389,6 +5393,7 @@ static const struct pci_device_id mptsas_pci_table[] = {
  		PCI_ANY_ID, PCI_ANY_ID },
  	{ PCI_VENDOR_ID_LSI_LOGIC, MPI_MANUFACTPAGE_DEVID_SAS1068_820XELP,
  		PCI_ANY_ID, PCI_ANY_ID },
@@ -2024,7 +2023,7 @@ index 5276bdb7acc27..684da1f2a0e5b 100644
  };
  MODULE_DEVICE_TABLE(pci, mptsas_pci_table);
 diff --git a/drivers/message/fusion/mptspi.c b/drivers/message/fusion/mptspi.c
-index 14707d19fbbd3..688a3f732ce18 100644
+index 56892b1f3de2e..b0e55913bb2e9 100644
 --- a/drivers/message/fusion/mptspi.c
 +++ b/drivers/message/fusion/mptspi.c
 @@ -1240,12 +1240,17 @@ static struct spi_function_template mptspi_transport_functions = {
@@ -2070,7 +2069,7 @@ index a00671b58701f..eeef2766b8b3d 100644
  	if (ret < 0)
  		goto err_allowedips;
 diff --git a/drivers/pci/pci-driver.c b/drivers/pci/pci-driver.c
-index 47887d55994a8..3abd553388ae1 100644
+index dd9075403987d..918b7cb788927 100644
 --- a/drivers/pci/pci-driver.c
 +++ b/drivers/pci/pci-driver.c
 @@ -19,6 +19,7 @@
@@ -2133,7 +2132,7 @@ index 48946cca4be72..e9f72105b3248 100644
   * AST1150 doesn't use a real PCI bus and always forwards the requester ID
   * from downstream devices.
 diff --git a/drivers/scsi/hpsa.c b/drivers/scsi/hpsa.c
-index 3e235dbfb67ae..0ed9b546ba200 100644
+index a1b116cd4723d..736707eafaabf 100644
 --- a/drivers/scsi/hpsa.c
 +++ b/drivers/scsi/hpsa.c
 @@ -82,7 +82,9 @@ MODULE_DESCRIPTION("Driver for HP Smart Array Controller version " \
@@ -2160,10 +2159,10 @@ index 3e235dbfb67ae..0ed9b546ba200 100644
  };
  
 diff --git a/drivers/scsi/qla2xxx/qla_os.c b/drivers/scsi/qla2xxx/qla_os.c
-index a88b460641f26..317274b6f1563 100644
+index 72b1c28e4dae0..2226c9dffa946 100644
 --- a/drivers/scsi/qla2xxx/qla_os.c
 +++ b/drivers/scsi/qla2xxx/qla_os.c
-@@ -8132,6 +8132,7 @@ static const struct pci_error_handlers qla2xxx_err_handler = {
+@@ -8128,6 +8128,7 @@ static const struct pci_error_handlers qla2xxx_err_handler = {
  };
  
  static const struct pci_device_id qla2xxx_pci_tbl[] = {
@@ -2171,7 +2170,7 @@ index a88b460641f26..317274b6f1563 100644
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2100) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2200) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2300) },
-@@ -8144,13 +8145,18 @@ static const struct pci_device_id qla2xxx_pci_tbl[] = {
+@@ -8140,13 +8141,18 @@ static const struct pci_device_id qla2xxx_pci_tbl[] = {
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP8432) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP5422) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP5432) },
@@ -2191,7 +2190,7 @@ index a88b460641f26..317274b6f1563 100644
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2271) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2261) },
 diff --git a/drivers/scsi/sd.c b/drivers/scsi/sd.c
-index d76996d6cbc9c..c815d3ae39aed 100644
+index 628a1d0a74bac..24a5fdfac7b11 100644
 --- a/drivers/scsi/sd.c
 +++ b/drivers/scsi/sd.c
 @@ -116,6 +116,14 @@ static const char *sd_cache_types[] = {
@@ -2222,7 +2221,7 @@ index d76996d6cbc9c..c815d3ae39aed 100644
  	if (err)
  		goto err_out_driver;
 diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
-index be50d03034a96..9ce9b6518acd5 100644
+index 24960ba9caa91..32597cdb72ef9 100644
 --- a/drivers/usb/core/hub.c
 +++ b/drivers/usb/core/hub.c
 @@ -5894,6 +5894,13 @@ static void hub_event(struct work_struct *work)
@@ -2240,7 +2239,7 @@ index be50d03034a96..9ce9b6518acd5 100644
  	 * disconnected while waiting for the lock to succeed. */
  	usb_lock_device(hdev);
 diff --git a/fs/afs/main.c b/fs/afs/main.c
-index e6bb8237db989..68fcbaf74e601 100644
+index 7a883c59976ff..907ec60e500a1 100644
 --- a/fs/afs/main.c
 +++ b/fs/afs/main.c
 @@ -194,6 +194,9 @@ static int __init afs_init(void)
@@ -2254,7 +2253,7 @@ index e6bb8237db989..68fcbaf74e601 100644
  
  error_proc:
 diff --git a/fs/erofs/super.c b/fs/erofs/super.c
-index 7827e61424b7f..9ecafa5c19123 100644
+index d4995686ac6c6..980362105f3ab 100644
 --- a/fs/erofs/super.c
 +++ b/fs/erofs/super.c
 @@ -643,6 +643,9 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
@@ -2281,10 +2280,10 @@ index 7827e61424b7f..9ecafa5c19123 100644
  }
  
 diff --git a/fs/ext4/super.c b/fs/ext4/super.c
-index 504148b2142b5..eb9d784564327 100644
+index 43f680c750ae6..284b647fd97aa 100644
 --- a/fs/ext4/super.c
 +++ b/fs/ext4/super.c
-@@ -5704,6 +5704,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
+@@ -5702,6 +5702,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
  	atomic_set(&sbi->s_warning_count, 0);
  	atomic_set(&sbi->s_msg_count, 0);
  
@@ -3164,66 +3163,6 @@ index 83a646d72f6f8..65b72854a0465 100644
 +#endif /* CONFIG_SECURITY_LOCKDOWN_LSM */
 +
  #endif /* ! __LINUX_SECURITY_H */
-diff --git a/include/rv/da_monitor.h b/include/rv/da_monitor.h
-index db11d41bb438b..7511f5464c48b 100644
---- a/include/rv/da_monitor.h
-+++ b/include/rv/da_monitor.h
-@@ -20,6 +20,12 @@
- #include <linux/bug.h>
- #include <linux/sched.h>
- 
-+/*
-+ * Per-cpu variables require a unique name although static in some
-+ * configurations (e.g. CONFIG_DEBUG_FORCE_WEAK_PER_CPU or alpha modules).
-+ */
-+#define DA_MON_NAME CONCATENATE(da_mon_, MONITOR_NAME)
-+
- static struct rv_monitor rv_this;
- 
- static void react(enum states curr_state, enum events event)
-@@ -183,14 +189,14 @@ static inline bool da_event(struct da_monitor *da_mon, struct task_struct *tsk,
- /*
-  * global monitor (a single variable)
-  */
--static struct da_monitor da_mon_this;
-+static struct da_monitor DA_MON_NAME;
- 
- /*
-  * da_get_monitor - return the global monitor address
-  */
- static struct da_monitor *da_get_monitor(void)
- {
--	return &da_mon_this;
-+	return &DA_MON_NAME;
- }
- 
- /*
-@@ -223,14 +229,14 @@ static inline void da_monitor_destroy(void) { }
- /*
-  * per-cpu monitor variables
-  */
--static DEFINE_PER_CPU(struct da_monitor, da_mon_this);
-+static DEFINE_PER_CPU(struct da_monitor, DA_MON_NAME);
- 
- /*
-  * da_get_monitor - return current CPU monitor address
-  */
- static struct da_monitor *da_get_monitor(void)
- {
--	return this_cpu_ptr(&da_mon_this);
-+	return this_cpu_ptr(&DA_MON_NAME);
- }
- 
- /*
-@@ -242,7 +248,7 @@ static void da_monitor_reset_all(void)
- 	int cpu;
- 
- 	for_each_cpu(cpu, cpu_online_mask) {
--		da_mon = per_cpu_ptr(&da_mon_this, cpu);
-+		da_mon = per_cpu_ptr(&DA_MON_NAME, cpu);
- 		da_monitor_reset(da_mon);
- 	}
- }
 diff --git a/init/main.c b/init/main.c
 index 1cb395dd94e43..7219a75f22875 100644
 --- a/init/main.c
@@ -3263,7 +3202,7 @@ index 6785982013dce..edd073e471ba1 100644
  obj-$(CONFIG_VHOST_TASK) += vhost_task.o
  
 diff --git a/kernel/bpf/core.c b/kernel/bpf/core.c
-index 5ab6bace7d0df..aeb931d5592ab 100644
+index 3ece2da55625c..f76ed92f4edbe 100644
 --- a/kernel/bpf/core.c
 +++ b/kernel/bpf/core.c
 @@ -547,7 +547,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
@@ -3280,7 +3219,7 @@ index 5ab6bace7d0df..aeb931d5592ab 100644
  long bpf_jit_limit_max __read_mostly;
  
 diff --git a/kernel/bpf/syscall.c b/kernel/bpf/syscall.c
-index dd89bf8097725..02634173d4ead 100644
+index 0378e83b40993..177702b3e7c97 100644
 --- a/kernel/bpf/syscall.c
 +++ b/kernel/bpf/syscall.c
 @@ -28,6 +28,7 @@
@@ -3315,7 +3254,7 @@ index dd89bf8097725..02634173d4ead 100644
  int sysctl_unprivileged_bpf_disabled __read_mostly =
  	IS_BUILTIN(CONFIG_BPF_UNPRIV_DEFAULT_OFF) ? 2 : 0;
  
-@@ -6560,6 +6578,11 @@ static int bpf_unpriv_handler(const struct ctl_table *table, int write,
+@@ -6559,6 +6577,11 @@ static int bpf_unpriv_handler(const struct ctl_table *table, int write,
  	if (write && !ret) {
  		if (locked_state && unpriv_enable != 1)
  			return -EPERM;
@@ -3328,7 +3267,7 @@ index dd89bf8097725..02634173d4ead 100644
  	}
  
 diff --git a/kernel/module/main.c b/kernel/module/main.c
-index 710ee30b3beab..3a43d9d322e7d 100644
+index 2bac4c7cd019a..2fb3834700566 100644
 --- a/kernel/module/main.c
 +++ b/kernel/module/main.c
 @@ -65,6 +65,8 @@
@@ -4592,7 +4531,7 @@ index 8d46886d2cca0..14a9cdff942b9 100644
  	LSM_HOOK_INIT(locked_down, lockdown_is_locked_down),
  };
 diff --git a/tools/testing/selftests/bpf/Makefile b/tools/testing/selftests/bpf/Makefile
-index c6bf4dfb14955..8db88c7d56146 100644
+index 6776158f1f3e6..97c89f8073364 100644
 --- a/tools/testing/selftests/bpf/Makefile
 +++ b/tools/testing/selftests/bpf/Makefile
 @@ -491,7 +491,7 @@ LSKELS := fexit_sleep.c trace_printk.c trace_vprintk.c map_ptr_kern.c 	\
