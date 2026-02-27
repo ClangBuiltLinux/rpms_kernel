@@ -1116,7 +1116,7 @@ index 505e32911c34c..26f7ee0ccf406 100644
  		dmi_decode_ipmi((const struct dmi_header *) dev->device_data);
  
 diff --git a/drivers/char/ipmi/ipmi_msghandler.c b/drivers/char/ipmi/ipmi_msghandler.c
-index c530966c4e070..db44f3a13f09c 100644
+index c41f51c82eddc..b36f35b54bd60 100644
 --- a/drivers/char/ipmi/ipmi_msghandler.c
 +++ b/drivers/char/ipmi/ipmi_msghandler.c
 @@ -34,6 +34,7 @@
@@ -1127,7 +1127,7 @@ index c530966c4e070..db44f3a13f09c 100644
  #include <linux/delay.h>
  
  #define IPMI_DRIVER_VERSION "39.2"
-@@ -5594,8 +5595,21 @@ static int __init ipmi_init_msghandler_mod(void)
+@@ -5643,8 +5644,21 @@ static int __init ipmi_init_msghandler_mod(void)
  {
  	int rv;
  
