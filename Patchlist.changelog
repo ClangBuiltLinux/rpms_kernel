@@ -1,3 +1,6 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/51aea5706fc6381678afaa1efcb2ac922d2b4dca
+ 51aea5706fc6381678afaa1efcb2ac922d2b4dca media: ipu-bridge: Add upside-down sensor DMI quirk for Dell XPS 13 9340 and XPS 14 9440
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/81a20aa2ab1d77ac14d2cc33e0ef81e2a471aa87
  81a20aa2ab1d77ac14d2cc33e0ef81e2a471aa87 efi: Fix swapped arguments to bsearch() in efi_status_to_*()
 
