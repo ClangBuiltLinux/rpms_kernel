@@ -204,7 +204,7 @@ index 0000000000000..85771d74c34f9
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index e944c6e71e81f..3e4704598247f 100644
+index 2446085983f7e..215c4ab5b1ef3 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -356,6 +356,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -367,7 +367,7 @@ index b0d00032479d6..afb9544fb0074 100644
  /*
   * DIAG 308 support
 diff --git a/arch/s390/kernel/ipl.c b/arch/s390/kernel/ipl.c
-index dcdc7e2748486..6b2fc225fa184 100644
+index 049c557c452ff..4c9fffbe62613 100644
 --- a/arch/s390/kernel/ipl.c
 +++ b/arch/s390/kernel/ipl.c
 @@ -2521,3 +2521,8 @@ int ipl_report_free(struct ipl_report *report)
@@ -3219,7 +3219,7 @@ index 3ece2da55625c..f76ed92f4edbe 100644
  long bpf_jit_limit_max __read_mostly;
  
 diff --git a/kernel/bpf/syscall.c b/kernel/bpf/syscall.c
-index 0378e83b40993..177702b3e7c97 100644
+index 274039e36465d..6e4219133788d 100644
 --- a/kernel/bpf/syscall.c
 +++ b/kernel/bpf/syscall.c
 @@ -28,6 +28,7 @@
@@ -4531,10 +4531,10 @@ index 8d46886d2cca0..14a9cdff942b9 100644
  	LSM_HOOK_INIT(locked_down, lockdown_is_locked_down),
  };
 diff --git a/tools/testing/selftests/bpf/Makefile b/tools/testing/selftests/bpf/Makefile
-index 6776158f1f3e6..97c89f8073364 100644
+index 72a9ba41f95eb..c4786b52d2c5c 100644
 --- a/tools/testing/selftests/bpf/Makefile
 +++ b/tools/testing/selftests/bpf/Makefile
-@@ -491,7 +491,7 @@ LSKELS := fexit_sleep.c trace_printk.c trace_vprintk.c map_ptr_kern.c 	\
+@@ -496,7 +496,7 @@ LSKELS := fexit_sleep.c trace_printk.c trace_vprintk.c map_ptr_kern.c 	\
  LSKELS_SIGNED := fentry_test.c fexit_test.c atomics.c
  
  # Generate both light skeleton and libbpf skeleton for these
