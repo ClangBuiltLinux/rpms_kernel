@@ -184,18 +184,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 6.19.5
-%define specversion 6.19.5
+%define specrpmversion 6.19.6
+%define specversion 6.19.6
 %define patchversion 6.19
 %define pkgrelease 300
 %define kversion 6
-%define tarfile_release 6.19.5
+%define tarfile_release 6.19.6
 # This is needed to do merge window version magic
 %define patchlevel 19
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 300%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 6.19.5
+%define kabiversion 6.19.6
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4811,8 +4811,19 @@ fi\
 #
 #
 %changelog
-* Fri Feb 27 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.5-300]
+* Wed Mar 04 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.6-300]
+- Turn on release_targets for F43/F42 (Justin M. Forbes)
+
+* Wed Mar 04 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.6-0]
+- net: macb: Fix tx/rx malfunction after phy link down and up (Kevin Hao)
+- net: macb: Replace open-coded device config retrieval with of_device_get_match_data() (Kevin Hao)
+- net: macb: convert to use .get_rx_ring_count (Breno Leitao)
+- net: cadence: macb: Discard pm_runtime_put() return value (Rafael J. Wysocki)
+- arm64: dts: broadcom: bcm2712: Add watchdog DT node (Stanimir Varbanov)
+- arm64: dts: broadcom: bcm2712: Enable RNG (Peter Robinson)
+- fedora: minor beeper cleanups (Peter Robinson)
 - Add config introduced in 6.19.4 (Justin M. Forbes)
+- Linux v6.19.6
 
 * Fri Feb 27 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.5-0]
 - Linux v6.19.5

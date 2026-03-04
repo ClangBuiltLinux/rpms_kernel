@@ -1,6 +1,7 @@
  Makefile                                           |  30 +++++
  arch/arm/Kconfig                                   |   4 +-
  arch/arm64/Kconfig                                 |   2 +-
+ arch/arm64/boot/dts/broadcom/bcm2712.dtsi          |  15 +++
  arch/arm64/kernel/setup.c                          |  27 +++++
  arch/s390/include/asm/ipl.h                        |   1 +
  arch/s390/kernel/ipl.c                             |   5 +
@@ -25,6 +26,7 @@
  drivers/input/rmi4/rmi_driver.c                    | 124 ++++++++++++---------
  drivers/iommu/iommu.c                              |  22 ++++
  drivers/media/pci/intel/ipu-bridge.c               |  14 +++
+ drivers/net/ethernet/cadence/macb_main.c           |  29 ++---
  drivers/pci/quirks.c                               |  24 ++++
  drivers/scsi/sd.c                                  |  10 ++
  drivers/usb/core/hub.c                             |   7 ++
@@ -41,10 +43,10 @@
  security/lockdown/lockdown.c                       |  11 ++
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 ------
- 43 files changed, 559 insertions(+), 220 deletions(-)
+ 45 files changed, 590 insertions(+), 233 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index f486050e0bee4..3af5f02848e7e 100644
+index 67f26d8b29343..d1f4007b07369 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -355,6 +355,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -127,6 +129,39 @@ index 93173f0a09c7d..8f992962ccd35 100644
  	help
  	  For systems with 52-bit userspace VAs enabled, the kernel will attempt
  	  to maintain compatibility with older software by providing 48-bit VAs
+diff --git a/arch/arm64/boot/dts/broadcom/bcm2712.dtsi b/arch/arm64/boot/dts/broadcom/bcm2712.dtsi
+index 205b87f557d6d..d57a9b1bff70c 100644
+--- a/arch/arm64/boot/dts/broadcom/bcm2712.dtsi
++++ b/arch/arm64/boot/dts/broadcom/bcm2712.dtsi
+@@ -250,6 +250,15 @@ uart10: serial@7d001000 {
+ 			status = "disabled";
+ 		};
+ 
++		pm: watchdog@7d200000 {
++			compatible = "brcm,bcm2712-pm", "brcm,bcm2835-pm-wdt";
++			reg = <0x7d200000 0x604>;
++			reg-names = "pm";
++			#power-domain-cells = <1>;
++			#reset-cells = <1>;
++			system-power-controller;
++		};
++
+ 		pinctrl: pinctrl@7d504100 {
+ 			compatible = "brcm,bcm2712c0-pinctrl";
+ 			reg = <0x7d504100 0x30>;
+@@ -283,6 +292,12 @@ pinctrl_aon: pinctrl@7d510700 {
+ 			reg = <0x7d510700 0x20>;
+ 		};
+ 
++		random: rng@7d208000 {
++			compatible = "brcm,bcm2711-rng200";
++			reg = <0x7d208000 0x28>;
++			status = "okay";
++		};
++
+ 		interrupt-controller@7d517000 {
+ 			compatible = "brcm,bcm7271-l2-intc";
+ 			reg = <0x7d517000 0x10>;
 diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
 index 23c05dc7a8f2a..d7b7b2f39e169 100644
 --- a/arch/arm64/kernel/setup.c
@@ -227,7 +262,7 @@ index c1fe0b53c5ac5..8e17bfe788cb9 100644
  	/* boot_command_line has been already set up in early.c */
  	*cmdline_p = boot_command_line;
 diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index 1b2edd07a3e17..1c434c6900ebe 100644
+index 383d4a4784f5b..45f428436e2d9 100644
 --- a/arch/x86/kernel/setup.c
 +++ b/arch/x86/kernel/setup.c
 @@ -21,6 +21,7 @@
@@ -238,7 +273,7 @@ index 1b2edd07a3e17..1c434c6900ebe 100644
  #include <linux/static_call.h>
  #include <linux/swiotlb.h>
  #include <linux/tboot.h>
-@@ -991,6 +992,13 @@ void __init setup_arch(char **cmdline_p)
+@@ -997,6 +998,13 @@ void __init setup_arch(char **cmdline_p)
  	if (efi_enabled(EFI_BOOT))
  		efi_init();
  
@@ -252,7 +287,7 @@ index 1b2edd07a3e17..1c434c6900ebe 100644
  	reserve_ibft_region();
  	x86_init.resources.dmi_setup();
  
-@@ -1154,19 +1162,7 @@ void __init setup_arch(char **cmdline_p)
+@@ -1160,19 +1168,7 @@ void __init setup_arch(char **cmdline_p)
  	/* Allocate bigger log buffer */
  	setup_log_buf(1);
  
@@ -474,10 +509,10 @@ index d1595156c86a4..9485212f1a6d6 100644
  	return ctx.rc;
  }
 diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index 416d87f9bd107..cb563be2b69c1 100644
+index b78f6be2f9468..8bf534f6f8933 100644
 --- a/drivers/acpi/scan.c
 +++ b/drivers/acpi/scan.c
-@@ -1802,6 +1802,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
+@@ -1803,6 +1803,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
  	if (!acpi_match_device_ids(device, ignore_serial_bus_ids))
  		return false;
  
@@ -1192,11 +1227,87 @@ index b2b710094914c..fd3c46aa0350e 100644
  	{
  		.matches = {
  			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "Dell Inc."),
+diff --git a/drivers/net/ethernet/cadence/macb_main.c b/drivers/net/ethernet/cadence/macb_main.c
+index 4ebb40adfab37..43cd013bb70e6 100644
+--- a/drivers/net/ethernet/cadence/macb_main.c
++++ b/drivers/net/ethernet/cadence/macb_main.c
+@@ -3849,6 +3849,13 @@ static int gem_get_all_flow_entries(struct net_device *netdev,
+ 	return 0;
+ }
+ 
++static u32 gem_get_rx_ring_count(struct net_device *netdev)
++{
++	struct macb *bp = netdev_priv(netdev);
++
++	return bp->num_queues;
++}
++
+ static int gem_get_rxnfc(struct net_device *netdev, struct ethtool_rxnfc *cmd,
+ 		u32 *rule_locs)
+ {
+@@ -3856,9 +3863,6 @@ static int gem_get_rxnfc(struct net_device *netdev, struct ethtool_rxnfc *cmd,
+ 	int ret = 0;
+ 
+ 	switch (cmd->cmd) {
+-	case ETHTOOL_GRXRINGS:
+-		cmd->data = bp->num_queues;
+-		break;
+ 	case ETHTOOL_GRXCLSRLCNT:
+ 		cmd->rule_cnt = bp->rx_fs_list.count;
+ 		break;
+@@ -3940,6 +3944,7 @@ static const struct ethtool_ops gem_ethtool_ops = {
+ 	.set_ringparam		= macb_set_ringparam,
+ 	.get_rxnfc			= gem_get_rxnfc,
+ 	.set_rxnfc			= gem_set_rxnfc,
++	.get_rx_ring_count		= gem_get_rx_ring_count,
+ };
+ 
+ static int macb_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
+@@ -4810,7 +4815,9 @@ static int at91ether_close(struct net_device *dev)
+ 
+ 	at91ether_stop(lp);
+ 
+-	return pm_runtime_put(&lp->pdev->dev);
++	pm_runtime_put(&lp->pdev->dev);
++
++	return 0;
+ }
+ 
+ /* Transmit packet */
+@@ -5430,9 +5437,9 @@ static const struct macb_config default_gem_config = {
+ 
+ static int macb_probe(struct platform_device *pdev)
+ {
+-	const struct macb_config *macb_config = &default_gem_config;
+-	struct device_node *np = pdev->dev.of_node;
+ 	struct clk *pclk, *hclk = NULL, *tx_clk = NULL, *rx_clk = NULL;
++	struct device_node *np = pdev->dev.of_node;
++	const struct macb_config *macb_config;
+ 	struct clk *tsu_clk = NULL;
+ 	phy_interface_t interface;
+ 	struct net_device *dev;
+@@ -5448,13 +5455,9 @@ static int macb_probe(struct platform_device *pdev)
+ 	if (IS_ERR(mem))
+ 		return PTR_ERR(mem);
+ 
+-	if (np) {
+-		const struct of_device_id *match;
+-
+-		match = of_match_node(macb_dt_ids, np);
+-		if (match && match->data)
+-			macb_config = match->data;
+-	}
++	macb_config = of_device_get_match_data(&pdev->dev);
++	if (!macb_config)
++		macb_config = &default_gem_config;
+ 
+ 	err = macb_config->clk_init(pdev, &pclk, &hclk, &tx_clk, &rx_clk, &tsu_clk);
+ 	if (err)
 diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
-index 6df78efd7f6dc..46f79808ff257 100644
+index fd86f72f54aef..34dbf67c104b0 100644
 --- a/drivers/pci/quirks.c
 +++ b/drivers/pci/quirks.c
-@@ -4453,6 +4453,30 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_BROADCOM, 0x9000,
+@@ -4481,6 +4481,30 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_BROADCOM, 0x9000,
  DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_BROADCOM, 0x9084,
  				quirk_bridge_cavm_thrx2_pcie_root);
  

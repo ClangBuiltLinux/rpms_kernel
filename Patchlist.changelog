@@ -1,3 +1,21 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/338f45a28efdfb7b01659662434fe7e4a21db681
+ 338f45a28efdfb7b01659662434fe7e4a21db681 net: macb: Fix tx/rx malfunction after phy link down and up
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/29d4af45ee481b48ee077c6fc5078efcdb915b75
+ 29d4af45ee481b48ee077c6fc5078efcdb915b75 net: macb: Replace open-coded device config retrieval with of_device_get_match_data()
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/65490d1d05e842782d1a5027aed37cd2b67b8166
+ 65490d1d05e842782d1a5027aed37cd2b67b8166 net: macb: convert to use .get_rx_ring_count
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/f60528b7231c389c8f29e1172f3b0cbc33ed0ea0
+ f60528b7231c389c8f29e1172f3b0cbc33ed0ea0 net: cadence: macb: Discard pm_runtime_put() return value
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/c7dfb6ce47f1e133cb7cf5bb651c028b8edd81e0
+ c7dfb6ce47f1e133cb7cf5bb651c028b8edd81e0 arm64: dts: broadcom: bcm2712: Add watchdog DT node
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/9e557cd3469d512fcd01dbd0b55d04ad31e7c074
+ 9e557cd3469d512fcd01dbd0b55d04ad31e7c074 arm64: dts: broadcom: bcm2712: Enable RNG
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/51aea5706fc6381678afaa1efcb2ac922d2b4dca
  51aea5706fc6381678afaa1efcb2ac922d2b4dca media: ipu-bridge: Add upside-down sensor DMI quirk for Dell XPS 13 9340 and XPS 14 9440
 
