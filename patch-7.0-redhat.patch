@@ -942,7 +942,7 @@ index beba745b64057..fd41f6d3abf9a 100644
  		alg->verify = sig_default_verify;
  	if (!alg->set_priv_key)
 diff --git a/crypto/testmgr.c b/crypto/testmgr.c
-index 49b607f65f636..87928a50ed26e 100644
+index 4985411dedaec..5b03fce3dfd51 100644
 --- a/crypto/testmgr.c
 +++ b/crypto/testmgr.c
 @@ -3843,7 +3843,7 @@ static int test_akcipher_one(struct crypto_akcipher *tfm,
