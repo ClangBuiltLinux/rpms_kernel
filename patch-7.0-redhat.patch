@@ -81,10 +81,10 @@
  80 files changed, 2812 insertions(+), 243 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index cb850e5290c2b..921ae17e312f2 100644
+index 55ffc0f8858a7..cc7152a0c5f0e 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -6679,6 +6679,20 @@ Kernel parameters
+@@ -6692,6 +6692,20 @@ Kernel parameters
  		2	The "airplane mode" button toggles between everything
  			blocked and everything unblocked.
  
@@ -105,7 +105,7 @@ index cb850e5290c2b..921ae17e312f2 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -8074,6 +8088,15 @@ Kernel parameters
+@@ -8087,6 +8101,15 @@ Kernel parameters
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -204,7 +204,7 @@ index 0000000000000..85771d74c34f9
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 2446085983f7e..215c4ab5b1ef3 100644
+index 2b15f0b4a0cb5..36947a7205f63 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -356,6 +356,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -402,10 +402,10 @@ index b60284328fe3d..e4d37b08ca295 100644
  	/* boot_command_line has been already set up in early.c */
  	*cmdline_p = boot_command_line;
 diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
-index 1c3261cae40c9..602b3e242977b 100644
+index a8ff4376c2860..642f73c7e7142 100644
 --- a/arch/x86/kernel/cpu/common.c
 +++ b/arch/x86/kernel/cpu/common.c
-@@ -1783,6 +1783,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
+@@ -1786,6 +1786,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
  		get_cpu_vendor(c);
  		intel_unlock_cpuid_leafs(c);
  		get_cpu_cap(c);
@@ -4531,10 +4531,10 @@ index 8d46886d2cca0..14a9cdff942b9 100644
  	LSM_HOOK_INIT(locked_down, lockdown_is_locked_down),
  };
 diff --git a/tools/testing/selftests/bpf/Makefile b/tools/testing/selftests/bpf/Makefile
-index 72a9ba41f95eb..c4786b52d2c5c 100644
+index d5acbeba03838..d75ead06b161a 100644
 --- a/tools/testing/selftests/bpf/Makefile
 +++ b/tools/testing/selftests/bpf/Makefile
-@@ -496,7 +496,7 @@ LSKELS := fexit_sleep.c trace_printk.c trace_vprintk.c map_ptr_kern.c 	\
+@@ -497,7 +497,7 @@ LSKELS := fexit_sleep.c trace_printk.c trace_vprintk.c map_ptr_kern.c 	\
  LSKELS_SIGNED := fentry_test.c fexit_test.c atomics.c
  
  # Generate both light skeleton and libbpf skeleton for these
