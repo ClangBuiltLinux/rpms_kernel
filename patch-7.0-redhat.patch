@@ -1041,10 +1041,10 @@ index d1595156c86a..9485212f1a6d 100644
  	return ctx.rc;
  }
 diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index dfdd004fb1a9..2ae3959f0856 100644
+index e8cdbdb46fdb..71366d15a7db 100644
 --- a/drivers/acpi/scan.c
 +++ b/drivers/acpi/scan.c
-@@ -1791,6 +1791,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
+@@ -1792,6 +1792,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
  	if (!acpi_match_device_ids(device, ignore_serial_bus_ids))
  		return false;
  
