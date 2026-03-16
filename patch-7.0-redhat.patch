@@ -81,7 +81,7 @@
  80 files changed, 2812 insertions(+), 243 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 55ffc0f8858a..cc7152a0c5f0 100644
+index 03a550630644..0f922527264a 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
 @@ -6692,6 +6692,20 @@ Kernel parameters
@@ -204,7 +204,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 2b15f0b4a0cb..36947a7205f6 100644
+index c9b7bee102e8..6f0d01aaafb3 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -356,6 +356,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -225,7 +225,7 @@ index 2b15f0b4a0cb..36947a7205f6 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1357,6 +1368,8 @@ uapi-asm-generic:
+@@ -1361,6 +1372,8 @@ uapi-asm-generic:
  # Generate some files
  # ---------------------------------------------------------------------------
  
@@ -234,7 +234,7 @@ index 2b15f0b4a0cb..36947a7205f6 100644
  # KERNELRELEASE can change from a few different places, meaning version.h
  # needs to be updated, so this check is forced on all builds
  
-@@ -1381,7 +1394,13 @@ define filechk_version.h
+@@ -1385,7 +1398,13 @@ define filechk_version.h
  	((c) > 255 ? 255 : (c)))';                                       \
  	echo \#define LINUX_VERSION_MAJOR $(VERSION);                    \
  	echo \#define LINUX_VERSION_PATCHLEVEL $(PATCHLEVEL);            \
@@ -249,7 +249,7 @@ index 2b15f0b4a0cb..36947a7205f6 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -2022,6 +2041,23 @@ endif
+@@ -2026,6 +2045,23 @@ endif
  
  ifdef CONFIG_MODULES
  
