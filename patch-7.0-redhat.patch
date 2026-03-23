@@ -204,7 +204,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index c9b7bee102e8..6f0d01aaafb3 100644
+index 2294decf0afc..77807e3aa8b8 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -356,6 +356,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -3202,7 +3202,7 @@ index 6785982013dc..edd073e471ba 100644
  obj-$(CONFIG_VHOST_TASK) += vhost_task.o
  
 diff --git a/kernel/bpf/core.c b/kernel/bpf/core.c
-index 3ece2da55625..f76ed92f4edb 100644
+index 7b675a451ec8..059d4f93db27 100644
 --- a/kernel/bpf/core.c
 +++ b/kernel/bpf/core.c
 @@ -547,7 +547,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
@@ -4531,7 +4531,7 @@ index 8d46886d2cca..14a9cdff942b 100644
  	LSM_HOOK_INIT(locked_down, lockdown_is_locked_down),
  };
 diff --git a/tools/testing/selftests/bpf/Makefile b/tools/testing/selftests/bpf/Makefile
-index d5acbeba0383..d75ead06b161 100644
+index 65485967c968..e44f47e01027 100644
 --- a/tools/testing/selftests/bpf/Makefile
 +++ b/tools/testing/selftests/bpf/Makefile
 @@ -497,7 +497,7 @@ LSKELS := fexit_sleep.c trace_printk.c trace_vprintk.c map_ptr_kern.c 	\
