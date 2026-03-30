@@ -1,5 +1,19 @@
-* Fri Mar 27 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.0.0-0.rc5.46b513250491.46]
+* Mon Mar 30 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.0.0-0.rc6.49]
 - Work around binutils update in s390x perf (Justin M. Forbes)
+Resolves: 
+
+* Mon Mar 30 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.0.0-0.rc6.48]
+- redhat/configs: Centralize iommu debugfs options, and enable amd iommu debugfs (Jerry Snitselaar)
+- Linux v7.0.0-0.rc6
+Resolves: 
+
+* Sun Mar 29 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.0.0-0.rc5.cbfffcca2bf0.47]
+- Linux v7.0.0-0.rc5.cbfffcca2bf0
+Resolves: 
+
+* Sat Mar 28 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.0.0-0.rc5.be762d8b6dd7.46]
+- fedora: arm64: Make qcom geni i2c-adapter and i2c-hid-of drivers builtin (Hans de Goede)
+- Linux v7.0.0-0.rc5.be762d8b6dd7
 Resolves: 
 
 * Fri Mar 27 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.0.0-0.rc5.46b513250491.45]

@@ -204,7 +204,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index e1279c4d5b24..71b76f5e0868 100644
+index 6b1d9fb1a6b4..4aebd174a105 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -356,6 +356,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -402,10 +402,10 @@ index b60284328fe3..e4d37b08ca29 100644
  	/* boot_command_line has been already set up in early.c */
  	*cmdline_p = boot_command_line;
 diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
-index a8ff4376c286..642f73c7e714 100644
+index ec0670114efa..33d03b082b36 100644
 --- a/arch/x86/kernel/cpu/common.c
 +++ b/arch/x86/kernel/cpu/common.c
-@@ -1786,6 +1786,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
+@@ -1799,6 +1799,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
  		get_cpu_vendor(c);
  		intel_unlock_cpuid_leafs(c);
  		get_cpu_cap(c);
@@ -2280,10 +2280,10 @@ index 972a0c82198d..d9221c4ab880 100644
  }
  
 diff --git a/fs/ext4/super.c b/fs/ext4/super.c
-index 43f680c750ae..284b647fd97a 100644
+index a34efb44e73d..7bdaaedd272e 100644
 --- a/fs/ext4/super.c
 +++ b/fs/ext4/super.c
-@@ -5702,6 +5702,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
+@@ -5727,6 +5727,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
  	atomic_set(&sbi->s_warning_count, 0);
  	atomic_set(&sbi->s_msg_count, 0);
  
