@@ -204,7 +204,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 6b1d9fb1a6b4..4aebd174a105 100644
+index 4f54c5685638..1f98583c2466 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -356,6 +356,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -290,10 +290,10 @@ index ec33376f8e2b..255679ba5351 100644
  	  The VM uses one page of physical memory for each page table.
  	  For systems with a lot of processes, this can use a lot of
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 38dba5f7e4d2..68fd9fb32f1c 100644
+index 9ea19b74b6c3..6d2800a2a061 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -1453,7 +1453,7 @@ endchoice
+@@ -1454,7 +1454,7 @@ endchoice
  
  config ARM64_FORCE_52BIT
  	bool "Force 52-bit virtual addresses for userspace"
