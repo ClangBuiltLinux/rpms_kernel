@@ -14,7 +14,7 @@
  crypto/akcipher.c                                  |   3 +-
  crypto/dh.c                                        |  25 +
  crypto/drbg.c                                      |  18 +-
- crypto/rng.c                                       | 155 +++++-
+ crypto/rng.c                                       | 157 +++++-
  crypto/seqiv.c                                     |  15 +-
  crypto/sig.c                                       |   3 +-
  crypto/testmgr.c                                   |   6 +-
@@ -48,7 +48,7 @@
  fs/ext4/super.c                                    |  11 +
  include/linux/crypto.h                             |   3 +
  include/linux/efi.h                                |  22 +-
- include/linux/kernel.h                             |  15 +
+ include/linux/kernel.h                             |  28 ++
  include/linux/lsm_hook_defs.h                      |   1 +
  include/linux/module.h                             |   5 +
  include/linux/panic.h                              |  17 +-
@@ -78,13 +78,13 @@
  security/lockdown/lockdown.c                       |  11 +
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
- 80 files changed, 2811 insertions(+), 243 deletions(-)
+ 80 files changed, 2825 insertions(+), 244 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 03a550630644f..0f922527264a0 100644
+index 4510b4b3c416..812e622c41d5 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -6692,6 +6692,20 @@ Kernel parameters
+@@ -6709,6 +6709,20 @@ Kernel parameters
  		2	The "airplane mode" button toggles between everything
  			blocked and everything unblocked.
  
@@ -105,7 +105,7 @@ index 03a550630644f..0f922527264a0 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -8087,6 +8101,15 @@ Kernel parameters
+@@ -8099,6 +8113,15 @@ Kernel parameters
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -123,7 +123,7 @@ index 03a550630644f..0f922527264a0 100644
  			useful for debugging certain unwinder error
 diff --git a/Documentation/admin-guide/rh-waived-items.rst b/Documentation/admin-guide/rh-waived-items.rst
 new file mode 100644
-index 0000000000000..7471c891419c2
+index 000000000000..7471c891419c
 --- /dev/null
 +++ b/Documentation/admin-guide/rh-waived-items.rst
 @@ -0,0 +1,29 @@
@@ -157,7 +157,7 @@ index 0000000000000..7471c891419c2
 +============================
 +
 diff --git a/Kconfig b/Kconfig
-index 307e581144de3..11e93e479ce4f 100644
+index 307e581144de..11e93e479ce4 100644
 --- a/Kconfig
 +++ b/Kconfig
 @@ -32,3 +32,5 @@ source "lib/Kconfig.debug"
@@ -168,7 +168,7 @@ index 307e581144de3..11e93e479ce4f 100644
 +source "Kconfig.redhat"
 diff --git a/Kconfig.redhat b/Kconfig.redhat
 new file mode 100644
-index 0000000000000..85771d74c34f9
+index 000000000000..85771d74c34f
 --- /dev/null
 +++ b/Kconfig.redhat
 @@ -0,0 +1,31 @@
@@ -204,7 +204,7 @@ index 0000000000000..85771d74c34f9
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 36d0a32fbe49b..ca747a61ad9e3 100644
+index 54e1ae602000..24a26ca3dc78 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -356,6 +356,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -225,7 +225,7 @@ index 36d0a32fbe49b..ca747a61ad9e3 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1361,6 +1372,8 @@ uapi-asm-generic:
+@@ -1395,6 +1406,8 @@ uapi-asm-generic:
  # Generate some files
  # ---------------------------------------------------------------------------
  
@@ -234,7 +234,7 @@ index 36d0a32fbe49b..ca747a61ad9e3 100644
  # KERNELRELEASE can change from a few different places, meaning version.h
  # needs to be updated, so this check is forced on all builds
  
-@@ -1385,7 +1398,13 @@ define filechk_version.h
+@@ -1419,7 +1432,13 @@ define filechk_version.h
  	((c) > 255 ? 255 : (c)))';                                       \
  	echo \#define LINUX_VERSION_MAJOR $(VERSION);                    \
  	echo \#define LINUX_VERSION_PATCHLEVEL $(PATCHLEVEL);            \
@@ -249,7 +249,7 @@ index 36d0a32fbe49b..ca747a61ad9e3 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -2026,6 +2045,23 @@ endif
+@@ -2060,6 +2079,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -274,7 +274,7 @@ index 36d0a32fbe49b..ca747a61ad9e3 100644
  	@:
  
 diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index ec33376f8e2ba..255679ba53510 100644
+index ec33376f8e2b..255679ba5351 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
 @@ -1213,9 +1213,9 @@ config HIGHMEM
@@ -290,10 +290,10 @@ index ec33376f8e2ba..255679ba53510 100644
  	  The VM uses one page of physical memory for each page table.
  	  For systems with a lot of processes, this can use a lot of
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 9ea19b74b6c3c..6d2800a2a0617 100644
+index 94bf7cc43063..af8202556f37 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -1454,7 +1454,7 @@ endchoice
+@@ -1419,7 +1419,7 @@ endchoice
  
  config ARM64_FORCE_52BIT
  	bool "Force 52-bit virtual addresses for userspace"
@@ -303,7 +303,7 @@ index 9ea19b74b6c3c..6d2800a2a0617 100644
  	  For systems with 52-bit userspace VAs enabled, the kernel will attempt
  	  to maintain compatibility with older software by providing 48-bit VAs
 diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
-index 23c05dc7a8f2a..d7b7b2f39e169 100644
+index 23c05dc7a8f2..d7b7b2f39e16 100644
 --- a/arch/arm64/kernel/setup.c
 +++ b/arch/arm64/kernel/setup.c
 @@ -32,6 +32,8 @@
@@ -355,7 +355,7 @@ index 23c05dc7a8f2a..d7b7b2f39e169 100644
  
  	arm64_memblock_init();
 diff --git a/arch/s390/include/asm/ipl.h b/arch/s390/include/asm/ipl.h
-index b0d00032479d6..afb9544fb0074 100644
+index b0d00032479d..afb9544fb007 100644
 --- a/arch/s390/include/asm/ipl.h
 +++ b/arch/s390/include/asm/ipl.h
 @@ -139,6 +139,7 @@ int ipl_report_add_component(struct ipl_report *report, struct kexec_buf *kbuf,
@@ -367,7 +367,7 @@ index b0d00032479d6..afb9544fb0074 100644
  /*
   * DIAG 308 support
 diff --git a/arch/s390/kernel/ipl.c b/arch/s390/kernel/ipl.c
-index 049c557c452ff..4c9fffbe62613 100644
+index 049c557c452f..4c9fffbe6261 100644
 --- a/arch/s390/kernel/ipl.c
 +++ b/arch/s390/kernel/ipl.c
 @@ -2521,3 +2521,8 @@ int ipl_report_free(struct ipl_report *report)
@@ -380,7 +380,7 @@ index 049c557c452ff..4c9fffbe62613 100644
 +	return !!ipl_secure_flag;
 +}
 diff --git a/arch/s390/kernel/setup.c b/arch/s390/kernel/setup.c
-index b60284328fe3d..e4d37b08ca295 100644
+index b60284328fe3..e4d37b08ca29 100644
 --- a/arch/s390/kernel/setup.c
 +++ b/arch/s390/kernel/setup.c
 @@ -47,6 +47,7 @@
@@ -402,10 +402,10 @@ index b60284328fe3d..e4d37b08ca295 100644
  	/* boot_command_line has been already set up in early.c */
  	*cmdline_p = boot_command_line;
 diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
-index ec0670114efab..33d03b082b36f 100644
+index 4e1f0c4afe3a..74826817f40d 100644
 --- a/arch/x86/kernel/cpu/common.c
 +++ b/arch/x86/kernel/cpu/common.c
-@@ -1799,6 +1799,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
+@@ -1801,6 +1801,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
  		get_cpu_vendor(c);
  		intel_unlock_cpuid_leafs(c);
  		get_cpu_cap(c);
@@ -414,7 +414,7 @@ index ec0670114efab..33d03b082b36f 100644
  		get_cpu_address_sizes(c);
  		cpu_parse_early_param();
 diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index eebcc9db1a1bb..a1f5ef4746c3d 100644
+index eebcc9db1a1b..a1f5ef4746c3 100644
 --- a/arch/x86/kernel/setup.c
 +++ b/arch/x86/kernel/setup.c
 @@ -21,6 +21,7 @@
@@ -561,7 +561,7 @@ index eebcc9db1a1bb..a1f5ef4746c3d 100644
  }
  
 diff --git a/crypto/akcipher.c b/crypto/akcipher.c
-index dfe87b3ce1837..cd1302ca3b368 100644
+index dfe87b3ce183..cd1302ca3b36 100644
 --- a/crypto/akcipher.c
 +++ b/crypto/akcipher.c
 @@ -140,8 +140,7 @@ int crypto_register_akcipher(struct akcipher_alg *alg)
@@ -575,7 +575,7 @@ index dfe87b3ce1837..cd1302ca3b368 100644
  		alg->set_priv_key = akcipher_default_set_key;
  
 diff --git a/crypto/dh.c b/crypto/dh.c
-index 8250eeeebd0fe..01f0f3963a740 100644
+index 7ad4768716c8..01ccc24db074 100644
 --- a/crypto/dh.c
 +++ b/crypto/dh.c
 @@ -227,10 +227,35 @@ static int dh_compute_value(struct kpp_request *req)
@@ -615,7 +615,7 @@ index 8250eeeebd0fe..01f0f3963a740 100644
  	}
  
 diff --git a/crypto/drbg.c b/crypto/drbg.c
-index 1ed209e5d5ddc..6a4e52faf3600 100644
+index 9204e6edb426..5c10baf70071 100644
 --- a/crypto/drbg.c
 +++ b/crypto/drbg.c
 @@ -1270,13 +1270,14 @@ static int drbg_generate(struct drbg_state *drbg,
@@ -670,7 +670,7 @@ index 1ed209e5d5ddc..6a4e52faf3600 100644
  
  /*
 diff --git a/crypto/rng.c b/crypto/rng.c
-index c6165c8eb3873..e3df615eb3e9b 100644
+index 1d4b9177bad4..f79246f8b690 100644
 --- a/crypto/rng.c
 +++ b/crypto/rng.c
 @@ -12,10 +12,13 @@
@@ -687,22 +687,24 @@ index c6165c8eb3873..e3df615eb3e9b 100644
  #include <linux/seq_file.h>
  #include <linux/slab.h>
  #include <linux/string.h>
-@@ -23,7 +26,9 @@
+@@ -23,8 +26,10 @@
  
  #include "internal.h"
  
 -static DEFINE_MUTEX(crypto_default_rng_lock);
+-static struct crypto_rng *crypto_default_rng;
 +static ____cacheline_aligned_in_smp DEFINE_MUTEX(crypto_reseed_rng_lock);
 +static struct crypto_rng *crypto_reseed_rng;
 +static ____cacheline_aligned_in_smp DEFINE_MUTEX(crypto_default_rng_lock);
- struct crypto_rng *crypto_default_rng;
- EXPORT_SYMBOL_GPL(crypto_default_rng);
++struct static crypto_rng *crypto_default_rng;
  static int crypto_default_rng_refcnt;
-@@ -106,31 +111,37 @@ struct crypto_rng *crypto_alloc_rng(const char *alg_name, u32 type, u32 mask)
+ 
+ int crypto_rng_reset(struct crypto_rng *tfm, const u8 *seed, unsigned int slen)
+@@ -105,31 +110,37 @@ struct crypto_rng *crypto_alloc_rng(const char *alg_name, u32 type, u32 mask)
  }
  EXPORT_SYMBOL_GPL(crypto_alloc_rng);
  
--int crypto_get_default_rng(void)
+-static int crypto_get_default_rng(void)
 +static int crypto_get_rng(struct crypto_rng **rngp)
  {
  	struct crypto_rng *rng;
@@ -734,7 +736,7 @@ index c6165c8eb3873..e3df615eb3e9b 100644
 +}
  
 -unlock:
-+int crypto_get_default_rng(void)
++static int crypto_get_default_rng(void)
 +{
 +	int err;
 +
@@ -745,8 +747,8 @@ index c6165c8eb3873..e3df615eb3e9b 100644
  	mutex_unlock(&crypto_default_rng_lock);
  
  	return err;
-@@ -146,24 +157,33 @@ void crypto_put_default_rng(void)
- EXPORT_SYMBOL_GPL(crypto_put_default_rng);
+@@ -157,24 +168,33 @@ int __crypto_stdrng_get_bytes(void *buf, unsigned int len)
+ EXPORT_SYMBOL_GPL(__crypto_stdrng_get_bytes);
  
  #if defined(CONFIG_CRYPTO_RNG) || defined(CONFIG_CRYPTO_RNG_MODULE)
 -int crypto_del_default_rng(void)
@@ -785,7 +787,7 @@ index c6165c8eb3873..e3df615eb3e9b 100644
  EXPORT_SYMBOL_GPL(crypto_del_default_rng);
  #endif
  
-@@ -221,5 +241,108 @@ void crypto_unregister_rngs(struct rng_alg *algs, int count)
+@@ -232,5 +252,108 @@ void crypto_unregister_rngs(struct rng_alg *algs, int count)
  }
  EXPORT_SYMBOL_GPL(crypto_unregister_rngs);
  
@@ -895,7 +897,7 @@ index c6165c8eb3873..e3df615eb3e9b 100644
  MODULE_LICENSE("GPL");
  MODULE_DESCRIPTION("Random Number Generator");
 diff --git a/crypto/seqiv.c b/crypto/seqiv.c
-index 678bb4145d783..fcc059e7d3db5 100644
+index 678bb4145d78..fcc059e7d3db 100644
 --- a/crypto/seqiv.c
 +++ b/crypto/seqiv.c
 @@ -123,6 +123,19 @@ static int seqiv_aead_decrypt(struct aead_request *req)
@@ -928,7 +930,7 @@ index 678bb4145d783..fcc059e7d3db5 100644
  
  	inst->alg.base.cra_ctxsize = sizeof(struct aead_geniv_ctx);
 diff --git a/crypto/sig.c b/crypto/sig.c
-index beba745b64057..fd41f6d3abf9a 100644
+index beba745b6405..fd41f6d3abf9 100644
 --- a/crypto/sig.c
 +++ b/crypto/sig.c
 @@ -112,8 +112,7 @@ static int sig_prepare_alg(struct sig_alg *alg)
@@ -942,7 +944,7 @@ index beba745b64057..fd41f6d3abf9a 100644
  		alg->verify = sig_default_verify;
  	if (!alg->set_priv_key)
 diff --git a/crypto/testmgr.c b/crypto/testmgr.c
-index 4985411dedaec..5b03fce3dfd51 100644
+index 4d86efae65b2..31c6372c50dd 100644
 --- a/crypto/testmgr.c
 +++ b/crypto/testmgr.c
 @@ -3843,7 +3843,7 @@ static int test_akcipher_one(struct crypto_akcipher *tfm,
@@ -963,7 +965,7 @@ index 4985411dedaec..5b03fce3dfd51 100644
  		return 0;
  
  	sig_size = crypto_sig_maxsize(tfm);
-@@ -4866,14 +4866,12 @@ static const struct alg_test_desc alg_test_descs[] = {
+@@ -4909,14 +4909,12 @@ static const struct alg_test_desc alg_test_descs[] = {
  	}, {
  		.alg = "ecdh-nist-p256",
  		.test = alg_test_kpp,
@@ -979,7 +981,7 @@ index 4985411dedaec..5b03fce3dfd51 100644
  			.kpp = __VECS(ecdh_p384_tv_template)
  		}
 diff --git a/drivers/acpi/apei/hest.c b/drivers/acpi/apei/hest.c
-index 20d757687e3d9..90a13f20f052b 100644
+index 20d757687e3d..90a13f20f052 100644
 --- a/drivers/acpi/apei/hest.c
 +++ b/drivers/acpi/apei/hest.c
 @@ -142,6 +142,14 @@ static int apei_hest_parse(apei_hest_func_t func, void *data)
@@ -998,7 +1000,7 @@ index 20d757687e3d9..90a13f20f052b 100644
  	for (i = 0; i < hest_tab->error_source_count; i++) {
  		len = hest_esrc_len(hest_hdr);
 diff --git a/drivers/acpi/irq.c b/drivers/acpi/irq.c
-index d1595156c86a4..9485212f1a6d6 100644
+index d1595156c86a..9485212f1a6d 100644
 --- a/drivers/acpi/irq.c
 +++ b/drivers/acpi/irq.c
 @@ -143,6 +143,7 @@ struct acpi_irq_parse_one_ctx {
@@ -1041,7 +1043,7 @@ index d1595156c86a4..9485212f1a6d6 100644
  	return ctx.rc;
  }
 diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index e8cdbdb46fdb4..71366d15a7db3 100644
+index e8cdbdb46fdb..71366d15a7db 100644
 --- a/drivers/acpi/scan.c
 +++ b/drivers/acpi/scan.c
 @@ -1792,6 +1792,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
@@ -1061,7 +1063,7 @@ index e8cdbdb46fdb4..71366d15a7db3 100644
  	acpi_dev_get_resources(device, &resource_list,
  			       acpi_check_serial_bus_slave,
 diff --git a/drivers/ata/libahci.c b/drivers/ata/libahci.c
-index c79abdfcd7a9b..e23bfb7f94c72 100644
+index c79abdfcd7a9..e23bfb7f94c7 100644
 --- a/drivers/ata/libahci.c
 +++ b/drivers/ata/libahci.c
 @@ -731,6 +731,24 @@ int ahci_stop_engine(struct ata_port *ap)
@@ -1090,7 +1092,7 @@ index c79abdfcd7a9b..e23bfb7f94c72 100644
  	tmp = ata_wait_register(ap, port_mmio + PORT_CMD,
  				PORT_CMD_LIST_ON, PORT_CMD_LIST_ON, 1, 500);
 diff --git a/drivers/char/ipmi/ipmi_dmi.c b/drivers/char/ipmi/ipmi_dmi.c
-index 505e32911c34c..26f7ee0ccf406 100644
+index 505e32911c34..26f7ee0ccf40 100644
 --- a/drivers/char/ipmi/ipmi_dmi.c
 +++ b/drivers/char/ipmi/ipmi_dmi.c
 @@ -215,6 +215,21 @@ static int __init scan_for_dmi_ipmi(void)
@@ -1116,7 +1118,7 @@ index 505e32911c34c..26f7ee0ccf406 100644
  		dmi_decode_ipmi((const struct dmi_header *) dev->device_data);
  
 diff --git a/drivers/char/ipmi/ipmi_msghandler.c b/drivers/char/ipmi/ipmi_msghandler.c
-index c41f51c82eddc..b36f35b54bd60 100644
+index c41f51c82edd..b36f35b54bd6 100644
 --- a/drivers/char/ipmi/ipmi_msghandler.c
 +++ b/drivers/char/ipmi/ipmi_msghandler.c
 @@ -34,6 +34,7 @@
@@ -1151,7 +1153,7 @@ index c41f51c82eddc..b36f35b54bd60 100644
  	rv = ipmi_register_driver();
  	mutex_unlock(&ipmi_interfaces_mutex);
 diff --git a/drivers/char/random.c b/drivers/char/random.c
-index 7ff4d29911fd8..bdcfdbc1665fc 100644
+index b4da1fb976c1..1e112e2b405b 100644
 --- a/drivers/char/random.c
 +++ b/drivers/char/random.c
 @@ -51,9 +51,11 @@
@@ -1165,8 +1167,8 @@ index 7ff4d29911fd8..bdcfdbc1665fc 100644
 +#include <linux/fips.h>
  #include <crypto/chacha.h>
  #include <crypto/blake2s.h>
- #ifdef CONFIG_VDSO_GETRANDOM
-@@ -323,6 +325,11 @@ static void crng_fast_key_erasure(u8 key[CHACHA_KEY_SIZE],
+ #include <vdso/datapage.h>
+@@ -320,6 +322,11 @@ static void crng_fast_key_erasure(u8 key[CHACHA_KEY_SIZE],
  	memzero_explicit(first_block, sizeof(first_block));
  }
  
@@ -1178,17 +1180,17 @@ index 7ff4d29911fd8..bdcfdbc1665fc 100644
  /*
   * This function returns a ChaCha state that you may use for generating
   * random data. It also returns up to 32 bytes on its own of random data
-@@ -735,7 +742,8 @@ static void __cold _credit_init_bits(size_t bits)
+@@ -732,7 +739,8 @@ static void __cold _credit_init_bits(size_t bits)
  			queue_work(system_dfl_wq, &set_ready);
  		atomic_notifier_call_chain(&random_ready_notifier, 0, NULL);
- #ifdef CONFIG_VDSO_GETRANDOM
--		WRITE_ONCE(vdso_k_rng_data->is_ready, true);
-+		if (!fips_enabled)
-+			WRITE_ONCE(vdso_k_rng_data->is_ready, true);
- #endif
+ 		if (IS_ENABLED(CONFIG_VDSO_GETRANDOM))
+-			WRITE_ONCE(vdso_k_rng_data->is_ready, true);
++			if (!fips_enabled)
++				WRITE_ONCE(vdso_k_rng_data->is_ready, true);
  		wake_up_interruptible(&crng_init_wait);
  		kill_fasync(&fasync, SIGIO, POLL_IN);
-@@ -755,6 +763,9 @@ static void __cold _credit_init_bits(size_t bits)
+ 		pr_notice("crng init done\n");
+@@ -751,6 +759,9 @@ static void __cold _credit_init_bits(size_t bits)
  }
  
  
@@ -1198,7 +1200,7 @@ index 7ff4d29911fd8..bdcfdbc1665fc 100644
  /**********************************************************************
   *
   * Entropy collection routines.
-@@ -971,6 +982,19 @@ void __init add_bootloader_randomness(const void *buf, size_t len)
+@@ -967,6 +978,19 @@ void __init add_bootloader_randomness(const void *buf, size_t len)
  		credit_init_bits(len * 8);
  }
  
@@ -1218,7 +1220,7 @@ index 7ff4d29911fd8..bdcfdbc1665fc 100644
  #if IS_ENABLED(CONFIG_VMGENID)
  static BLOCKING_NOTIFIER_HEAD(vmfork_chain);
  
-@@ -1385,6 +1409,7 @@ SYSCALL_DEFINE3(getrandom, char __user *, ubuf, size_t, len, unsigned int, flags
+@@ -1381,6 +1405,7 @@ SYSCALL_DEFINE3(getrandom, char __user *, ubuf, size_t, len, unsigned int, flags
  {
  	struct iov_iter iter;
  	int ret;
@@ -1226,7 +1228,7 @@ index 7ff4d29911fd8..bdcfdbc1665fc 100644
  
  	if (flags & ~(GRND_NONBLOCK | GRND_RANDOM | GRND_INSECURE))
  		return -EINVAL;
-@@ -1396,6 +1421,21 @@ SYSCALL_DEFINE3(getrandom, char __user *, ubuf, size_t, len, unsigned int, flags
+@@ -1392,6 +1417,21 @@ SYSCALL_DEFINE3(getrandom, char __user *, ubuf, size_t, len, unsigned int, flags
  	if ((flags & (GRND_INSECURE | GRND_RANDOM)) == (GRND_INSECURE | GRND_RANDOM))
  		return -EINVAL;
  
@@ -1248,7 +1250,7 @@ index 7ff4d29911fd8..bdcfdbc1665fc 100644
  	if (!crng_ready() && !(flags & GRND_INSECURE)) {
  		if (flags & GRND_NONBLOCK)
  			return -EAGAIN;
-@@ -1416,6 +1456,12 @@ static __poll_t random_poll(struct file *file, poll_table *wait)
+@@ -1412,6 +1452,12 @@ static __poll_t random_poll(struct file *file, poll_table *wait)
  	return crng_ready() ? EPOLLIN | EPOLLRDNORM : EPOLLOUT | EPOLLWRNORM;
  }
  
@@ -1261,7 +1263,7 @@ index 7ff4d29911fd8..bdcfdbc1665fc 100644
  static ssize_t write_pool_user(struct iov_iter *iter)
  {
  	u8 block[BLAKE2S_BLOCK_SIZE];
-@@ -1556,7 +1602,58 @@ static int random_fasync(int fd, struct file *filp, int on)
+@@ -1552,7 +1598,58 @@ static int random_fasync(int fd, struct file *filp, int on)
  	return fasync_helper(fd, filp, on, &fasync);
  }
  
@@ -1320,7 +1322,7 @@ index 7ff4d29911fd8..bdcfdbc1665fc 100644
  	.read_iter = random_read_iter,
  	.write_iter = random_write_iter,
  	.poll = random_poll,
-@@ -1569,6 +1666,7 @@ const struct file_operations random_fops = {
+@@ -1565,6 +1662,7 @@ const struct file_operations random_fops = {
  };
  
  const struct file_operations urandom_fops = {
@@ -1328,7 +1330,7 @@ index 7ff4d29911fd8..bdcfdbc1665fc 100644
  	.read_iter = urandom_read_iter,
  	.write_iter = random_write_iter,
  	.unlocked_ioctl = random_ioctl,
-@@ -1579,6 +1677,32 @@ const struct file_operations urandom_fops = {
+@@ -1575,6 +1673,32 @@ const struct file_operations urandom_fops = {
  	.splice_write = iter_file_splice_write,
  };
  
@@ -1362,7 +1364,7 @@ index 7ff4d29911fd8..bdcfdbc1665fc 100644
  /********************************************************************
   *
 diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-index 8efbcf699e4ff..96d5a1ca981df 100644
+index 8efbcf699e4f..96d5a1ca981d 100644
 --- a/drivers/firmware/efi/Makefile
 +++ b/drivers/firmware/efi/Makefile
 @@ -25,6 +25,7 @@ subdir-$(CONFIG_EFI_STUB)		+= libstub
@@ -1374,7 +1376,7 @@ index 8efbcf699e4ff..96d5a1ca981df 100644
  obj-$(CONFIG_EFI_RCI2_TABLE)		+= rci2-table.o
  obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
 diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index b2fb92a4bbd11..533e132e1bd8a 100644
+index 3dab284a7754..24a7dbfa2fc8 100644
 --- a/drivers/firmware/efi/efi.c
 +++ b/drivers/firmware/efi/efi.c
 @@ -33,6 +33,7 @@
@@ -1519,7 +1521,7 @@ index b2fb92a4bbd11..533e132e1bd8a 100644
  EXPORT_SYMBOL_GPL(efi_status_to_err);
  
 diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-index 6a337f1f8787b..89244e0d9fa86 100644
+index 6a337f1f8787..89244e0d9fa8 100644
 --- a/drivers/firmware/efi/libstub/fdt.c
 +++ b/drivers/firmware/efi/libstub/fdt.c
 @@ -132,6 +132,11 @@ static efi_status_t update_fdt(void *orig_fdt, unsigned long orig_fdt_size,
@@ -1535,7 +1537,7 @@ index 6a337f1f8787b..89244e0d9fa86 100644
  	fdt_pack(fdt);
  
 diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
-index 516f4f0069bd2..380354755108b 100644
+index 516f4f0069bd..380354755108 100644
 --- a/drivers/firmware/efi/libstub/secureboot.c
 +++ b/drivers/firmware/efi/libstub/secureboot.c
 @@ -29,10 +29,13 @@ enum efi_secureboot_mode efi_get_secureboot(void)
@@ -1572,7 +1574,7 @@ index 516f4f0069bd2..380354755108b 100644
  }
 diff --git a/drivers/firmware/efi/secureboot.c b/drivers/firmware/efi/secureboot.c
 new file mode 100644
-index 0000000000000..de0a3714a5d44
+index 000000000000..de0a3714a5d4
 --- /dev/null
 +++ b/drivers/firmware/efi/secureboot.c
 @@ -0,0 +1,38 @@
@@ -1615,7 +1617,7 @@ index 0000000000000..de0a3714a5d44
 +	}
 +}
 diff --git a/drivers/hid/hid-rmi.c b/drivers/hid/hid-rmi.c
-index d4af17fdba467..154f0403cbf4c 100644
+index d4af17fdba46..154f0403cbf4 100644
 --- a/drivers/hid/hid-rmi.c
 +++ b/drivers/hid/hid-rmi.c
 @@ -321,21 +321,12 @@ static int rmi_input_event(struct hid_device *hdev, u8 *data, int size)
@@ -1717,7 +1719,7 @@ index d4af17fdba467..154f0403cbf4c 100644
  	data->xport.ops = &hid_rmi_ops;
  
 diff --git a/drivers/hwtracing/coresight/coresight-etm4x-core.c b/drivers/hwtracing/coresight/coresight-etm4x-core.c
-index d565a73f0042e..0e64fc7c10041 100644
+index d565a73f0042..0e64fc7c1004 100644
 --- a/drivers/hwtracing/coresight/coresight-etm4x-core.c
 +++ b/drivers/hwtracing/coresight/coresight-etm4x-core.c
 @@ -12,6 +12,7 @@
@@ -1768,7 +1770,7 @@ index d565a73f0042e..0e64fc7c10041 100644
  	platform_driver_unregister(&etm4_platform_driver);
  	etm4_pm_clear();
 diff --git a/drivers/input/rmi4/rmi_driver.c b/drivers/input/rmi4/rmi_driver.c
-index ccd9338a44dbe..5c54e522e8a47 100644
+index ccd9338a44db..5c54e522e8a4 100644
 --- a/drivers/input/rmi4/rmi_driver.c
 +++ b/drivers/input/rmi4/rmi_driver.c
 @@ -183,34 +183,47 @@ void rmi_set_attn_data(struct rmi_device *rmi_dev, unsigned long irq_status,
@@ -1960,7 +1962,7 @@ index ccd9338a44dbe..5c54e522e8a47 100644
  	if (data->f01_container->dev.driver) {
  		/* Driver already bound, so enable ATTN now. */
 diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
-index ee83850c70605..53ad11f18182e 100644
+index 61c12ba78206..125a2475eeea 100644
 --- a/drivers/iommu/iommu.c
 +++ b/drivers/iommu/iommu.c
 @@ -8,6 +8,7 @@
@@ -1971,7 +1973,7 @@ index ee83850c70605..53ad11f18182e 100644
  #include <linux/kernel.h>
  #include <linux/bits.h>
  #include <linux/bug.h>
-@@ -3068,6 +3069,27 @@ int iommu_fwspec_add_ids(struct device *dev, const u32 *ids, int num_ids)
+@@ -3106,6 +3107,27 @@ int iommu_fwspec_add_ids(struct device *dev, const u32 *ids, int num_ids)
  }
  EXPORT_SYMBOL_GPL(iommu_fwspec_add_ids);
  
@@ -2000,7 +2002,7 @@ index ee83850c70605..53ad11f18182e 100644
   * iommu_setup_default_domain - Set the default_domain for the group
   * @group: Group to change
 diff --git a/drivers/message/fusion/mptsas.c b/drivers/message/fusion/mptsas.c
-index c362f09a8c555..bcda62d89ecdb 100644
+index c362f09a8c55..bcda62d89ecd 100644
 --- a/drivers/message/fusion/mptsas.c
 +++ b/drivers/message/fusion/mptsas.c
 @@ -5377,6 +5377,10 @@ static void mptsas_remove(struct pci_dev *pdev)
@@ -2023,7 +2025,7 @@ index c362f09a8c555..bcda62d89ecdb 100644
  };
  MODULE_DEVICE_TABLE(pci, mptsas_pci_table);
 diff --git a/drivers/message/fusion/mptspi.c b/drivers/message/fusion/mptspi.c
-index 56892b1f3de2e..b0e55913bb2e9 100644
+index 56892b1f3de2..b0e55913bb2e 100644
 --- a/drivers/message/fusion/mptspi.c
 +++ b/drivers/message/fusion/mptspi.c
 @@ -1240,12 +1240,17 @@ static struct spi_function_template mptspi_transport_functions = {
@@ -2045,7 +2047,7 @@ index 56892b1f3de2e..b0e55913bb2e9 100644
  };
  MODULE_DEVICE_TABLE(pci, mptspi_pci_table);
 diff --git a/drivers/net/wireguard/main.c b/drivers/net/wireguard/main.c
-index a00671b58701f..eeef2766b8b3d 100644
+index a00671b58701..eeef2766b8b3 100644
 --- a/drivers/net/wireguard/main.c
 +++ b/drivers/net/wireguard/main.c
 @@ -12,6 +12,7 @@
@@ -2069,7 +2071,7 @@ index a00671b58701f..eeef2766b8b3d 100644
  	if (ret < 0)
  		goto err_allowedips;
 diff --git a/drivers/pci/pci-driver.c b/drivers/pci/pci-driver.c
-index dd9075403987d..918b7cb788927 100644
+index d10ece0889f0..e35c9d168794 100644
 --- a/drivers/pci/pci-driver.c
 +++ b/drivers/pci/pci-driver.c
 @@ -19,6 +19,7 @@
@@ -2080,7 +2082,7 @@ index dd9075403987d..918b7cb788927 100644
  #include <linux/dma-map-ops.h>
  #include <linux/iommu.h>
  #include "pci.h"
-@@ -320,7 +321,15 @@ static int local_pci_probe(struct drv_dev_and_id *ddi)
+@@ -322,7 +323,15 @@ static int local_pci_probe(struct drv_dev_and_id *ddi)
  	 */
  	pm_runtime_get_sync(dev);
  	pci_dev->driver = pci_drv;
@@ -2097,12 +2099,12 @@ index dd9075403987d..918b7cb788927 100644
  		return rc;
  	if (rc < 0) {
 diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
-index 48946cca4be72..e9f72105b3248 100644
+index 757a296eae41..096e8bedc7ef 100644
 --- a/drivers/pci/quirks.c
 +++ b/drivers/pci/quirks.c
-@@ -4498,6 +4498,30 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_BROADCOM, 0x9000,
- DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_BROADCOM, 0x9084,
- 				quirk_bridge_cavm_thrx2_pcie_root);
+@@ -4508,6 +4508,30 @@ static void quirk_aspeed_pci_bridge_no_alias(struct pci_dev *pdev)
+ }
+ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_ASPEED, 0x1150, quirk_aspeed_pci_bridge_no_alias);
  
 +/*
 + * PCI BAR 5 is not setup correctly for the on-board AHCI controller
@@ -2129,10 +2131,10 @@ index 48946cca4be72..e9f72105b3248 100644
 +DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_BROADCOM, 0x9027, quirk_fix_vulcan_ahci_bars);
 +
  /*
-  * AST1150 doesn't use a real PCI bus and always forwards the requester ID
-  * from downstream devices.
+  * Intersil/Techwell TW686[4589]-based video capture cards have an empty (zero)
+  * class code.  Fix it.
 diff --git a/drivers/scsi/hpsa.c b/drivers/scsi/hpsa.c
-index a1b116cd4723d..736707eafaabf 100644
+index a1b116cd4723..736707eafaab 100644
 --- a/drivers/scsi/hpsa.c
 +++ b/drivers/scsi/hpsa.c
 @@ -82,7 +82,9 @@ MODULE_DESCRIPTION("Driver for HP Smart Array Controller version " \
@@ -2159,7 +2161,7 @@ index a1b116cd4723d..736707eafaabf 100644
  };
  
 diff --git a/drivers/scsi/qla2xxx/qla_os.c b/drivers/scsi/qla2xxx/qla_os.c
-index 72b1c28e4dae0..2226c9dffa946 100644
+index 72b1c28e4dae..2226c9dffa94 100644
 --- a/drivers/scsi/qla2xxx/qla_os.c
 +++ b/drivers/scsi/qla2xxx/qla_os.c
 @@ -8128,6 +8128,7 @@ static const struct pci_error_handlers qla2xxx_err_handler = {
@@ -2190,7 +2192,7 @@ index 72b1c28e4dae0..2226c9dffa946 100644
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2271) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2261) },
 diff --git a/drivers/scsi/sd.c b/drivers/scsi/sd.c
-index 628a1d0a74bac..24a5fdfac7b11 100644
+index 628a1d0a74ba..24a5fdfac7b1 100644
 --- a/drivers/scsi/sd.c
 +++ b/drivers/scsi/sd.c
 @@ -116,6 +116,14 @@ static const char *sd_cache_types[] = {
@@ -2221,7 +2223,7 @@ index 628a1d0a74bac..24a5fdfac7b11 100644
  	if (err)
  		goto err_out_driver;
 diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
-index 24960ba9caa91..32597cdb72ef9 100644
+index 24960ba9caa9..32597cdb72ef 100644
 --- a/drivers/usb/core/hub.c
 +++ b/drivers/usb/core/hub.c
 @@ -5894,6 +5894,13 @@ static void hub_event(struct work_struct *work)
@@ -2239,7 +2241,7 @@ index 24960ba9caa91..32597cdb72ef9 100644
  	 * disconnected while waiting for the lock to succeed. */
  	usb_lock_device(hdev);
 diff --git a/fs/afs/main.c b/fs/afs/main.c
-index 7a883c59976ff..907ec60e500a1 100644
+index 7a883c59976f..907ec60e500a 100644
 --- a/fs/afs/main.c
 +++ b/fs/afs/main.c
 @@ -194,6 +194,9 @@ static int __init afs_init(void)
@@ -2253,10 +2255,10 @@ index 7a883c59976ff..907ec60e500a1 100644
  
  error_proc:
 diff --git a/fs/erofs/super.c b/fs/erofs/super.c
-index 972a0c82198d7..d9221c4ab8809 100644
+index 802add6652fd..b0244c658646 100644
 --- a/fs/erofs/super.c
 +++ b/fs/erofs/super.c
-@@ -632,6 +632,9 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
+@@ -636,6 +636,9 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
  {
  	struct inode *inode;
  	struct erofs_sb_info *sbi = EROFS_SB(sb);
@@ -2266,7 +2268,7 @@ index 972a0c82198d7..d9221c4ab8809 100644
  	int err;
  
  	sb->s_magic = EROFS_SUPER_MAGIC;
-@@ -784,6 +787,12 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
+@@ -788,6 +791,12 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
  
  	sbi->dir_ra_bytes = EROFS_DIR_RA_BYTES;
  	erofs_info(sb, "mounted with root inode @ nid %llu.", sbi->root_nid);
@@ -2280,10 +2282,10 @@ index 972a0c82198d7..d9221c4ab8809 100644
  }
  
 diff --git a/fs/ext4/super.c b/fs/ext4/super.c
-index a34efb44e73d7..7bdaaedd272ec 100644
+index 578508eb4f1a..9570913365d8 100644
 --- a/fs/ext4/super.c
 +++ b/fs/ext4/super.c
-@@ -5727,6 +5727,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
+@@ -5729,6 +5729,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
  	atomic_set(&sbi->s_warning_count, 0);
  	atomic_set(&sbi->s_msg_count, 0);
  
@@ -2302,7 +2304,7 @@ index a34efb44e73d7..7bdaaedd272ec 100644
  	err = ext4_register_sysfs(sb);
  	if (err)
 diff --git a/include/linux/crypto.h b/include/linux/crypto.h
-index a2137e19be7d8..df268ca70170e 100644
+index a2137e19be7d..df268ca70170 100644
 --- a/include/linux/crypto.h
 +++ b/include/linux/crypto.h
 @@ -151,6 +151,9 @@
@@ -2316,7 +2318,7 @@ index a2137e19be7d8..df268ca70170e 100644
  /*
   * Miscellaneous stuff.
 diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 664898d09ff57..34f476d021815 100644
+index 664898d09ff5..34f476d02181 100644
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
 @@ -45,6 +45,8 @@ struct screen_info;
@@ -2384,13 +2386,26 @@ index 664898d09ff57..34f476d021815 100644
  enum efi_secureboot_mode efi_get_secureboot_mode(efi_get_variable_t *get_var)
  {
 diff --git a/include/linux/kernel.h b/include/linux/kernel.h
-index e5570a16cbb1a..3f66e4d286c12 100644
+index e5570a16cbb1..82945b474e2e 100644
 --- a/include/linux/kernel.h
 +++ b/include/linux/kernel.h
-@@ -194,4 +194,19 @@ extern enum system_states system_state;
+@@ -194,4 +194,32 @@ extern enum system_states system_state;
  # define REBUILD_DUE_TO_DYNAMIC_FTRACE
  #endif
  
++/* Permissions on a sysfs file: you didn't miss the 0 prefix did you? */
++#define VERIFY_OCTAL_PERMISSIONS(perms)						\
++	(BUILD_BUG_ON_ZERO((perms) < 0) +					\
++	 BUILD_BUG_ON_ZERO((perms) > 0777) +					\
++	 /* USER_READABLE >= GROUP_READABLE >= OTHER_READABLE */		\
++	 BUILD_BUG_ON_ZERO((((perms) >> 6) & 4) < (((perms) >> 3) & 4)) +	\
++	 BUILD_BUG_ON_ZERO((((perms) >> 3) & 4) < ((perms) & 4)) +		\
++	 /* USER_WRITABLE >= GROUP_WRITABLE */					\
++	 BUILD_BUG_ON_ZERO((((perms) >> 6) & 2) < (((perms) >> 3) & 2)) +	\
++	 /* OTHER_WRITABLE?  Generally considered a bad idea. */		\
++	 BUILD_BUG_ON_ZERO((perms) & 2) +					\
++	 (perms))
++
 +struct module;
 +
 +#ifdef CONFIG_RHEL_DIFFERENCES
@@ -2408,10 +2423,10 @@ index e5570a16cbb1a..3f66e4d286c12 100644
 +
  #endif
 diff --git a/include/linux/lsm_hook_defs.h b/include/linux/lsm_hook_defs.h
-index 8c42b4bde09c0..694ce5c5bcd43 100644
+index 2b8dfb35caed..47274c0e7900 100644
 --- a/include/linux/lsm_hook_defs.h
 +++ b/include/linux/lsm_hook_defs.h
-@@ -446,6 +446,7 @@ LSM_HOOK(int, 0, bpf_token_capable, const struct bpf_token *token, int cap)
+@@ -456,6 +456,7 @@ LSM_HOOK(int, 0, bpf_token_capable, const struct bpf_token *token, int cap)
  
  LSM_HOOK(int, 0, locked_down, enum lockdown_reason what)
  
@@ -2420,7 +2435,7 @@ index 8c42b4bde09c0..694ce5c5bcd43 100644
  LSM_HOOK(int, 0, perf_event_open, int type)
  LSM_HOOK(int, 0, perf_event_alloc, struct perf_event *event)
 diff --git a/include/linux/module.h b/include/linux/module.h
-index 14f391b186c6d..ff29324e27f1f 100644
+index 7566815fabbe..f18af7fdb45b 100644
 --- a/include/linux/module.h
 +++ b/include/linux/module.h
 @@ -413,6 +413,7 @@ struct module {
@@ -2428,10 +2443,10 @@ index 14f391b186c6d..ff29324e27f1f 100644
  	const char *version;
  	const char *srcversion;
 +	const char *rhelversion;
+ 	const char *imported_namespaces;
  	struct kobject *holders_dir;
  
- 	/* Exported symbols */
-@@ -1021,6 +1022,10 @@ static inline unsigned long find_kallsyms_symbol_value(struct module *mod,
+@@ -1020,6 +1021,10 @@ static inline unsigned long find_kallsyms_symbol_value(struct module *mod,
  
  #endif  /* CONFIG_MODULES && CONFIG_KALLSYMS */
  
@@ -2443,7 +2458,7 @@ index 14f391b186c6d..ff29324e27f1f 100644
  DEFINE_FREE(module_put, struct module *, if (_T) module_put(_T))
  
 diff --git a/include/linux/panic.h b/include/linux/panic.h
-index f1dd417e54b29..95344281ed2c5 100644
+index f1dd417e54b2..95344281ed2c 100644
 --- a/include/linux/panic.h
 +++ b/include/linux/panic.h
 @@ -88,7 +88,22 @@ static inline void set_arch_panic_timeout(int timeout, int arch_default_timeout)
@@ -2471,10 +2486,10 @@ index f1dd417e54b29..95344281ed2c5 100644
  
  struct taint_flag {
 diff --git a/include/linux/pci.h b/include/linux/pci.h
-index 1c270f1d51230..0888bb51d142e 100644
+index 2c4454583c11..6514d4322a94 100644
 --- a/include/linux/pci.h
 +++ b/include/linux/pci.h
-@@ -1705,6 +1705,7 @@ int pci_add_dynid(struct pci_driver *drv,
+@@ -1711,6 +1711,7 @@ int pci_add_dynid(struct pci_driver *drv,
  		  unsigned long driver_data);
  const struct pci_device_id *pci_match_id(const struct pci_device_id *ids,
  					 struct pci_dev *dev);
@@ -2482,7 +2497,7 @@ index 1c270f1d51230..0888bb51d142e 100644
  int pci_scan_bridge(struct pci_bus *bus, struct pci_dev *dev, int max,
  		    int pass);
  
-@@ -2841,6 +2842,10 @@ static inline bool pci_is_thunderbolt_attached(struct pci_dev *pdev)
+@@ -2846,6 +2847,10 @@ static inline bool pci_is_thunderbolt_attached(struct pci_dev *pdev)
  	return false;
  }
  
@@ -2494,7 +2509,7 @@ index 1c270f1d51230..0888bb51d142e 100644
  void pci_uevent_ers(struct pci_dev *pdev, enum  pci_ers_result err_type);
  #endif
 diff --git a/include/linux/random.h b/include/linux/random.h
-index 8a8064dc3970b..3238fab8f7498 100644
+index 8a8064dc3970..3238fab8f749 100644
 --- a/include/linux/random.h
 +++ b/include/linux/random.h
 @@ -9,6 +9,13 @@
@@ -2523,7 +2538,7 @@ index 8a8064dc3970b..3238fab8f7498 100644
  #endif
 diff --git a/include/linux/rh_flags.h b/include/linux/rh_flags.h
 new file mode 100644
-index 0000000000000..d498d319ace3a
+index 000000000000..d498d319ace3
 --- /dev/null
 +++ b/include/linux/rh_flags.h
 @@ -0,0 +1,34 @@
@@ -2563,7 +2578,7 @@ index 0000000000000..d498d319ace3a
 +#endif
 diff --git a/include/linux/rh_kabi.h b/include/linux/rh_kabi.h
 new file mode 100644
-index 0000000000000..5139cb2cabdc0
+index 000000000000..5139cb2cabdc
 --- /dev/null
 +++ b/include/linux/rh_kabi.h
 @@ -0,0 +1,541 @@
@@ -3110,7 +3125,7 @@ index 0000000000000..5139cb2cabdc0
 +#endif /* _LINUX_RH_KABI_H */
 diff --git a/include/linux/rh_waived.h b/include/linux/rh_waived.h
 new file mode 100644
-index 0000000000000..d62a9e896b5ee
+index 000000000000..d62a9e896b5e
 --- /dev/null
 +++ b/include/linux/rh_waived.h
 @@ -0,0 +1,19 @@
@@ -3134,7 +3149,7 @@ index 0000000000000..d62a9e896b5ee
 +
 +#endif /* _RH_WAIVED_H */
 diff --git a/include/linux/rmi.h b/include/linux/rmi.h
-index ab7eea01ab427..fff7c5f737fc8 100644
+index ab7eea01ab42..fff7c5f737fc 100644
 --- a/include/linux/rmi.h
 +++ b/include/linux/rmi.h
 @@ -364,6 +364,7 @@ struct rmi_driver_data {
@@ -3146,10 +3161,10 @@ index ab7eea01ab427..fff7c5f737fc8 100644
  
  int rmi_register_transport_device(struct rmi_transport_dev *xport);
 diff --git a/include/linux/security.h b/include/linux/security.h
-index ee88dd2d2d1f7..5c816f0b8b671 100644
+index 41d7367cf403..ad6f69c6fcff 100644
 --- a/include/linux/security.h
 +++ b/include/linux/security.h
-@@ -2405,4 +2405,13 @@ static inline void security_initramfs_populated(void)
+@@ -2438,4 +2438,13 @@ static inline void security_initramfs_populated(void)
  }
  #endif /* CONFIG_SECURITY */
  
@@ -3164,10 +3179,10 @@ index ee88dd2d2d1f7..5c816f0b8b671 100644
 +
  #endif /* ! __LINUX_SECURITY_H */
 diff --git a/init/main.c b/init/main.c
-index 1cb395dd94e43..7219a75f22875 100644
+index 96f93bb06c49..20dfcf6693f5 100644
 --- a/init/main.c
 +++ b/init/main.c
-@@ -1271,8 +1271,10 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
+@@ -1281,8 +1281,10 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
  	char fn_name[KSYM_SYMBOL_LEN];
  	unsigned long addr;
  
@@ -3178,7 +3193,7 @@ index 1cb395dd94e43..7219a75f22875 100644
  
  	addr = (unsigned long) dereference_function_descriptor(fn);
  	sprint_symbol_no_offset(fn_name, addr);
-@@ -1283,6 +1285,9 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
+@@ -1293,6 +1295,9 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
  	 */
  	strreplace(fn_name, ' ', '\0');
  
@@ -3189,7 +3204,7 @@ index 1cb395dd94e43..7219a75f22875 100644
  		if (!strcmp(fn_name, entry->buf)) {
  			pr_debug("initcall %s blacklisted\n", fn_name);
 diff --git a/kernel/Makefile b/kernel/Makefile
-index 6785982013dce..edd073e471ba1 100644
+index 6785982013dc..edd073e471ba 100644
 --- a/kernel/Makefile
 +++ b/kernel/Makefile
 @@ -12,6 +12,8 @@ obj-y     = fork.o exec_domain.o panic.o \
@@ -3202,10 +3217,10 @@ index 6785982013dce..edd073e471ba1 100644
  obj-$(CONFIG_VHOST_TASK) += vhost_task.o
  
 diff --git a/kernel/bpf/core.c b/kernel/bpf/core.c
-index 7b675a451ec8e..059d4f93db270 100644
+index 066b86e7233c..41fbff61e948 100644
 --- a/kernel/bpf/core.c
 +++ b/kernel/bpf/core.c
-@@ -547,7 +547,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
+@@ -546,7 +546,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
  /* All BPF JIT sysctl knobs here. */
  int bpf_jit_enable   __read_mostly = IS_BUILTIN(CONFIG_BPF_JIT_DEFAULT_ON);
  int bpf_jit_kallsyms __read_mostly = IS_BUILTIN(CONFIG_BPF_JIT_DEFAULT_ON);
@@ -3219,7 +3234,7 @@ index 7b675a451ec8e..059d4f93db270 100644
  long bpf_jit_limit_max __read_mostly;
  
 diff --git a/kernel/bpf/syscall.c b/kernel/bpf/syscall.c
-index 700938782bed2..360621ca94c1f 100644
+index b73b25c63073..11ea822de293 100644
 --- a/kernel/bpf/syscall.c
 +++ b/kernel/bpf/syscall.c
 @@ -28,6 +28,7 @@
@@ -3254,7 +3269,7 @@ index 700938782bed2..360621ca94c1f 100644
  int sysctl_unprivileged_bpf_disabled __read_mostly =
  	IS_BUILTIN(CONFIG_BPF_UNPRIV_DEFAULT_OFF) ? 2 : 0;
  
-@@ -6580,6 +6598,11 @@ static int bpf_unpriv_handler(const struct ctl_table *table, int write,
+@@ -6582,6 +6600,11 @@ static int bpf_unpriv_handler(const struct ctl_table *table, int write,
  	if (write && !ret) {
  		if (locked_state && unpriv_enable != 1)
  			return -EPERM;
@@ -3267,10 +3282,10 @@ index 700938782bed2..360621ca94c1f 100644
  	}
  
 diff --git a/kernel/module/main.c b/kernel/module/main.c
-index c3ce106c70af1..5c51665b3b806 100644
+index 46dd8d25a605..e82b2b13f588 100644
 --- a/kernel/module/main.c
 +++ b/kernel/module/main.c
-@@ -65,6 +65,8 @@
+@@ -66,6 +66,8 @@
  #define CREATE_TRACE_POINTS
  #include <trace/events/module.h>
  
@@ -3279,23 +3294,23 @@ index c3ce106c70af1..5c51665b3b806 100644
  /*
   * Mutex protects:
   * 1) List of modules (also safely readable within RCU read section),
-@@ -606,6 +608,7 @@ static const struct module_attribute modinfo_##field = {              \
+@@ -604,6 +606,7 @@ static const struct module_attribute modinfo_##field = {              \
  
  MODINFO_ATTR(version);
  MODINFO_ATTR(srcversion);
 +MODINFO_ATTR(rhelversion);
  
- static struct {
- 	char name[MODULE_NAME_LEN];
-@@ -1058,6 +1061,7 @@ const struct module_attribute *const modinfo_attrs[] = {
+ static void setup_modinfo_import_ns(struct module *mod, const char *s)
+ {
+@@ -1086,6 +1089,7 @@ const struct module_attribute *const modinfo_attrs[] = {
  	&module_uevent,
  	&modinfo_version,
  	&modinfo_srcversion,
 +	&modinfo_rhelversion,
+ 	&modinfo_import_ns,
  	&modinfo_initstate,
  	&modinfo_coresize,
- #ifdef CONFIG_ARCH_WANTS_MODULES_DATA_IN_VMALLOC
-@@ -3332,6 +3336,11 @@ static int early_mod_check(struct load_info *info, int flags)
+@@ -3396,6 +3400,11 @@ static int early_mod_check(struct load_info *info, int flags)
  		return -EPERM;
  	}
  
@@ -3307,7 +3322,7 @@ index c3ce106c70af1..5c51665b3b806 100644
  	err = rewrite_section_headers(info, flags);
  	if (err)
  		return err;
-@@ -3910,6 +3919,10 @@ void print_modules(void)
+@@ -3974,6 +3983,10 @@ void print_modules(void)
  		pr_cont(" [last unloaded: %s%s]", last_unloaded_module.name,
  			last_unloaded_module.taints);
  	pr_cont("\n");
@@ -3319,7 +3334,7 @@ index c3ce106c70af1..5c51665b3b806 100644
  
  #ifdef CONFIG_MODULE_DEBUGFS
 diff --git a/kernel/module/signing.c b/kernel/module/signing.c
-index a2ff4242e623d..f0d2be1ee4f1c 100644
+index 590ba29c85ab..02153d857531 100644
 --- a/kernel/module/signing.c
 +++ b/kernel/module/signing.c
 @@ -61,10 +61,17 @@ int mod_verify_sig(const void *mod, struct load_info *info)
@@ -3342,7 +3357,7 @@ index a2ff4242e623d..f0d2be1ee4f1c 100644
  
  int module_sig_check(struct load_info *info, int flags)
 diff --git a/kernel/panic.c b/kernel/panic.c
-index c78600212b6c1..616cc240f78db 100644
+index c78600212b6c..616cc240f78d 100644
 --- a/kernel/panic.c
 +++ b/kernel/panic.c
 @@ -823,6 +823,18 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
@@ -3366,7 +3381,7 @@ index c78600212b6c1..616cc240f78db 100644
  #undef TAINT_FLAG
 diff --git a/kernel/rh_flags.c b/kernel/rh_flags.c
 new file mode 100644
-index 0000000000000..10d26958f840c
+index 000000000000..10d26958f840
 --- /dev/null
 +++ b/kernel/rh_flags.c
 @@ -0,0 +1,115 @@
@@ -3487,7 +3502,7 @@ index 0000000000000..10d26958f840c
 +subsys_initcall(rh_flags_init);
 diff --git a/kernel/rh_messages.c b/kernel/rh_messages.c
 new file mode 100644
-index 0000000000000..bb69e8965748b
+index 000000000000..bb69e8965748
 --- /dev/null
 +++ b/kernel/rh_messages.c
 @@ -0,0 +1,414 @@
@@ -3907,7 +3922,7 @@ index 0000000000000..bb69e8965748b
 +}
 diff --git a/kernel/rh_messages.h b/kernel/rh_messages.h
 new file mode 100644
-index 0000000000000..6c757a2fe4e0f
+index 000000000000..6c757a2fe4e0
 --- /dev/null
 +++ b/kernel/rh_messages.h
 @@ -0,0 +1,334 @@
@@ -4247,7 +4262,7 @@ index 0000000000000..6c757a2fe4e0f
 +#endif /* __RH_MESSAGES_H */
 diff --git a/kernel/rh_waived.c b/kernel/rh_waived.c
 new file mode 100644
-index 0000000000000..20966f7c7277f
+index 000000000000..20966f7c7277
 --- /dev/null
 +++ b/kernel/rh_waived.c
 @@ -0,0 +1,147 @@
@@ -4399,7 +4414,7 @@ index 0000000000000..20966f7c7277f
 +}
 +late_initcall(__add_rh_flag);
 diff --git a/scripts/Makefile.lib b/scripts/Makefile.lib
-index 0718e39cedda2..10e94a1b8b6e3 100644
+index 0718e39cedda..10e94a1b8b6e 100644
 --- a/scripts/Makefile.lib
 +++ b/scripts/Makefile.lib
 @@ -201,7 +201,10 @@ objtool-args-$(CONFIG_HAVE_STATIC_CALL_INLINE)		+= --static-call
@@ -4414,7 +4429,7 @@ index 0718e39cedda2..10e94a1b8b6e3 100644
  objtool-args = $(objtool-args-y)					\
  	$(if $(delay-objtool), --link)					\
 diff --git a/scripts/mod/modpost.c b/scripts/mod/modpost.c
-index c3bc801d8b2de..d807b287d10af 100644
+index abbcd3fc1394..a2d2a436f2df 100644
 --- a/scripts/mod/modpost.c
 +++ b/scripts/mod/modpost.c
 @@ -27,6 +27,7 @@
@@ -4425,7 +4440,7 @@ index c3bc801d8b2de..d807b287d10af 100644
  
  #define MODULE_NS_PREFIX "module:"
  
-@@ -2038,6 +2039,12 @@ static void write_buf(struct buffer *b, const char *fname)
+@@ -2046,6 +2047,12 @@ static void write_buf(struct buffer *b, const char *fname)
  	}
  }
  
@@ -4438,7 +4453,7 @@ index c3bc801d8b2de..d807b287d10af 100644
  static void write_if_changed(struct buffer *b, const char *fname)
  {
  	char *tmp;
-@@ -2122,6 +2129,7 @@ static void write_mod_c_file(struct module *mod)
+@@ -2130,6 +2137,7 @@ static void write_mod_c_file(struct module *mod)
  	}
  
  	add_srcversion(&buf, mod);
@@ -4447,7 +4462,7 @@ index c3bc801d8b2de..d807b287d10af 100644
  	ret = snprintf(fname, sizeof(fname), "%s.mod.c", mod->name);
  	if (ret >= sizeof(fname)) {
 diff --git a/scripts/tags.sh b/scripts/tags.sh
-index 243373683f98a..2affd5e58ee82 100755
+index 243373683f98..2affd5e58ee8 100755
 --- a/scripts/tags.sh
 +++ b/scripts/tags.sh
 @@ -16,6 +16,8 @@ fi
@@ -4460,7 +4475,7 @@ index 243373683f98a..2affd5e58ee82 100755
  # ignore arbitrary directories
  if [ -n "${IGNORE_DIRS}" ]; then
 diff --git a/security/integrity/platform_certs/load_uefi.c b/security/integrity/platform_certs/load_uefi.c
-index d1fdd113450a6..182e8090cfe85 100644
+index d1fdd113450a..182e8090cfe8 100644
 --- a/security/integrity/platform_certs/load_uefi.c
 +++ b/security/integrity/platform_certs/load_uefi.c
 @@ -74,7 +74,8 @@ static __init void *get_cert_list(efi_char16_t *name, efi_guid_t *guid,
@@ -4484,7 +4499,7 @@ index d1fdd113450a6..182e8090cfe85 100644
  	}
  
 diff --git a/security/lockdown/Kconfig b/security/lockdown/Kconfig
-index e84ddf4840101..d0501353a4b95 100644
+index e84ddf484010..d0501353a4b9 100644
 --- a/security/lockdown/Kconfig
 +++ b/security/lockdown/Kconfig
 @@ -16,6 +16,19 @@ config SECURITY_LOCKDOWN_LSM_EARLY
@@ -4508,7 +4523,7 @@ index e84ddf4840101..d0501353a4b95 100644
  	prompt "Kernel default lockdown mode"
  	default LOCK_DOWN_KERNEL_FORCE_NONE
 diff --git a/security/lockdown/lockdown.c b/security/lockdown/lockdown.c
-index 8d46886d2cca0..14a9cdff942b9 100644
+index 8d46886d2cca..14a9cdff942b 100644
 --- a/security/lockdown/lockdown.c
 +++ b/security/lockdown/lockdown.c
 @@ -72,6 +72,17 @@ static int lockdown_is_locked_down(enum lockdown_reason what)
@@ -4530,10 +4545,10 @@ index 8d46886d2cca0..14a9cdff942b9 100644
  	LSM_HOOK_INIT(locked_down, lockdown_is_locked_down),
  };
 diff --git a/tools/testing/selftests/bpf/Makefile b/tools/testing/selftests/bpf/Makefile
-index 65485967c9681..e44f47e01027c 100644
+index 78e60040811e..b14518e30b4f 100644
 --- a/tools/testing/selftests/bpf/Makefile
 +++ b/tools/testing/selftests/bpf/Makefile
-@@ -497,7 +497,7 @@ LSKELS := fexit_sleep.c trace_printk.c trace_vprintk.c map_ptr_kern.c 	\
+@@ -504,7 +504,7 @@ LSKELS := fexit_sleep.c trace_printk.c trace_vprintk.c map_ptr_kern.c 	\
  LSKELS_SIGNED := fentry_test.c fexit_test.c atomics.c
  
  # Generate both light skeleton and libbpf skeleton for these
@@ -4543,7 +4558,7 @@ index 65485967c9681..e44f47e01027c 100644
  SKEL_BLACKLIST += $$(LSKELS) $$(LSKELS_SIGNED)
  
 diff --git a/tools/testing/selftests/bpf/prog_tests/ksyms_btf.c b/tools/testing/selftests/bpf/prog_tests/ksyms_btf.c
-index 1d7a2f1e07317..b22f3a9cb8b80 100644
+index 1d7a2f1e0731..b22f3a9cb8b8 100644
 --- a/tools/testing/selftests/bpf/prog_tests/ksyms_btf.c
 +++ b/tools/testing/selftests/bpf/prog_tests/ksyms_btf.c
 @@ -7,7 +7,6 @@
