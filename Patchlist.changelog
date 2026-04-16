@@ -1,3 +1,6 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/82dafda39bdd2fa076811bdb6613c4365d882bf3
+ 82dafda39bdd2fa076811bdb6613c4365d882bf3 Correct manual merge error in crypto/rng.c
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/96cfc00a6c84f3d03d5a95d68f21b4266ce23f5c
  96cfc00a6c84f3d03d5a95d68f21b4266ce23f5c Fix up rebase typo in drivers/pci/quirks.c
 

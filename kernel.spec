@@ -4835,6 +4835,9 @@ fi\
 #
 #
 %changelog
+* Thu Apr 16 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.1.0-0.rc0.260416g1d51b370a0f8.65]
+- Correct manual merge error in crypto/rng.c (Patrick Talbert)
+
 * Thu Apr 16 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.1.0-0.rc0.1d51b370a0f8.65]
 - add man-page for rv-mon-stall (Thorsten Leemhuis)
 - disable selftests by default for now (Thorsten Leemhuis)
