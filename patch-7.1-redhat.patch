@@ -1374,7 +1374,7 @@ index 8efbcf699e4f..96d5a1ca981d 100644
  obj-$(CONFIG_EFI_RCI2_TABLE)		+= rci2-table.o
  obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
 diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 3dab284a7754..24a7dbfa2fc8 100644
+index d04be38f1750..2c6243ac49e2 100644
 --- a/drivers/firmware/efi/efi.c
 +++ b/drivers/firmware/efi/efi.c
 @@ -33,6 +33,7 @@
@@ -1385,8 +1385,8 @@ index 3dab284a7754..24a7dbfa2fc8 100644
  
  #include <asm/early_ioremap.h>
  
-@@ -1021,40 +1022,101 @@ int efi_mem_type(unsigned long phys_addr)
- 	return -EINVAL;
+@@ -1014,40 +1015,101 @@ int efi_mem_type(unsigned long phys_addr)
+ 	return md.type;
  }
  
 +struct efi_error_code {
@@ -1519,7 +1519,7 @@ index 3dab284a7754..24a7dbfa2fc8 100644
  EXPORT_SYMBOL_GPL(efi_status_to_err);
  
 diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-index 6a337f1f8787..89244e0d9fa8 100644
+index 23b3543d3041..0d08a549a10b 100644
 --- a/drivers/firmware/efi/libstub/fdt.c
 +++ b/drivers/firmware/efi/libstub/fdt.c
 @@ -132,6 +132,11 @@ static efi_status_t update_fdt(void *orig_fdt, unsigned long orig_fdt_size,
@@ -2316,7 +2316,7 @@ index a2137e19be7d..df268ca70170 100644
  /*
   * Miscellaneous stuff.
 diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 664898d09ff5..34f476d02181 100644
+index 72e76ec54641..2236aca5b1ae 100644
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
 @@ -45,6 +45,8 @@ struct screen_info;
@@ -2328,7 +2328,7 @@ index 664898d09ff5..34f476d02181 100644
  typedef unsigned long efi_status_t;
  typedef u8 efi_bool_t;
  typedef u16 efi_char16_t;		/* UNICODE character */
-@@ -868,6 +870,14 @@ static inline int efi_range_is_wc(unsigned long start, unsigned long len)
+@@ -847,6 +849,14 @@ extern int __init parse_efi_signature_list(
  #define EFI_MEM_ATTR		9	/* Did firmware publish an EFI_MEMORY_ATTRIBUTES table? */
  #define EFI_MEM_NO_SOFT_RESERVE	10	/* Is the kernel configured to ignore soft reservations? */
  #define EFI_PRESERVE_BS_REGIONS	11	/* Are EFI boot-services memory segments available? */
@@ -2343,7 +2343,7 @@ index 664898d09ff5..34f476d02181 100644
  
  #ifdef CONFIG_EFI
  /*
-@@ -879,6 +889,8 @@ static inline bool efi_enabled(int feature)
+@@ -858,6 +868,8 @@ static inline bool efi_enabled(int feature)
  }
  extern void efi_reboot(enum reboot_mode reboot_mode, const char *__unused);
  
@@ -2352,7 +2352,7 @@ index 664898d09ff5..34f476d02181 100644
  bool __pure __efi_soft_reserve_enabled(void);
  
  static inline bool __pure efi_soft_reserve_enabled(void)
-@@ -900,6 +912,8 @@ static inline bool efi_enabled(int feature)
+@@ -879,6 +891,8 @@ static inline bool efi_enabled(int feature)
  static inline void
  efi_reboot(enum reboot_mode reboot_mode, const char *__unused) {}
  
@@ -2361,7 +2361,7 @@ index 664898d09ff5..34f476d02181 100644
  static inline bool efi_soft_reserve_enabled(void)
  {
  	return false;
-@@ -914,6 +928,7 @@ static inline void efi_find_mirror(void) {}
+@@ -893,6 +907,7 @@ static inline void efi_find_mirror(void) {}
  #endif
  
  extern int efi_status_to_err(efi_status_t status);
@@ -2369,7 +2369,7 @@ index 664898d09ff5..34f476d02181 100644
  
  /*
   * Variable Attributes
-@@ -1131,13 +1146,6 @@ extern unsigned long efi_call_virt_save_flags(void);
+@@ -1110,13 +1125,6 @@ extern unsigned long efi_call_virt_save_flags(void);
  
  void efi_runtime_assert_lock_held(void);
  
@@ -3355,10 +3355,10 @@ index 590ba29c85ab..02153d857531 100644
  
  int module_sig_check(struct load_info *info, int flags)
 diff --git a/kernel/panic.c b/kernel/panic.c
-index c78600212b6c..616cc240f78d 100644
+index 20feada5319d..fa6332e68570 100644
 --- a/kernel/panic.c
 +++ b/kernel/panic.c
-@@ -823,6 +823,18 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
+@@ -825,6 +825,18 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
  	TAINT_FLAG(RANDSTRUCT,			'T', ' '),
  	TAINT_FLAG(TEST,			'N', ' '),
  	TAINT_FLAG(FWCTL,			'J', ' '),
