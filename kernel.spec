@@ -184,18 +184,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 6.19.13
-%define specversion 6.19.13
+%define specrpmversion 6.19.14
+%define specversion 6.19.14
 %define patchversion 6.19
 %define pkgrelease 100
 %define kversion 6
-%define tarfile_release 6.19.13
+%define tarfile_release 6.19.14
 # This is needed to do merge window version magic
 %define patchlevel 19
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 100%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 6.19.13
+%define kabiversion 6.19.14
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4695,11 +4695,14 @@ fi\
 #
 #
 %changelog
-* Sat Apr 18 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.13-100]
+* Thu Apr 23 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.14-100]
 - Revert "redhat/kernel.spec.template: Fix indentation of uki-virt generation code" (Justin M. Forbes)
 - Revert "redhat/kernel.spec.template: Simplify uki-virt signing" (Justin M. Forbes)
 - Revert "redhat/kernel.spec.template: Add kernel-uki-dtbloader sub-package" (Justin M. Forbes)
 - Revert "redhat/kernel.spec.template: Make -uki-dtbloader provide kernel-core-uname-r" (Justin M. Forbes)
+
+* Thu Apr 23 2026 Augusto Caringi <acaringi@redhat.com> [6.19.14-0]
+- Linux v6.19.14
 
 * Sat Apr 18 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.13-0]
 - Linux v6.19.13
