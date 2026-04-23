@@ -39,10 +39,18 @@ emptyrpm:
 patches:
     ignore_list:
         - linux-kernel-test.patch
-        - patch-6.18-redhat.patch
+        - patch-7.0-redhat.patch
 
 runpath:
     ignore:
         - /usr/libexec/kselftests/bpf/urandom_read
         - /usr/libexec/kselftests/bpf/no_alu32/urandom_read
         - /usr/libexec/kselftests/bpf/cpuv4/urandom_read
+
+annocheck:
+    ignore:
+        - /usr/libexec/kselftests/*
+        - /lib/modules/*/vmlinuz
+        - /lib/modules/*/vdso/*
+        - /usr/libexec/ksamples/*
+        - /usr/sbin/intel_sdsi
