@@ -81,10 +81,10 @@
  80 files changed, 2824 insertions(+), 243 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index cf3807641d89..09eb19c25d1a 100644
+index 4d0f545fb3ec..767989050205 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -6692,6 +6692,20 @@ Kernel parameters
+@@ -6674,6 +6674,20 @@ Kernel parameters
  		2	The "airplane mode" button toggles between everything
  			blocked and everything unblocked.
  
@@ -105,7 +105,7 @@ index cf3807641d89..09eb19c25d1a 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -8082,6 +8096,15 @@ Kernel parameters
+@@ -8064,6 +8078,15 @@ Kernel parameters
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -204,7 +204,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 54e1ae602000..24a26ca3dc78 100644
+index e27c91ea56fc..cdf06c9c4611 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -356,6 +356,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -225,7 +225,7 @@ index 54e1ae602000..24a26ca3dc78 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1395,6 +1406,8 @@ uapi-asm-generic:
+@@ -1397,6 +1408,8 @@ uapi-asm-generic:
  # Generate some files
  # ---------------------------------------------------------------------------
  
@@ -234,7 +234,7 @@ index 54e1ae602000..24a26ca3dc78 100644
  # KERNELRELEASE can change from a few different places, meaning version.h
  # needs to be updated, so this check is forced on all builds
  
-@@ -1419,7 +1432,13 @@ define filechk_version.h
+@@ -1421,7 +1434,13 @@ define filechk_version.h
  	((c) > 255 ? 255 : (c)))';                                       \
  	echo \#define LINUX_VERSION_MAJOR $(VERSION);                    \
  	echo \#define LINUX_VERSION_PATCHLEVEL $(PATCHLEVEL);            \
@@ -249,7 +249,7 @@ index 54e1ae602000..24a26ca3dc78 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -2060,6 +2079,23 @@ endif
+@@ -2062,6 +2081,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -274,10 +274,10 @@ index 54e1ae602000..24a26ca3dc78 100644
  	@:
  
 diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index ec33376f8e2b..255679ba5351 100644
+index 71fc5dd4123f..b8e26ec50519 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
-@@ -1213,9 +1213,9 @@ config HIGHMEM
+@@ -1214,9 +1214,9 @@ config HIGHMEM
  	  If unsure, say n.
  
  config HIGHPTE
