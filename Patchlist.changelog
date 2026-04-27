@@ -1,3 +1,162 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/dc3a145ac459508e4074946ab926a4d9803aa2a0
+ dc3a145ac459508e4074946ab926a4d9803aa2a0 drm/v3d: Reject empty multisync extension to prevent infinite loop
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/eb657386c5855d2a96e82426ff968a331056381b
+ eb657386c5855d2a96e82426ff968a331056381b net: macb: Use napi_schedule_irqoff() in IRQ handler
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/f3cfe71f8a352c101188130ffdf50b14bede9dab
+ f3cfe71f8a352c101188130ffdf50b14bede9dab net: macb: Use netif_napi_add_tx() instead of netif_napi_add() for TX NAPI
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/3cec419c07008a5344bb87c49d66c5fcf3a00142
+ 3cec419c07008a5344bb87c49d66c5fcf3a00142 net: macb: Remove dedicated IRQ handler for WoL
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/1ee63176faf30585031fb5ee02bc44d13155f2a3
+ 1ee63176faf30585031fb5ee02bc44d13155f2a3 net: macb: Factor out the handling of non-hot IRQ events into a separate function
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/095d65e8231e9bd4117f84e66ca690c3535dccdd
+ 095d65e8231e9bd4117f84e66ca690c3535dccdd net: macb: Introduce macb_queue_isr_clear() helper function
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/cddb5ec47ff05cdb9e80dcadf78f59a29599d477
+ cddb5ec47ff05cdb9e80dcadf78f59a29599d477 net: macb: Replace open-coded implementation with napi_schedule()
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/def446b0ffaa2a41f119bb308b1a4bf510714089
+ def446b0ffaa2a41f119bb308b1a4bf510714089 net: macb: fix use of at91_default_usrio without CONFIG_OF
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/4bff799b00d5f84db3477fd5f95a23cb41a439e2
+ 4bff799b00d5f84db3477fd5f95a23cb41a439e2 net: macb: drop usrio pointer on EyeQ5 config
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/5fae490c804854e3ef23157ddd0c4339ad77c050
+ 5fae490c804854e3ef23157ddd0c4339ad77c050 net: macb: set MACB_CAPS_USRIO_DISABLED if no usrio config is provided
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/df0b024e10f3482302da7a6f557f5e17319463fa
+ df0b024e10f3482302da7a6f557f5e17319463fa net: macb: runtime detect MACB_CAPS_USRIO_DISABLED
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/ecbc6c1a57b211699944065401cc8ed6400b258e
+ ecbc6c1a57b211699944065401cc8ed6400b258e net: macb: timer adjust mode is not supported
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/c8eed9677ebc8a65d9d0f6663a101dfcefe11ead
+ c8eed9677ebc8a65d9d0f6663a101dfcefe11ead net: macb: clean up tsu clk rate acquisition
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/6cbc69d90df8616e222cf1f7e4e102630637d7e2
+ 6cbc69d90df8616e222cf1f7e4e102630637d7e2 net: macb: warn on pclk use as a tsu_clk fallback
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/705ec686ecd84ee404832f77c2517038a5eb3024
+ 705ec686ecd84ee404832f77c2517038a5eb3024 net: macb: add mpfs specific usrio configuration
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/f6872aad2e0c77731ca433025be182744a4948f0
+ f6872aad2e0c77731ca433025be182744a4948f0 net: macb: np4 doesn't need a usrio pointer
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/29fe9fe82b8df6c552b301d278137e6df10c86db
+ 29fe9fe82b8df6c552b301d278137e6df10c86db net: macb: rework usrio refclk selection code
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/7bfd324aeb36caeacec3b69bac1e805ad5e6b3f3
+ 7bfd324aeb36caeacec3b69bac1e805ad5e6b3f3 net: macb: split USRIO_HAS_CLKEN capability in two
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/8b2f394823a60e5a28f9653a137852061e69316b
+ 8b2f394823a60e5a28f9653a137852061e69316b net: macb: rename macb_default_usrio to at91_default_usrio as not all platforms have mii mode control in usrio
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/d7bb406858ead33555064201870693990c9f7413
+ d7bb406858ead33555064201870693990c9f7413 Revert "net: macb: Clean up the .usrio settings in macb_config instances"
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/e630fb9b856c412625d09c24d18d8afeefaf82f1
+ e630fb9b856c412625d09c24d18d8afeefaf82f1 net: macb: add support for Microchip pic64hpsc ethernet endpoint
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/10a0b7af9e3b28ad971b883270c9af5afd0c9369
+ 10a0b7af9e3b28ad971b883270c9af5afd0c9369 net: macb: add safeguards for jumbo frame larger than 10240
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/4b63219dfed63ebfaa78e55314c3382d53f39202
+ 4b63219dfed63ebfaa78e55314c3382d53f39202 net: macb: set default_an_inband to true for SGMII
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/f55d3cff1b85dab0298539695cff3005cfda2262
+ f55d3cff1b85dab0298539695cff3005cfda2262 net: macb: Clean up the .usrio settings in macb_config instances
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/f02732b2f4c4cc6e827ce73cd9e836ef590da006
+ f02732b2f4c4cc6e827ce73cd9e836ef590da006 net: macb: Clean up the .init settings in macb_config instances
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/c18f79c99588a7a1748c1551f3778a5920be5a46
+ c18f79c99588a7a1748c1551f3778a5920be5a46 net: macb: Clean up the .clk_init setting in the macb_config instances
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/3bd0daeaef5def29918567f3706552ef27795b71
+ 3bd0daeaef5def29918567f3706552ef27795b71 net: cadence: macb: enable EEE for Mobileye EyeQ5
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/cdbb1a704ad445d22166a2a6f3892fb1112fecb1
+ cdbb1a704ad445d22166a2a6f3892fb1112fecb1 net: cadence: macb: enable EEE for Raspberry Pi RP1
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/dc6150b07156d28f27728394ef2f8ac8e8576205
+ dc6150b07156d28f27728394ef2f8ac8e8576205 net: cadence: macb: add ethtool EEE support
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/426db79853e3f4661e47c2bb3898ab604f436f58
+ 426db79853e3f4661e47c2bb3898ab604f436f58 net: cadence: macb: implement EEE TX LPI support
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/c7b81454b4c8e83a9e4703d6a89a7d9f2182f4bd
+ c7b81454b4c8e83a9e4703d6a89a7d9f2182f4bd net: cadence: macb: add EEE LPI statistics counters
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/324c3711f99352a519ced4f57a0b979d8a51c8ba
+ 324c3711f99352a519ced4f57a0b979d8a51c8ba net: macb: use ethtool_sprintf to fill ethtool stats strings
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/ab0143c22156e2ceabee74f095cfaada38dd4806
+ ab0143c22156e2ceabee74f095cfaada38dd4806 net: macb: add the .pcs_inband_caps() callback for SGMII
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/d146cb96f4ed4270dc04a4f5cdf3d9a15cf80cbb
+ d146cb96f4ed4270dc04a4f5cdf3d9a15cf80cbb net: macb: add support for reporting SGMII inband link status
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/ce128e34d6808c70c2bb0f12a37db37578ac7d46
+ ce128e34d6808c70c2bb0f12a37db37578ac7d46 net: macb: fix SGMII with inband aneg disabled
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/e4c8bf72a5de7abf94f30895c023abf25a259ace
+ e4c8bf72a5de7abf94f30895c023abf25a259ace net: cadence: macb: add ethtool nway_reset support
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/78bc02e06af6a4dfaf7c101b44e90754c42d0ff5
+ 78bc02e06af6a4dfaf7c101b44e90754c42d0ff5 ARM: dts: broadcom: bcm2835-rpi: Move non simple-bus nodes to root level
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/aed7a1e46ab5a8f9cdf9d8e6f92205b8c9b94e83
+ aed7a1e46ab5a8f9cdf9d8e6f92205b8c9b94e83 arm64: dts: broadcom: bcm2712: Move non simple-bus nodes to root level
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/912c4e57060e87a71be98074c4c43658e402191d
+ 912c4e57060e87a71be98074c4c43658e402191d arm64: dts: broadcom: bcm2712-d-rpi-5-b: update uart10 interrupt
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/b736d4af02c0dc45b62b1b57aa2c573cfa8bb70c
+ b736d4af02c0dc45b62b1b57aa2c573cfa8bb70c arm64: dts: broadcom: bcm2712-d-rpi-5-b: add fixes for pinctrl/pinctrl_aon
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/9579b472973b51d5f24ed9682c704d59a4ebe23a
+ 9579b472973b51d5f24ed9682c704d59a4ebe23a arm64: dts: broadcom: bcm2712-rpi-5-b: add pinctrl properties for csi i2cs
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/58d9a4f680a76144148b89439449596d034f59a3
+ 58d9a4f680a76144148b89439449596d034f59a3 arm64: dts: broadcom: bcm2712: add camera backend node pispbe
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/dd1830ef448bf366f67e6721a26cdba4cb7ff9fc
+ dd1830ef448bf366f67e6721a26cdba4cb7ff9fc arm64: dts: broadcom: rp1: add csi nodes
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/410af8469a923dbf5b86a6803a11baf9b4389fd4
+ 410af8469a923dbf5b86a6803a11baf9b4389fd4 arm64: dts: broadcom: rp1: add i2c controller
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/bccab7a88dea23431407839dc6d2a64b4f1215e2
+ bccab7a88dea23431407839dc6d2a64b4f1215e2 arm64: dts: broadcom: bcm2712: Add V3D device node
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/53c9aad19855ba5a1cb45cbb6c44a0b046815959
+ 53c9aad19855ba5a1cb45cbb6c44a0b046815959 arm64: dts: freescale: imx93: Add Ethos-U65 NPU and SRAM nodes
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/4c2e732ad5d15a3d8080d8ebf7b2e86f51a153f5
+ 4c2e732ad5d15a3d8080d8ebf7b2e86f51a153f5 Documentation: add documentation of AMD isp 4 driver
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/711109dff36b615e872fe739dca0c8c5e219bee8
+ 711109dff36b615e872fe739dca0c8c5e219bee8 media: platform: amd: isp4 debug fs logging and more descriptive errors
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/d250c9ec6a1185759539136fc5c00b909ecb391a
+ d250c9ec6a1185759539136fc5c00b909ecb391a media: platform: amd: isp4 video node and buffers handling added
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/d54ed8f39392e1c7e82f0a2dd2b94135b30e8a80
+ d54ed8f39392e1c7e82f0a2dd2b94135b30e8a80 media: platform: amd: isp4 subdev and firmware loading handling added
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/9a7de974831ae5560192b0e6e3051b379d55da69
+ 9a7de974831ae5560192b0e6e3051b379d55da69 media: platform: amd: Add isp4 fw and hw interface
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/931a94124353ed16aeb83077908d120f52fc5ed1
+ 931a94124353ed16aeb83077908d120f52fc5ed1 media: platform: amd: low level support for isp4 firmware
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/ec1a008cf8f5f4a854253363213af9b7f10b668a
+ ec1a008cf8f5f4a854253363213af9b7f10b668a media: platform: amd: Introduce amd isp4 capture driver
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/b34b1a79f731a2d213db5cd4e194d3f1471b00c8
  b34b1a79f731a2d213db5cd4e194d3f1471b00c8 Fix up rebase typo in drivers/pci/quirks.c
 
