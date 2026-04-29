@@ -76,9 +76,10 @@
  security/integrity/platform_certs/load_uefi.c      |   6 +-
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |  11 +
+ tools/testing/selftests/bpf/DENYLIST.rhel          |  76 +++
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
- 80 files changed, 2824 insertions(+), 243 deletions(-)
+ 81 files changed, 2900 insertions(+), 243 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index 4d0f545fb3ec5..767989050205b 100644
@@ -2536,7 +2537,7 @@ index 8a8064dc3970b..3238fab8f7498 100644
  #endif
 diff --git a/include/linux/rh_flags.h b/include/linux/rh_flags.h
 new file mode 100644
-index 0000000000000..d498d319ace3a
+index 0000000000000..4bb0f5585df0b
 --- /dev/null
 +++ b/include/linux/rh_flags.h
 @@ -0,0 +1,34 @@
@@ -2570,8 +2571,8 @@ index 0000000000000..d498d319ace3a
 +	unlikely(__ret_mark_once);					\
 +})
 +#else
-+static void rh_print_flags(void) { }
-+static void rh_add_flag(const char *flag_name) { }
++static inline void rh_print_flags(void) { }
++static inline void rh_add_flag(const char *flag_name) { }
 +#endif
 +#endif
 diff --git a/include/linux/rh_kabi.h b/include/linux/rh_kabi.h
@@ -4542,6 +4543,88 @@ index 8d46886d2cca0..14a9cdff942b9 100644
  static struct security_hook_list lockdown_hooks[] __ro_after_init = {
  	LSM_HOOK_INIT(locked_down, lockdown_is_locked_down),
  };
+diff --git a/tools/testing/selftests/bpf/DENYLIST.rhel b/tools/testing/selftests/bpf/DENYLIST.rhel
+new file mode 100644
+index 0000000000000..9424a83c6f489
+--- /dev/null
++++ b/tools/testing/selftests/bpf/DENYLIST.rhel
+@@ -0,0 +1,76 @@
++# Tests that need CONFIG_FUNCTION_ERROR_INJECTION
++# Typical observed errors are:
++#     <...some function...> is not sleepable
++#     <...some function...> is not modifiable
++cgrp_local_storage/yes_rcu_lock
++cgrp_local_storage/no_rcu_lock
++cgrp_local_storage/cgrp1_yes_rcu_lock
++cgrp_local_storage/cgrp1_no_rcu_lock
++compute_live_registers/addr_space_cast
++dynptr/test_read_write
++dynptr/test_dynptr_data
++dynptr/test_dynptr_copy
++dynptr/test_dynptr_copy_xdp
++dynptr/test_dynptr_memset_zero
++dynptr/test_dynptr_memset_notzero
++dynptr/test_dynptr_memset_zero_offset
++dynptr/test_dynptr_memset_zero_adjusted
++dynptr/test_dynptr_memset_overflow
++dynptr/test_dynptr_memset_overflow_offset
++dynptr/test_dynptr_memset_readonly
++dynptr/test_dynptr_memset_xdp_chunks
++dynptr/test_dynptr_skb_meta_data
++dynptr/test_dynptr_skb_meta_flags
++dynptr/test_ringbuf
++dynptr/test_skb_readonly
++dynptr/test_dynptr_skb_data
++dynptr/test_adjust
++dynptr/test_adjust_err
++dynptr/test_zero_size_dynptr
++dynptr/test_dynptr_is_null
++dynptr/test_dynptr_is_rdonly
++dynptr/test_dynptr_clone
++dynptr/test_dynptr_skb_no_buff
++dynptr/test_dynptr_skb_strcmp
++dynptr/test_dynptr_skb_tp_btf
++dynptr/test_probe_read_user_dynptr
++dynptr/test_probe_read_kernel_dynptr
++dynptr/test_probe_read_user_str_dynptr
++dynptr/test_probe_read_kernel_str_dynptr
++dynptr/test_copy_from_user_dynptr
++dynptr/test_copy_from_user_str_dynptr
++dynptr/test_copy_from_user_task_dynptr
++dynptr/test_copy_from_user_task_str_dynptr
++irq/irq_sleepable_helper
++irq/irq_sleepable_kfunc
++iters/iter_css_task_for_each_sleep
++iters/iter_ret_rcu_test_protected
++iters/iter_ret_rcu_test_type
++iters/iter_ret_rcu_test_protected_nostruct
++iters/iter_ret_rcu_test_type_nostruct
++iters/task
++iters/css
++iters/iter_tasks_without_lock
++iters/iter_css_without_lock
++iters/iter_tasks_lock_and_unlock
++iters/iter_css_lock_and_unlock
++map_excl/map_excl_allowed
++map_in_map/sleepable_acc_map_in_array
++map_in_map/sleepable_acc_map_in_htab
++mem_rdonly_untrusted/helper_param_not_ok
++module_attach
++preempt_lock/preempt_sleepable_helper
++preempt_lock/preempt_sleepable_kfunc
++rcu_read_lock/success
++rcu_read_lock/rcuptr_acquire
++read_vsyscall
++refcounted_kptr/rbtree_sleepable_rcu
++refcounted_kptr/rbtree_sleepable_rcu_no_explicit_rcu_lock
++refcounted_kptr_fail/rbtree_fail_sleepable_lock_across_rcu
++test_lsm/lsm_basic
++verifier_global_subprogs/arg_tag_ctx_fmod_ret
++
++kprobe_multi_test/attach_override                # needs CONFIG_BPF_KPROBE_OVERRIDE
++libbpf_probe_prog_types/BPF_PROG_TYPE_LIRC_MODE2 # needs CONFIG_BPF_LIRC_MODE2
++test_bpffs                                       # needs CONFIG_BPF_PRELOAD
++tunnel                                           # needs CONFIG_NET_FOU
 diff --git a/tools/testing/selftests/bpf/Makefile b/tools/testing/selftests/bpf/Makefile
 index 6ef6872adbc3e..bd76422a1f135 100644
 --- a/tools/testing/selftests/bpf/Makefile

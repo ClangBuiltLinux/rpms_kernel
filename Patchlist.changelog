@@ -1,3 +1,9 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/49dc112a24f8c571d32554e8a1dfdc74c0140b42
+ 49dc112a24f8c571d32554e8a1dfdc74c0140b42 redhat: rh_flags: mark !CONFIG_RHEL_DIFFERENCES stubs as static inline
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/e325a62142ca8d5a4fde32b1ed8b32f24cfd5e96
+ e325a62142ca8d5a4fde32b1ed8b32f24cfd5e96 redhat: Add DENYLIST.rhel to BPF selftests
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/8159dbbbf1cb453c55864b50bbc47481c8c06394
  8159dbbbf1cb453c55864b50bbc47481c8c06394 Correct manual merge error in crypto/rng.c
 
