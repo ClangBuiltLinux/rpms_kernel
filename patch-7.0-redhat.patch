@@ -202,7 +202,7 @@ index d1cc0e12fe1f0..985c66951475d 100644
  M:	Felix Kuehling <Felix.Kuehling@amd.com>
  L:	amd-gfx@lists.freedesktop.org
 diff --git a/Makefile b/Makefile
-index b17ca865bcee7..37d287b75ed25 100644
+index 61f8019efd5af..54eafc112e5b7 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -356,6 +356,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
