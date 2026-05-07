@@ -4695,11 +4695,21 @@ fi\
 #
 #
 %changelog
-* Thu Apr 23 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.14-100]
+* Thu May 07 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.14-100]
 - Revert "redhat/kernel.spec.template: Fix indentation of uki-virt generation code" (Justin M. Forbes)
 - Revert "redhat/kernel.spec.template: Simplify uki-virt signing" (Justin M. Forbes)
 - Revert "redhat/kernel.spec.template: Add kernel-uki-dtbloader sub-package" (Justin M. Forbes)
 - Revert "redhat/kernel.spec.template: Make -uki-dtbloader provide kernel-core-uname-r" (Justin M. Forbes)
+- Turn off F43 and F44 release targets (Justin M. Forbes)
+- rxrpc: Also unshare DATA/RESPONSE packets when paged frags are present (Hyunwoo Kim)
+- rxrpc: Fix rxrpc_input_call_event() to only unshare DATA packets (David Howells)
+- rxrpc: Fix re-decryption of RESPONSE packets (David Howells)
+- rxrpc: Fix error handling in rxgk_extract_token() (David Howells)
+- rxrpc: Fix rxkad crypto unalignment handling (David Howells)
+- rxrpc: Fix conn-level packet handling to unshare RESPONSE packets (David Howells)
+- rxrpc: Fix memory leaks in rxkad_verify_response() (David Howells)
+- rxrpc: Fix potential UAF after skb_unshare() failure (David Howells)
+- xfrm: esp: avoid in-place decrypt on shared skb frags (Kuan-Ting Chen)
 
 * Thu Apr 23 2026 Augusto Caringi <acaringi@redhat.com> [6.19.14-0]
 - Linux v6.19.14

@@ -1,3 +1,30 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/ca36fa122f3d39719e4b373014e0a7c387547a63
+ ca36fa122f3d39719e4b373014e0a7c387547a63 rxrpc: Also unshare DATA/RESPONSE packets when paged frags are present
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/bd027dfb6e5448a1f45cba60c7c24b4d39697be4
+ bd027dfb6e5448a1f45cba60c7c24b4d39697be4 rxrpc: Fix rxrpc_input_call_event() to only unshare DATA packets
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/0537c82050c54ce4543ba963babdf1e3c5236d8f
+ 0537c82050c54ce4543ba963babdf1e3c5236d8f rxrpc: Fix re-decryption of RESPONSE packets
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/95de3d8a6daa55d20de69d627f3dd7db5f545ea3
+ 95de3d8a6daa55d20de69d627f3dd7db5f545ea3 rxrpc: Fix error handling in rxgk_extract_token()
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/f9e532e917dba77db3cdfd821b5bdd9c872efc07
+ f9e532e917dba77db3cdfd821b5bdd9c872efc07 rxrpc: Fix rxkad crypto unalignment handling
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/1de384f39c537055c03de4cfd9bbd1aa9e9ebbda
+ 1de384f39c537055c03de4cfd9bbd1aa9e9ebbda rxrpc: Fix conn-level packet handling to unshare RESPONSE packets
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/eabcd253fb3adacdc44590cec64ffd8a6d2ed165
+ eabcd253fb3adacdc44590cec64ffd8a6d2ed165 rxrpc: Fix memory leaks in rxkad_verify_response()
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/40359c5f7a6a9ac8d7ab035fecdb2eaf15e36e88
+ 40359c5f7a6a9ac8d7ab035fecdb2eaf15e36e88 rxrpc: Fix potential UAF after skb_unshare() failure
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/4b759c336fd1f3dbb9d129d616b0ef0c7030165a
+ 4b759c336fd1f3dbb9d129d616b0ef0c7030165a xfrm: esp: avoid in-place decrypt on shared skb frags
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/be074bcb52e8cdf7c346e64b2ab062b407eeb80b
  be074bcb52e8cdf7c346e64b2ab062b407eeb80b Revert "drm: Fix use-after-free on framebuffers and property blobs when calling drm_dev_unplug"
 

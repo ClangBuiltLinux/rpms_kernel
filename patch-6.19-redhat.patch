@@ -53,7 +53,19 @@
  include/linux/mfd/bcm2835-pm.h                     |   7 +
  include/linux/rmi.h                                |   1 +
  include/linux/security.h                           |   9 +
+ include/trace/events/rxrpc.h                       |   6 +-
  kernel/module/signing.c                            |   9 +-
+ net/ipv4/esp4.c                                    |   3 +-
+ net/ipv4/ip_output.c                               |   2 +
+ net/ipv6/esp6.c                                    |   3 +-
+ net/ipv6/ip6_output.c                              |   2 +
+ net/rxrpc/ar-internal.h                            |   1 -
+ net/rxrpc/call_event.c                             |  20 +-
+ net/rxrpc/conn_event.c                             |  43 +-
+ net/rxrpc/io_thread.c                              |  24 +-
+ net/rxrpc/rxgk_app.c                               |   1 +
+ net/rxrpc/rxkad.c                                  | 112 ++-
+ net/rxrpc/skbuff.c                                 |   9 -
  scripts/Makefile.lib                               |   3 +
  scripts/tags.sh                                    |   2 +
  security/integrity/platform_certs/load_uefi.c      |   6 +-
@@ -61,7 +73,7 @@
  security/lockdown/lockdown.c                       |  11 +
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 -
- 63 files changed, 1892 insertions(+), 442 deletions(-)
+ 75 files changed, 2004 insertions(+), 556 deletions(-)
 
 diff --git a/Documentation/hid/intel-ish-hid.rst b/Documentation/hid/intel-ish-hid.rst
 index 2adc174fb576..068a5906b177 100644
@@ -3742,6 +3754,51 @@ index ee88dd2d2d1f..5c816f0b8b67 100644
 +#endif /* CONFIG_SECURITY_LOCKDOWN_LSM */
 +
  #endif /* ! __LINUX_SECURITY_H */
+diff --git a/include/trace/events/rxrpc.h b/include/trace/events/rxrpc.h
+index 578b8038b211..573f2df3a2c9 100644
+--- a/include/trace/events/rxrpc.h
++++ b/include/trace/events/rxrpc.h
+@@ -37,6 +37,7 @@
+ 	EM(rxkad_abort_1_short_encdata,		"rxkad1-short-encdata")	\
+ 	EM(rxkad_abort_1_short_header,		"rxkad1-short-hdr")	\
+ 	EM(rxkad_abort_2_short_check,		"rxkad2-short-check")	\
++	EM(rxkad_abort_2_crypto_unaligned,	"rxkad2-crypto-unaligned") \
+ 	EM(rxkad_abort_2_short_data,		"rxkad2-short-data")	\
+ 	EM(rxkad_abort_2_short_header,		"rxkad2-short-hdr")	\
+ 	EM(rxkad_abort_2_short_len,		"rxkad2-short-len")	\
+@@ -161,8 +162,6 @@
+ 	E_(rxrpc_call_poke_timer_now,		"Timer-now")
+ 
+ #define rxrpc_skb_traces \
+-	EM(rxrpc_skb_eaten_by_unshare,		"ETN unshare  ") \
+-	EM(rxrpc_skb_eaten_by_unshare_nomem,	"ETN unshar-nm") \
+ 	EM(rxrpc_skb_get_call_rx,		"GET call-rx  ") \
+ 	EM(rxrpc_skb_get_conn_secured,		"GET conn-secd") \
+ 	EM(rxrpc_skb_get_conn_work,		"GET conn-work") \
+@@ -189,6 +188,7 @@
+ 	EM(rxrpc_skb_put_purge,			"PUT purge    ") \
+ 	EM(rxrpc_skb_put_purge_oob,		"PUT purge-oob") \
+ 	EM(rxrpc_skb_put_response,		"PUT response ") \
++	EM(rxrpc_skb_put_response_copy,		"PUT resp-cpy ") \
+ 	EM(rxrpc_skb_put_rotate,		"PUT rotate   ") \
+ 	EM(rxrpc_skb_put_unknown,		"PUT unknown  ") \
+ 	EM(rxrpc_skb_see_conn_work,		"SEE conn-work") \
+@@ -197,6 +197,7 @@
+ 	EM(rxrpc_skb_see_recvmsg_oob,		"SEE recvm-oob") \
+ 	EM(rxrpc_skb_see_reject,		"SEE reject   ") \
+ 	EM(rxrpc_skb_see_rotate,		"SEE rotate   ") \
++	EM(rxrpc_skb_see_unshare_nomem,		"SEE unshar-nm") \
+ 	E_(rxrpc_skb_see_version,		"SEE version  ")
+ 
+ #define rxrpc_local_traces \
+@@ -284,7 +285,6 @@
+ 	EM(rxrpc_conn_put_unidle,		"PUT unidle  ") \
+ 	EM(rxrpc_conn_put_work,			"PUT work    ") \
+ 	EM(rxrpc_conn_queue_challenge,		"QUE chall   ") \
+-	EM(rxrpc_conn_queue_retry_work,		"QUE retry-wk") \
+ 	EM(rxrpc_conn_queue_rx_work,		"QUE rx-work ") \
+ 	EM(rxrpc_conn_see_new_service_conn,	"SEE new-svc ") \
+ 	EM(rxrpc_conn_see_reap_service,		"SEE reap-svc") \
 diff --git a/kernel/module/signing.c b/kernel/module/signing.c
 index a2ff4242e623..f0d2be1ee4f1 100644
 --- a/kernel/module/signing.c
@@ -3765,6 +3822,489 @@ index a2ff4242e623..f0d2be1ee4f1 100644
  }
  
  int module_sig_check(struct load_info *info, int flags)
+diff --git a/net/ipv4/esp4.c b/net/ipv4/esp4.c
+index 6dfc0bcdef65..6a5febbdbee4 100644
+--- a/net/ipv4/esp4.c
++++ b/net/ipv4/esp4.c
+@@ -873,7 +873,8 @@ static int esp_input(struct xfrm_state *x, struct sk_buff *skb)
+ 			nfrags = 1;
+ 
+ 			goto skip_cow;
+-		} else if (!skb_has_frag_list(skb)) {
++		} else if (!skb_has_frag_list(skb) &&
++			   !skb_has_shared_frag(skb)) {
+ 			nfrags = skb_shinfo(skb)->nr_frags;
+ 			nfrags++;
+ 
+diff --git a/net/ipv4/ip_output.c b/net/ipv4/ip_output.c
+index ff11d3a85a36..7c005263262f 100644
+--- a/net/ipv4/ip_output.c
++++ b/net/ipv4/ip_output.c
+@@ -1233,6 +1233,8 @@ static int __ip_append_data(struct sock *sk,
+ 			if (err < 0)
+ 				goto error;
+ 			copy = err;
++			if (!(flags & MSG_NO_SHARED_FRAGS))
++				skb_shinfo(skb)->flags |= SKBFL_SHARED_FRAG;
+ 			wmem_alloc_delta += copy;
+ 		} else if (!zc) {
+ 			int i = skb_shinfo(skb)->nr_frags;
+diff --git a/net/ipv6/esp6.c b/net/ipv6/esp6.c
+index 9f75313734f8..9c06c5a1419d 100644
+--- a/net/ipv6/esp6.c
++++ b/net/ipv6/esp6.c
+@@ -915,7 +915,8 @@ static int esp6_input(struct xfrm_state *x, struct sk_buff *skb)
+ 			nfrags = 1;
+ 
+ 			goto skip_cow;
+-		} else if (!skb_has_frag_list(skb)) {
++		} else if (!skb_has_frag_list(skb) &&
++			   !skb_has_shared_frag(skb)) {
+ 			nfrags = skb_shinfo(skb)->nr_frags;
+ 			nfrags++;
+ 
+diff --git a/net/ipv6/ip6_output.c b/net/ipv6/ip6_output.c
+index f904739e99b9..f5ca0267e770 100644
+--- a/net/ipv6/ip6_output.c
++++ b/net/ipv6/ip6_output.c
+@@ -1777,6 +1777,8 @@ static int __ip6_append_data(struct sock *sk,
+ 			if (err < 0)
+ 				goto error;
+ 			copy = err;
++			if (!(flags & MSG_NO_SHARED_FRAGS))
++				skb_shinfo(skb)->flags |= SKBFL_SHARED_FRAG;
+ 			wmem_alloc_delta += copy;
+ 		} else if (!zc) {
+ 			int i = skb_shinfo(skb)->nr_frags;
+diff --git a/net/rxrpc/ar-internal.h b/net/rxrpc/ar-internal.h
+index 96ecb83c9071..27c2aa2dd023 100644
+--- a/net/rxrpc/ar-internal.h
++++ b/net/rxrpc/ar-internal.h
+@@ -1486,7 +1486,6 @@ int rxrpc_server_keyring(struct rxrpc_sock *, sockptr_t, int);
+ void rxrpc_kernel_data_consumed(struct rxrpc_call *, struct sk_buff *);
+ void rxrpc_new_skb(struct sk_buff *, enum rxrpc_skb_trace);
+ void rxrpc_see_skb(struct sk_buff *, enum rxrpc_skb_trace);
+-void rxrpc_eaten_skb(struct sk_buff *, enum rxrpc_skb_trace);
+ void rxrpc_get_skb(struct sk_buff *, enum rxrpc_skb_trace);
+ void rxrpc_free_skb(struct sk_buff *, enum rxrpc_skb_trace);
+ void rxrpc_purge_queue(struct sk_buff_head *);
+diff --git a/net/rxrpc/call_event.c b/net/rxrpc/call_event.c
+index fec59d9338b9..6c924ef55208 100644
+--- a/net/rxrpc/call_event.c
++++ b/net/rxrpc/call_event.c
+@@ -332,7 +332,25 @@ bool rxrpc_input_call_event(struct rxrpc_call *call)
+ 
+ 			saw_ack |= sp->hdr.type == RXRPC_PACKET_TYPE_ACK;
+ 
+-			rxrpc_input_call_packet(call, skb);
++			if (sp->hdr.type == RXRPC_PACKET_TYPE_DATA &&
++			    sp->hdr.securityIndex != 0 &&
++			    (skb_cloned(skb) || skb->data_len)) {
++				/* Unshare the packet so that it can be
++				 * modified by in-place decryption.
++				 */
++				struct sk_buff *nskb = skb_copy(skb, GFP_ATOMIC);
++
++				if (nskb) {
++					rxrpc_new_skb(nskb, rxrpc_skb_new_unshared);
++					rxrpc_input_call_packet(call, nskb);
++					rxrpc_free_skb(nskb, rxrpc_skb_put_call_rx);
++				} else {
++					/* OOM - Drop the packet. */
++					rxrpc_see_skb(skb, rxrpc_skb_see_unshare_nomem);
++				}
++			} else {
++				rxrpc_input_call_packet(call, skb);
++			}
+ 			rxrpc_free_skb(skb, rxrpc_skb_put_call_rx);
+ 			did_receive = true;
+ 		}
+diff --git a/net/rxrpc/conn_event.c b/net/rxrpc/conn_event.c
+index 9a41ec708aeb..eab7c5f2517a 100644
+--- a/net/rxrpc/conn_event.c
++++ b/net/rxrpc/conn_event.c
+@@ -240,6 +240,33 @@ static void rxrpc_call_is_secure(struct rxrpc_call *call)
+ 		rxrpc_notify_socket(call);
+ }
+ 
++static int rxrpc_verify_response(struct rxrpc_connection *conn,
++				 struct sk_buff *skb)
++{
++	int ret;
++
++	if (skb_cloned(skb) || skb->data_len) {
++		/* Copy the packet if shared so that we can do in-place
++		 * decryption.
++		 */
++		struct sk_buff *nskb = skb_copy(skb, GFP_NOFS);
++
++		if (nskb) {
++			rxrpc_new_skb(nskb, rxrpc_skb_new_unshared);
++			ret = conn->security->verify_response(conn, nskb);
++			rxrpc_free_skb(nskb, rxrpc_skb_put_response_copy);
++		} else {
++			/* OOM - Drop the packet. */
++			rxrpc_see_skb(skb, rxrpc_skb_see_unshare_nomem);
++			ret = -ENOMEM;
++		}
++	} else {
++		ret = conn->security->verify_response(conn, skb);
++	}
++
++	return ret;
++}
++
+ /*
+  * connection-level Rx packet processor
+  */
+@@ -270,7 +297,7 @@ static int rxrpc_process_event(struct rxrpc_connection *conn,
+ 		}
+ 		spin_unlock_irq(&conn->state_lock);
+ 
+-		ret = conn->security->verify_response(conn, skb);
++		ret = rxrpc_verify_response(conn, skb);
+ 		if (ret < 0)
+ 			return ret;
+ 
+@@ -362,7 +389,6 @@ void rxrpc_process_delayed_final_acks(struct rxrpc_connection *conn, bool force)
+ static void rxrpc_do_process_connection(struct rxrpc_connection *conn)
+ {
+ 	struct sk_buff *skb;
+-	int ret;
+ 
+ 	if (test_and_clear_bit(RXRPC_CONN_EV_CHALLENGE, &conn->events))
+ 		rxrpc_secure_connection(conn);
+@@ -371,17 +397,8 @@ static void rxrpc_do_process_connection(struct rxrpc_connection *conn)
+ 	 * connection that each one has when we've finished with it */
+ 	while ((skb = skb_dequeue(&conn->rx_queue))) {
+ 		rxrpc_see_skb(skb, rxrpc_skb_see_conn_work);
+-		ret = rxrpc_process_event(conn, skb);
+-		switch (ret) {
+-		case -ENOMEM:
+-		case -EAGAIN:
+-			skb_queue_head(&conn->rx_queue, skb);
+-			rxrpc_queue_conn(conn, rxrpc_conn_queue_retry_work);
+-			break;
+-		default:
+-			rxrpc_free_skb(skb, rxrpc_skb_put_conn_work);
+-			break;
+-		}
++		rxrpc_process_event(conn, skb);
++		rxrpc_free_skb(skb, rxrpc_skb_put_conn_work);
+ 	}
+ }
+ 
+diff --git a/net/rxrpc/io_thread.c b/net/rxrpc/io_thread.c
+index 697956931925..dc5184a2fa9d 100644
+--- a/net/rxrpc/io_thread.c
++++ b/net/rxrpc/io_thread.c
+@@ -192,13 +192,12 @@ static bool rxrpc_extract_abort(struct sk_buff *skb)
+ /*
+  * Process packets received on the local endpoint
+  */
+-static bool rxrpc_input_packet(struct rxrpc_local *local, struct sk_buff **_skb)
++static bool rxrpc_input_packet(struct rxrpc_local *local, struct sk_buff *skb)
+ {
+ 	struct rxrpc_connection *conn;
+ 	struct sockaddr_rxrpc peer_srx;
+ 	struct rxrpc_skb_priv *sp;
+ 	struct rxrpc_peer *peer = NULL;
+-	struct sk_buff *skb = *_skb;
+ 	bool ret = false;
+ 
+ 	skb_pull(skb, sizeof(struct udphdr));
+@@ -244,25 +243,6 @@ static bool rxrpc_input_packet(struct rxrpc_local *local, struct sk_buff **_skb)
+ 			return rxrpc_bad_message(skb, rxrpc_badmsg_zero_call);
+ 		if (sp->hdr.seq == 0)
+ 			return rxrpc_bad_message(skb, rxrpc_badmsg_zero_seq);
+-
+-		/* Unshare the packet so that it can be modified for in-place
+-		 * decryption.
+-		 */
+-		if (sp->hdr.securityIndex != 0) {
+-			skb = skb_unshare(skb, GFP_ATOMIC);
+-			if (!skb) {
+-				rxrpc_eaten_skb(*_skb, rxrpc_skb_eaten_by_unshare_nomem);
+-				*_skb = NULL;
+-				return just_discard;
+-			}
+-
+-			if (skb != *_skb) {
+-				rxrpc_eaten_skb(*_skb, rxrpc_skb_eaten_by_unshare);
+-				*_skb = skb;
+-				rxrpc_new_skb(skb, rxrpc_skb_new_unshared);
+-				sp = rxrpc_skb(skb);
+-			}
+-		}
+ 		break;
+ 
+ 	case RXRPC_PACKET_TYPE_CHALLENGE:
+@@ -494,7 +474,7 @@ int rxrpc_io_thread(void *data)
+ 			switch (skb->mark) {
+ 			case RXRPC_SKB_MARK_PACKET:
+ 				skb->priority = 0;
+-				if (!rxrpc_input_packet(local, &skb))
++				if (!rxrpc_input_packet(local, skb))
+ 					rxrpc_reject_packet(local, skb);
+ 				trace_rxrpc_rx_done(skb->mark, skb->priority);
+ 				rxrpc_free_skb(skb, rxrpc_skb_put_input);
+diff --git a/net/rxrpc/rxgk_app.c b/net/rxrpc/rxgk_app.c
+index 30275cb5ba3e..30b6701a9867 100644
+--- a/net/rxrpc/rxgk_app.c
++++ b/net/rxrpc/rxgk_app.c
+@@ -245,6 +245,7 @@ int rxgk_extract_token(struct rxrpc_connection *conn, struct sk_buff *skb,
+ 		if (ret != -ENOMEM)
+ 			return rxrpc_abort_conn(conn, skb, ec, ret,
+ 						rxgk_abort_resp_tok_dec);
++		return ret;
+ 	}
+ 
+ 	ret = conn->security->default_decode_ticket(conn, skb, ticket_offset,
+diff --git a/net/rxrpc/rxkad.c b/net/rxrpc/rxkad.c
+index 4a3c63094149..af24d54b6b4f 100644
+--- a/net/rxrpc/rxkad.c
++++ b/net/rxrpc/rxkad.c
+@@ -510,6 +510,9 @@ static int rxkad_verify_packet_2(struct rxrpc_call *call, struct sk_buff *skb,
+ 		return rxrpc_abort_eproto(call, skb, RXKADSEALEDINCON,
+ 					  rxkad_abort_2_short_header);
+ 
++	/* Don't let the crypto algo see a misaligned length. */
++	sp->len = round_down(sp->len, 8);
++
+ 	/* Decrypt the skbuff in-place.  TODO: We really want to decrypt
+ 	 * directly into the target buffer.
+ 	 */
+@@ -543,8 +546,10 @@ static int rxkad_verify_packet_2(struct rxrpc_call *call, struct sk_buff *skb,
+ 	if (sg != _sg)
+ 		kfree(sg);
+ 	if (ret < 0) {
+-		WARN_ON_ONCE(ret != -ENOMEM);
+-		return ret;
++		if (ret == -ENOMEM)
++			return ret;
++		return rxrpc_abort_eproto(call, skb, RXKADSEALEDINCON,
++					  rxkad_abort_2_crypto_unaligned);
+ 	}
+ 
+ 	/* Extract the decrypted packet length */
+@@ -1136,7 +1141,7 @@ static int rxkad_verify_response(struct rxrpc_connection *conn,
+ 	struct rxrpc_crypt session_key;
+ 	struct key *server_key;
+ 	time64_t expiry;
+-	void *ticket;
++	void *ticket = NULL;
+ 	u32 version, kvno, ticket_len, level;
+ 	__be32 csum;
+ 	int ret, i;
+@@ -1162,13 +1167,13 @@ static int rxkad_verify_response(struct rxrpc_connection *conn,
+ 	ret = -ENOMEM;
+ 	response = kzalloc(sizeof(struct rxkad_response), GFP_NOFS);
+ 	if (!response)
+-		goto temporary_error;
++		goto error;
+ 
+ 	if (skb_copy_bits(skb, sizeof(struct rxrpc_wire_header),
+ 			  response, sizeof(*response)) < 0) {
+-		rxrpc_abort_conn(conn, skb, RXKADPACKETSHORT, -EPROTO,
+-				 rxkad_abort_resp_short);
+-		goto protocol_error;
++		ret = rxrpc_abort_conn(conn, skb, RXKADPACKETSHORT, -EPROTO,
++				       rxkad_abort_resp_short);
++		goto error;
+ 	}
+ 
+ 	version = ntohl(response->version);
+@@ -1178,62 +1183,62 @@ static int rxkad_verify_response(struct rxrpc_connection *conn,
+ 	trace_rxrpc_rx_response(conn, sp->hdr.serial, version, kvno, ticket_len);
+ 
+ 	if (version != RXKAD_VERSION) {
+-		rxrpc_abort_conn(conn, skb, RXKADINCONSISTENCY, -EPROTO,
+-				 rxkad_abort_resp_version);
+-		goto protocol_error;
++		ret = rxrpc_abort_conn(conn, skb, RXKADINCONSISTENCY, -EPROTO,
++				       rxkad_abort_resp_version);
++		goto error;
+ 	}
+ 
+ 	if (ticket_len < 4 || ticket_len > MAXKRB5TICKETLEN) {
+-		rxrpc_abort_conn(conn, skb, RXKADTICKETLEN, -EPROTO,
+-				 rxkad_abort_resp_tkt_len);
+-		goto protocol_error;
++		ret = rxrpc_abort_conn(conn, skb, RXKADTICKETLEN, -EPROTO,
++				       rxkad_abort_resp_tkt_len);
++		goto error;
+ 	}
+ 
+ 	if (kvno >= RXKAD_TKT_TYPE_KERBEROS_V5) {
+-		rxrpc_abort_conn(conn, skb, RXKADUNKNOWNKEY, -EPROTO,
+-				 rxkad_abort_resp_unknown_tkt);
+-		goto protocol_error;
++		ret = rxrpc_abort_conn(conn, skb, RXKADUNKNOWNKEY, -EPROTO,
++				       rxkad_abort_resp_unknown_tkt);
++		goto error;
+ 	}
+ 
+ 	/* extract the kerberos ticket and decrypt and decode it */
+ 	ret = -ENOMEM;
+ 	ticket = kmalloc(ticket_len, GFP_NOFS);
+ 	if (!ticket)
+-		goto temporary_error_free_resp;
++		goto error;
+ 
+ 	if (skb_copy_bits(skb, sizeof(struct rxrpc_wire_header) + sizeof(*response),
+ 			  ticket, ticket_len) < 0) {
+-		rxrpc_abort_conn(conn, skb, RXKADPACKETSHORT, -EPROTO,
+-				 rxkad_abort_resp_short_tkt);
+-		goto protocol_error;
++		ret = rxrpc_abort_conn(conn, skb, RXKADPACKETSHORT, -EPROTO,
++				       rxkad_abort_resp_short_tkt);
++		goto error;
+ 	}
+ 
+ 	ret = rxkad_decrypt_ticket(conn, server_key, skb, ticket, ticket_len,
+ 				   &session_key, &expiry);
+ 	if (ret < 0)
+-		goto temporary_error_free_ticket;
++		goto error;
+ 
+ 	/* use the session key from inside the ticket to decrypt the
+ 	 * response */
+ 	ret = rxkad_decrypt_response(conn, response, &session_key);
+ 	if (ret < 0)
+-		goto temporary_error_free_ticket;
++		goto error;
+ 
+ 	if (ntohl(response->encrypted.epoch) != conn->proto.epoch ||
+ 	    ntohl(response->encrypted.cid) != conn->proto.cid ||
+ 	    ntohl(response->encrypted.securityIndex) != conn->security_ix) {
+-		rxrpc_abort_conn(conn, skb, RXKADSEALEDINCON, -EPROTO,
+-				 rxkad_abort_resp_bad_param);
+-		goto protocol_error_free;
++		ret = rxrpc_abort_conn(conn, skb, RXKADSEALEDINCON, -EPROTO,
++				       rxkad_abort_resp_bad_param);
++		goto error;
+ 	}
+ 
+ 	csum = response->encrypted.checksum;
+ 	response->encrypted.checksum = 0;
+ 	rxkad_calc_response_checksum(response);
+ 	if (response->encrypted.checksum != csum) {
+-		rxrpc_abort_conn(conn, skb, RXKADSEALEDINCON, -EPROTO,
+-				 rxkad_abort_resp_bad_checksum);
+-		goto protocol_error_free;
++		ret = rxrpc_abort_conn(conn, skb, RXKADSEALEDINCON, -EPROTO,
++				       rxkad_abort_resp_bad_checksum);
++		goto error;
+ 	}
+ 
+ 	for (i = 0; i < RXRPC_MAXCALLS; i++) {
+@@ -1241,38 +1246,38 @@ static int rxkad_verify_response(struct rxrpc_connection *conn,
+ 		u32 counter = READ_ONCE(conn->channels[i].call_counter);
+ 
+ 		if (call_id > INT_MAX) {
+-			rxrpc_abort_conn(conn, skb, RXKADSEALEDINCON, -EPROTO,
+-					 rxkad_abort_resp_bad_callid);
+-			goto protocol_error_free;
++			ret = rxrpc_abort_conn(conn, skb, RXKADSEALEDINCON, -EPROTO,
++					       rxkad_abort_resp_bad_callid);
++			goto error;
+ 		}
+ 
+ 		if (call_id < counter) {
+-			rxrpc_abort_conn(conn, skb, RXKADSEALEDINCON, -EPROTO,
+-					 rxkad_abort_resp_call_ctr);
+-			goto protocol_error_free;
++			ret = rxrpc_abort_conn(conn, skb, RXKADSEALEDINCON, -EPROTO,
++					       rxkad_abort_resp_call_ctr);
++			goto error;
+ 		}
+ 
+ 		if (call_id > counter) {
+ 			if (conn->channels[i].call) {
+-				rxrpc_abort_conn(conn, skb, RXKADSEALEDINCON, -EPROTO,
++				ret = rxrpc_abort_conn(conn, skb, RXKADSEALEDINCON, -EPROTO,
+ 						 rxkad_abort_resp_call_state);
+-				goto protocol_error_free;
++				goto error;
+ 			}
+ 			conn->channels[i].call_counter = call_id;
+ 		}
+ 	}
+ 
+ 	if (ntohl(response->encrypted.inc_nonce) != conn->rxkad.nonce + 1) {
+-		rxrpc_abort_conn(conn, skb, RXKADOUTOFSEQUENCE, -EPROTO,
+-				 rxkad_abort_resp_ooseq);
+-		goto protocol_error_free;
++		ret = rxrpc_abort_conn(conn, skb, RXKADOUTOFSEQUENCE, -EPROTO,
++				       rxkad_abort_resp_ooseq);
++		goto error;
+ 	}
+ 
+ 	level = ntohl(response->encrypted.level);
+ 	if (level > RXRPC_SECURITY_ENCRYPT) {
+-		rxrpc_abort_conn(conn, skb, RXKADLEVELFAIL, -EPROTO,
+-				 rxkad_abort_resp_level);
+-		goto protocol_error_free;
++		ret = rxrpc_abort_conn(conn, skb, RXKADLEVELFAIL, -EPROTO,
++				       rxkad_abort_resp_level);
++		goto error;
+ 	}
+ 	conn->security_level = level;
+ 
+@@ -1280,31 +1285,12 @@ static int rxkad_verify_response(struct rxrpc_connection *conn,
+ 	 * this the connection security can be handled in exactly the same way
+ 	 * as for a client connection */
+ 	ret = rxrpc_get_server_data_key(conn, &session_key, expiry, kvno);
+-	if (ret < 0)
+-		goto temporary_error_free_ticket;
+-
+-	kfree(ticket);
+-	kfree(response);
+-	_leave(" = 0");
+-	return 0;
+-
+-protocol_error_free:
+-	kfree(ticket);
+-protocol_error:
+-	kfree(response);
+-	key_put(server_key);
+-	return -EPROTO;
+ 
+-temporary_error_free_ticket:
++error:
+ 	kfree(ticket);
+-temporary_error_free_resp:
+ 	kfree(response);
+-temporary_error:
+-	/* Ignore the response packet if we got a temporary error such as
+-	 * ENOMEM.  We just want to send the challenge again.  Note that we
+-	 * also come out this way if the ticket decryption fails.
+-	 */
+ 	key_put(server_key);
++	_leave(" = %d", ret);
+ 	return ret;
+ }
+ 
+diff --git a/net/rxrpc/skbuff.c b/net/rxrpc/skbuff.c
+index 3bcd6ee80396..e2169d1a14b5 100644
+--- a/net/rxrpc/skbuff.c
++++ b/net/rxrpc/skbuff.c
+@@ -46,15 +46,6 @@ void rxrpc_get_skb(struct sk_buff *skb, enum rxrpc_skb_trace why)
+ 	skb_get(skb);
+ }
+ 
+-/*
+- * Note the dropping of a ref on a socket buffer by the core.
+- */
+-void rxrpc_eaten_skb(struct sk_buff *skb, enum rxrpc_skb_trace why)
+-{
+-	int n = atomic_inc_return(&rxrpc_n_rx_skbs);
+-	trace_rxrpc_skb(skb, 0, n, why);
+-}
+-
+ /*
+  * Note the destruction of a socket buffer.
+  */
 diff --git a/scripts/Makefile.lib b/scripts/Makefile.lib
 index 28a1c08e3b22..3126a6fa6328 100644
 --- a/scripts/Makefile.lib
