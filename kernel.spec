@@ -187,13 +187,13 @@ Summary: The Linux kernel
 %define specrpmversion 6.19.14
 %define specversion 6.19.14
 %define patchversion 6.19
-%define pkgrelease 100
+%define pkgrelease 101
 %define kversion 6
 %define tarfile_release 6.19.14
 # This is needed to do merge window version magic
 %define patchlevel 19
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 100%{?buildid}%{?dist}
+%define specrelease 101%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.19.14
 
@@ -4695,7 +4695,7 @@ fi\
 #
 #
 %changelog
-* Thu May 07 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.14-100]
+* Thu May 07 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.14-101]
 - Revert "redhat/kernel.spec.template: Fix indentation of uki-virt generation code" (Justin M. Forbes)
 - Revert "redhat/kernel.spec.template: Simplify uki-virt signing" (Justin M. Forbes)
 - Revert "redhat/kernel.spec.template: Add kernel-uki-dtbloader sub-package" (Justin M. Forbes)
