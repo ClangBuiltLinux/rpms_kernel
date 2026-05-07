@@ -4847,6 +4847,10 @@ fi\
 #
 #
 %changelog
+* Thu May 07 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.1.0-0.rc2.260507g8ab992f815d6.19]
+- xfrm: esp: avoid in-place decrypt on shared skb frags (Kuan-Ting Chen)
+- rxrpc: Also unshare DATA/RESPONSE packets when paged frags are present (Hyunwoo Kim)
+
 * Thu May 07 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.1.0-0.rc2.8ab992f815d6.19]
 - Disable MODULE_SIG_KEY_TYPE_MLDSA_87 for RHEL right now (Justin M. Forbes)
 - Gate Fedora ELN kernel updates on openQA tests (Adam Williamson)
