@@ -1,9 +1,3 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/a65ed893ebac4efd11e535603a6079bbc03d50ba
- a65ed893ebac4efd11e535603a6079bbc03d50ba xfrm: esp: avoid in-place decrypt on shared skb frags
-
-https://gitlab.com/cki-project/kernel-ark/-/commit/12a2ae195063274f78186cdd3dffc613219b2549
- 12a2ae195063274f78186cdd3dffc613219b2549 rxrpc: Also unshare DATA/RESPONSE packets when paged frags are present
-
 https://gitlab.com/cki-project/kernel-ark/-/commit/49dc112a24f8c571d32554e8a1dfdc74c0140b42
  49dc112a24f8c571d32554e8a1dfdc74c0140b42 redhat: rh_flags: mark !CONFIG_RHEL_DIFFERENCES stubs as static inline
 
