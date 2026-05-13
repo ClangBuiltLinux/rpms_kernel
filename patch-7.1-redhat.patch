@@ -70,6 +70,7 @@
  kernel/rh_messages.c                               | 414 ++++++++++++++++
  kernel/rh_messages.h                               | 334 +++++++++++++
  kernel/rh_waived.c                                 | 147 ++++++
+ net/core/skbuff.c                                  |   3 +
  scripts/Makefile.lib                               |   3 +
  scripts/mod/modpost.c                              |   8 +
  scripts/tags.sh                                    |   2 +
@@ -79,7 +80,7 @@
  tools/testing/selftests/bpf/DENYLIST.rhel          |  76 +++
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
- 81 files changed, 2900 insertions(+), 243 deletions(-)
+ 82 files changed, 2903 insertions(+), 243 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index 4d0f545fb3ec..767989050205 100644
@@ -4412,6 +4413,27 @@ index 000000000000..20966f7c7277
 +	return 0;
 +}
 +late_initcall(__add_rh_flag);
+diff --git a/net/core/skbuff.c b/net/core/skbuff.c
+index 7dad68e3b518..15bdec53e8d9 100644
+--- a/net/core/skbuff.c
++++ b/net/core/skbuff.c
+@@ -2248,6 +2248,7 @@ struct sk_buff *__pskb_copy_fclone(struct sk_buff *skb, int headroom,
+ 			skb_frag_ref(skb, i);
+ 		}
+ 		skb_shinfo(n)->nr_frags = i;
++		skb_shinfo(n)->flags |= skb_shinfo(skb)->flags & SKBFL_SHARED_FRAG;
+ 	}
+ 
+ 	if (skb_has_frag_list(skb)) {
+@@ -6200,6 +6201,8 @@ bool skb_try_coalesce(struct sk_buff *to, struct sk_buff *from,
+ 	       from_shinfo->frags,
+ 	       from_shinfo->nr_frags * sizeof(skb_frag_t));
+ 	to_shinfo->nr_frags += from_shinfo->nr_frags;
++	if (from_shinfo->nr_frags)
++		to_shinfo->flags |= from_shinfo->flags & SKBFL_SHARED_FRAG;
+ 
+ 	if (!skb_cloned(from))
+ 		from_shinfo->nr_frags = 0;
 diff --git a/scripts/Makefile.lib b/scripts/Makefile.lib
 index 0718e39cedda..10e94a1b8b6e 100644
 --- a/scripts/Makefile.lib
