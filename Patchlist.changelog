@@ -1,3 +1,9 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/73ad57bf7b16f672acb27219675436cebdd77b76
+ 73ad57bf7b16f672acb27219675436cebdd77b76 net: skbuff: preserve shared-frag marker during coalescing
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/b67729f3a15b25372c4dc14dc86112790e0f3818
+ b67729f3a15b25372c4dc14dc86112790e0f3818 net: skbuff: propagate shared-frag marker through pskb_copy()
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/ca36fa122f3d39719e4b373014e0a7c387547a63
  ca36fa122f3d39719e4b373014e0a7c387547a63 rxrpc: Also unshare DATA/RESPONSE packets when paged frags are present
 

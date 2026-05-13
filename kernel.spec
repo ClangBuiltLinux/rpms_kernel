@@ -187,13 +187,13 @@ Summary: The Linux kernel
 %define specrpmversion 6.19.14
 %define specversion 6.19.14
 %define patchversion 6.19
-%define pkgrelease 101
+%define pkgrelease 100
 %define kversion 6
 %define tarfile_release 6.19.14
 # This is needed to do merge window version magic
 %define patchlevel 19
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 101%{?buildid}%{?dist}
+%define specrelease 100%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.19.14
 
@@ -4695,11 +4695,15 @@ fi\
 #
 #
 %changelog
-* Thu May 07 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.14-101]
+* Wed May 13 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.14-100]
 - Revert "redhat/kernel.spec.template: Fix indentation of uki-virt generation code" (Justin M. Forbes)
 - Revert "redhat/kernel.spec.template: Simplify uki-virt signing" (Justin M. Forbes)
 - Revert "redhat/kernel.spec.template: Add kernel-uki-dtbloader sub-package" (Justin M. Forbes)
 - Revert "redhat/kernel.spec.template: Make -uki-dtbloader provide kernel-core-uname-r" (Justin M. Forbes)
+
+* Wed May 13 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.14-0]
+- net: skbuff: preserve shared-frag marker during coalescing (William Bowling)
+- net: skbuff: propagate shared-frag marker through pskb_copy() (Hyunwoo Kim)
 - Turn off F43 and F44 release targets (Justin M. Forbes)
 - rxrpc: Also unshare DATA/RESPONSE packets when paged frags are present (Hyunwoo Kim)
 - rxrpc: Fix rxrpc_input_call_event() to only unshare DATA packets (David Howells)
