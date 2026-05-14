@@ -187,13 +187,13 @@ Summary: The Linux kernel
 %define specrpmversion 6.19.14
 %define specversion 6.19.14
 %define patchversion 6.19
-%define pkgrelease 102
+%define pkgrelease 103
 %define kversion 6
 %define tarfile_release 6.19.14
 # This is needed to do merge window version magic
 %define patchlevel 19
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 102%{?buildid}%{?dist}
+%define specrelease 103%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.19.14
 
@@ -4695,11 +4695,14 @@ fi\
 #
 #
 %changelog
-* Wed May 13 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.14-102]
+* Thu May 14 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.14-103]
 - Revert "redhat/kernel.spec.template: Fix indentation of uki-virt generation code" (Justin M. Forbes)
 - Revert "redhat/kernel.spec.template: Simplify uki-virt signing" (Justin M. Forbes)
 - Revert "redhat/kernel.spec.template: Add kernel-uki-dtbloader sub-package" (Justin M. Forbes)
 - Revert "redhat/kernel.spec.template: Make -uki-dtbloader provide kernel-core-uname-r" (Justin M. Forbes)
+- net: skbuff: propagate shared-frag marker through frag-transfer helpers (Hyunwoo Kim)
+- Revert old fragnesia fixes in favor of more complete solution (Justin M. Forbes)
+- Revert old fragnesia fixes in favor of more complete solution (Justin M. Forbes)
 
 * Wed May 13 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.14-0]
 - net: skbuff: preserve shared-frag marker during coalescing (William Bowling)
