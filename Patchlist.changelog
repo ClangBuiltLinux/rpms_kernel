@@ -1,3 +1,12 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/6c2c61f8bf60b90d25f0b345cc0b3b430b395cfd
+ 6c2c61f8bf60b90d25f0b345cc0b3b430b395cfd net: skbuff: propagate shared-frag marker through frag-transfer helpers
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/068abdf865b6f2ded1d57c7e35466d5360acd92a
+ 068abdf865b6f2ded1d57c7e35466d5360acd92a Revert v3 of the fragnesia fix. V4 covers an additional path
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/0f596c498b46472e144c956a858c9d8f1d653d65
+ 0f596c498b46472e144c956a858c9d8f1d653d65 ptrace: slightly saner 'get_dumpable()' logic
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/55e3149ad9069766a049fa848589f71d144c3407
  55e3149ad9069766a049fa848589f71d144c3407 net: skbuff: propagate shared-frag marker through frag-transfer helpers
 

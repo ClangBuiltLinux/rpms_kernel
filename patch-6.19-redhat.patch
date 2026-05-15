@@ -52,13 +52,17 @@
  include/linux/lsm_hook_defs.h                      |   1 +
  include/linux/mfd/bcm2835-pm.h                     |   7 +
  include/linux/rmi.h                                |   1 +
+ include/linux/sched.h                              |   3 +
  include/linux/security.h                           |   9 +
  include/trace/events/rxrpc.h                       |   6 +-
+ kernel/exit.c                                      |   1 +
  kernel/module/signing.c                            |   9 +-
+ kernel/ptrace.c                                    |  22 +-
  net/core/gro.c                                     |   4 +
- net/core/skbuff.c                                  |   5 +
+ net/core/skbuff.c                                  |   3 +
  net/ipv4/esp4.c                                    |   3 +-
  net/ipv4/ip_output.c                               |   2 +
+ net/ipv4/tcp_output.c                              |   1 +
  net/ipv6/esp6.c                                    |   3 +-
  net/ipv6/ip6_output.c                              |   2 +
  net/rxrpc/ar-internal.h                            |   1 -
@@ -75,7 +79,7 @@
  security/lockdown/lockdown.c                       |  11 +
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 -
- 77 files changed, 2013 insertions(+), 556 deletions(-)
+ 81 files changed, 2032 insertions(+), 562 deletions(-)
 
 diff --git a/Documentation/hid/intel-ish-hid.rst b/Documentation/hid/intel-ish-hid.rst
 index 2adc174fb576..068a5906b177 100644
@@ -3738,6 +3742,20 @@ index ab7eea01ab42..fff7c5f737fc 100644
  };
  
  int rmi_register_transport_device(struct rmi_transport_dev *xport);
+diff --git a/include/linux/sched.h b/include/linux/sched.h
+index 0719862970a2..205f659e4944 100644
+--- a/include/linux/sched.h
++++ b/include/linux/sched.h
+@@ -1003,6 +1003,9 @@ struct task_struct {
+ 	unsigned			sched_rt_mutex:1;
+ #endif
+ 
++	/* Save user-dumpable when mm goes away */
++	unsigned			user_dumpable:1;
++
+ 	/* Bit to tell TOMOYO we're in execve(): */
+ 	unsigned			in_execve:1;
+ 	unsigned			in_iowait:1;
 diff --git a/include/linux/security.h b/include/linux/security.h
 index ee88dd2d2d1f..5c816f0b8b67 100644
 --- a/include/linux/security.h
@@ -3801,6 +3819,18 @@ index 578b8038b211..573f2df3a2c9 100644
  	EM(rxrpc_conn_queue_rx_work,		"QUE rx-work ") \
  	EM(rxrpc_conn_see_new_service_conn,	"SEE new-svc ") \
  	EM(rxrpc_conn_see_reap_service,		"SEE reap-svc") \
+diff --git a/kernel/exit.c b/kernel/exit.c
+index ede3117fa7d4..bbb44fd3ffba 100644
+--- a/kernel/exit.c
++++ b/kernel/exit.c
+@@ -571,6 +571,7 @@ static void exit_mm(void)
+ 	 */
+ 	smp_mb__after_spinlock();
+ 	local_irq_disable();
++	current->user_dumpable = (get_dumpable(mm) == SUID_DUMP_USER);
+ 	current->mm = NULL;
+ 	membarrier_update_current_mm(NULL);
+ 	enter_lazy_tlb(mm, current);
 diff --git a/kernel/module/signing.c b/kernel/module/signing.c
 index a2ff4242e623..f0d2be1ee4f1 100644
 --- a/kernel/module/signing.c
@@ -3824,6 +3854,50 @@ index a2ff4242e623..f0d2be1ee4f1 100644
  }
  
  int module_sig_check(struct load_info *info, int flags)
+diff --git a/kernel/ptrace.c b/kernel/ptrace.c
+index 392ec2f75f01..0e3ab697cff5 100644
+--- a/kernel/ptrace.c
++++ b/kernel/ptrace.c
+@@ -272,11 +272,24 @@ static bool ptrace_has_cap(struct user_namespace *ns, unsigned int mode)
+ 	return ns_capable(ns, CAP_SYS_PTRACE);
+ }
+ 
++static bool task_still_dumpable(struct task_struct *task, unsigned int mode)
++{
++	struct mm_struct *mm = task->mm;
++	if (mm) {
++		if (get_dumpable(mm) == SUID_DUMP_USER)
++			return true;
++		return ptrace_has_cap(mm->user_ns, mode);
++	}
++
++	if (task->user_dumpable)
++		return true;
++	return ptrace_has_cap(&init_user_ns, mode);
++}
++
+ /* Returns 0 on success, -errno on denial. */
+ static int __ptrace_may_access(struct task_struct *task, unsigned int mode)
+ {
+ 	const struct cred *cred = current_cred(), *tcred;
+-	struct mm_struct *mm;
+ 	kuid_t caller_uid;
+ 	kgid_t caller_gid;
+ 
+@@ -337,11 +350,8 @@ static int __ptrace_may_access(struct task_struct *task, unsigned int mode)
+ 	 * Pairs with a write barrier in commit_creds().
+ 	 */
+ 	smp_rmb();
+-	mm = task->mm;
+-	if (mm &&
+-	    ((get_dumpable(mm) != SUID_DUMP_USER) &&
+-	     !ptrace_has_cap(mm->user_ns, mode)))
+-	    return -EPERM;
++	if (!task_still_dumpable(task, mode))
++		return -EPERM;
+ 
+ 	return security_ptrace_access_check(task, mode);
+ }
 diff --git a/net/core/gro.c b/net/core/gro.c
 index ef61695fbdbb..867611d171db 100644
 --- a/net/core/gro.c
@@ -3851,7 +3925,7 @@ index ef61695fbdbb..867611d171db 100644
  
  	return 0;
 diff --git a/net/core/skbuff.c b/net/core/skbuff.c
-index a95dc0638836..3509a95427b3 100644
+index a95dc0638836..fa21147d2188 100644
 --- a/net/core/skbuff.c
 +++ b/net/core/skbuff.c
 @@ -2226,6 +2226,7 @@ struct sk_buff *__pskb_copy_fclone(struct sk_buff *skb, int headroom,
@@ -3871,15 +3945,6 @@ index a95dc0638836..3509a95427b3 100644
  	skb_len_add(skb, -shiftlen);
  	skb_len_add(tgt, shiftlen);
  
-@@ -6191,6 +6194,8 @@ bool skb_try_coalesce(struct sk_buff *to, struct sk_buff *from,
- 	       from_shinfo->frags,
- 	       from_shinfo->nr_frags * sizeof(skb_frag_t));
- 	to_shinfo->nr_frags += from_shinfo->nr_frags;
-+	if (from_shinfo->nr_frags)
-+		to_shinfo->flags |= from_shinfo->flags & SKBFL_SHARED_FRAG;
- 
- 	if (!skb_cloned(from))
- 		from_shinfo->nr_frags = 0;
 diff --git a/net/ipv4/esp4.c b/net/ipv4/esp4.c
 index 6dfc0bcdef65..6a5febbdbee4 100644
 --- a/net/ipv4/esp4.c
@@ -3907,6 +3972,18 @@ index ff11d3a85a36..7c005263262f 100644
  			wmem_alloc_delta += copy;
  		} else if (!zc) {
  			int i = skb_shinfo(skb)->nr_frags;
+diff --git a/net/ipv4/tcp_output.c b/net/ipv4/tcp_output.c
+index 479afb714bdf..968c5db581a3 100644
+--- a/net/ipv4/tcp_output.c
++++ b/net/ipv4/tcp_output.c
+@@ -2544,6 +2544,7 @@ static int tcp_clone_payload(struct sock *sk, struct sk_buff *to,
+ 			todo = min_t(int, skb_frag_size(fragfrom),
+ 				     probe_size - len);
+ 			len += todo;
++			skb_shinfo(to)->flags |= skb_shinfo(skb)->flags & SKBFL_SHARED_FRAG;
+ 			if (lastfrag &&
+ 			    skb_frag_page(fragfrom) == skb_frag_page(lastfrag) &&
+ 			    skb_frag_off(fragfrom) == skb_frag_off(lastfrag) +
 diff --git a/net/ipv6/esp6.c b/net/ipv6/esp6.c
 index 9f75313734f8..9c06c5a1419d 100644
 --- a/net/ipv6/esp6.c
