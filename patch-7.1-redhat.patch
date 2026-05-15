@@ -71,7 +71,8 @@
  kernel/rh_messages.h                               | 334 +++++++++++++
  kernel/rh_waived.c                                 | 147 ++++++
  net/core/gro.c                                     |   4 +
- net/core/skbuff.c                                  |   5 +
+ net/core/skbuff.c                                  |   3 +
+ net/ipv4/tcp_output.c                              |   1 +
  scripts/Makefile.lib                               |   3 +
  scripts/mod/modpost.c                              |   8 +
  scripts/tags.sh                                    |   2 +
@@ -81,7 +82,7 @@
  tools/testing/selftests/bpf/DENYLIST.rhel          |  76 +++
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
- 83 files changed, 2909 insertions(+), 243 deletions(-)
+ 84 files changed, 2908 insertions(+), 243 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index 4d0f545fb3ec..767989050205 100644
@@ -4441,7 +4442,7 @@ index 31d21de5b15a..9f8960789b2c 100644
  
  	return 0;
 diff --git a/net/core/skbuff.c b/net/core/skbuff.c
-index 7dad68e3b518..7cd388504297 100644
+index 7dad68e3b518..b45fac03af38 100644
 --- a/net/core/skbuff.c
 +++ b/net/core/skbuff.c
 @@ -2248,6 +2248,7 @@ struct sk_buff *__pskb_copy_fclone(struct sk_buff *skb, int headroom,
@@ -4461,15 +4462,18 @@ index 7dad68e3b518..7cd388504297 100644
  	skb_len_add(skb, -shiftlen);
  	skb_len_add(tgt, shiftlen);
  
-@@ -6200,6 +6203,8 @@ bool skb_try_coalesce(struct sk_buff *to, struct sk_buff *from,
- 	       from_shinfo->frags,
- 	       from_shinfo->nr_frags * sizeof(skb_frag_t));
- 	to_shinfo->nr_frags += from_shinfo->nr_frags;
-+	if (from_shinfo->nr_frags)
-+		to_shinfo->flags |= from_shinfo->flags & SKBFL_SHARED_FRAG;
- 
- 	if (!skb_cloned(from))
- 		from_shinfo->nr_frags = 0;
+diff --git a/net/ipv4/tcp_output.c b/net/ipv4/tcp_output.c
+index f9d8755705f7..6e4bb411dc04 100644
+--- a/net/ipv4/tcp_output.c
++++ b/net/ipv4/tcp_output.c
+@@ -2626,6 +2626,7 @@ static int tcp_clone_payload(struct sock *sk, struct sk_buff *to,
+ 			todo = min_t(int, skb_frag_size(fragfrom),
+ 				     probe_size - len);
+ 			len += todo;
++			skb_shinfo(to)->flags |= skb_shinfo(skb)->flags & SKBFL_SHARED_FRAG;
+ 			if (lastfrag &&
+ 			    skb_frag_page(fragfrom) == skb_frag_page(lastfrag) &&
+ 			    skb_frag_off(fragfrom) == skb_frag_off(lastfrag) +
 diff --git a/scripts/Makefile.lib b/scripts/Makefile.lib
 index 0718e39cedda..10e94a1b8b6e 100644
 --- a/scripts/Makefile.lib
