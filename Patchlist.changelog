@@ -1,11 +1,14 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/fa6fe2ab6433bcfcbc8dee7e1685175158e74100
- fa6fe2ab6433bcfcbc8dee7e1685175158e74100 net: skbuff: propagate shared-frag marker through frag-transfer helpers
+https://gitlab.com/cki-project/kernel-ark/-/commit/27b00cb168312e52012c17f5be504623d37fd6d7
+ 27b00cb168312e52012c17f5be504623d37fd6d7 net/sched: act_pedit: extend the writable skb range per key
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/14a54c42c45616deb8f7036872ff4d6c763a3f72
- 14a54c42c45616deb8f7036872ff4d6c763a3f72 Revert "net: skbuff: propagate shared-frag marker through frag-transfer helpers"
+https://gitlab.com/cki-project/kernel-ark/-/commit/d3c0e3a5797ae6c16b27b67b49502cf4b7218441
+ d3c0e3a5797ae6c16b27b67b49502cf4b7218441 net: skbuff: propagate shared-frag marker through frag-transfer helpers
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/9b348238805b8425d80ee0d228ad56bd7ae7b6b0
- 9b348238805b8425d80ee0d228ad56bd7ae7b6b0 net: skbuff: propagate shared-frag marker through frag-transfer helpers
+https://gitlab.com/cki-project/kernel-ark/-/commit/3c848e4c096a03aad568285f16a213f99ccd54e4
+ 3c848e4c096a03aad568285f16a213f99ccd54e4 Revert fragnesia v4 in favor of v5
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/8027c81b011738fdee7cf923f559557939fb0e65
+ 8027c81b011738fdee7cf923f559557939fb0e65 net: skbuff: propagate shared-frag marker through frag-transfer helpers
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/49dc112a24f8c571d32554e8a1dfdc74c0140b42
  49dc112a24f8c571d32554e8a1dfdc74c0140b42 redhat: rh_flags: mark !CONFIG_RHEL_DIFFERENCES stubs as static inline
