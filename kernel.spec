@@ -187,13 +187,13 @@ Summary: The Linux kernel
 %define specrpmversion 6.19.14
 %define specversion 6.19.14
 %define patchversion 6.19
-%define pkgrelease 106
+%define pkgrelease 107
 %define kversion 6
 %define tarfile_release 6.19.14
 # This is needed to do merge window version magic
 %define patchlevel 19
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 106%{?buildid}%{?dist}
+%define specrelease 107%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.19.14
 
@@ -4695,13 +4695,17 @@ fi\
 #
 #
 %changelog
-* Mon May 18 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.14-106]
+* Tue May 19 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.14-107]
 - Revert "redhat/kernel.spec.template: Fix indentation of uki-virt generation code" (Justin M. Forbes)
 - Revert "redhat/kernel.spec.template: Simplify uki-virt signing" (Justin M. Forbes)
 - Revert "redhat/kernel.spec.template: Add kernel-uki-dtbloader sub-package" (Justin M. Forbes)
 - Revert "redhat/kernel.spec.template: Make -uki-dtbloader provide kernel-core-uname-r" (Justin M. Forbes)
 
-* Mon May 18 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.14-6]
+* Tue May 19 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.14-7]
+- net: gro: don't copy frags between mixed zcopy skbs (Sabrina Dubroca)
+- Turn on auto bumping for remainder of F42 (Justin M. Forbes)
+
+* Mon May 18 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.14-0]
 - net/sched: fix pedit partial COW leading to page cache corruption (Rajat Gupta)
 - net: skbuff: propagate shared-frag marker through frag-transfer helpers (Hyunwoo Kim)
 - Revert fragnesia v4 in favor of v5 (Justin M. Forbes)
