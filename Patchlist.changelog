@@ -1,14 +1,17 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/a045da4e5ad916cae0993acb26d13e4a939b3222
- a045da4e5ad916cae0993acb26d13e4a939b3222 net/sched: fix pedit partial COW leading to page cache corruption
+https://gitlab.com/cki-project/kernel-ark/-/commit/1fd0b51e79d01a83264bb776116a03124cc52ab3
+ 1fd0b51e79d01a83264bb776116a03124cc52ab3 rxrpc: Fix RESPONSE packet verification to extract skb to a linear buffer
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/98a5ab48468a9adaac3d51b63d563184ce18d467
- 98a5ab48468a9adaac3d51b63d563184ce18d467 net/sched: act_pedit: extend the writable skb range per key
+https://gitlab.com/cki-project/kernel-ark/-/commit/a4ab1e4043f3fd72c003411c41b17330f740f558
+ a4ab1e4043f3fd72c003411c41b17330f740f558 rxrpc: Fix DATA decrypt vs splice() by copying data to buffer in recvmsg
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/7d5eab6d20dd0715072eb0b63c6442ae5f04b8c4
- 7d5eab6d20dd0715072eb0b63c6442ae5f04b8c4 net: gro: don't copy frags between mixed zcopy skbs
+https://gitlab.com/cki-project/kernel-ark/-/commit/a0d6c108060fc2a54db0cebef156ed0e4920b9e2
+ a0d6c108060fc2a54db0cebef156ed0e4920b9e2 crypto/krb5, rxrpc: Fix lack of pre-decrypt/pre-verify length checks
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/fb5067616ac829fe905f9e3d99705ee0e3fb9999
- fb5067616ac829fe905f9e3d99705ee0e3fb9999 net: skbuff: propagate shared-frag marker through frag-transfer helpers
+https://gitlab.com/cki-project/kernel-ark/-/commit/cb40b98910bb792bbd345eac4c5243e8874470db
+ cb40b98910bb792bbd345eac4c5243e8874470db net/sched: act_pedit: extend the writable skb range per key
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/2af74697445d87fcd76496132b477a5195182599
+ 2af74697445d87fcd76496132b477a5195182599 net: skbuff: propagate shared-frag marker through frag-transfer helpers
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/49dc112a24f8c571d32554e8a1dfdc74c0140b42
  49dc112a24f8c571d32554e8a1dfdc74c0140b42 redhat: rh_flags: mark !CONFIG_RHEL_DIFFERENCES stubs as static inline
