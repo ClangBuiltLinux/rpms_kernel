@@ -59,11 +59,11 @@
  kernel/module/signing.c                            |   9 +-
  kernel/ptrace.c                                    |  22 +-
  net/core/gro.c                                     |   7 +
- net/core/skbuff.c                                  |   9 +-
- net/ipv4/esp4.c                                    |   3 +-
+ net/core/skbuff.c                                  |  11 +-
+ net/ipv4/esp4.c                                    |   8 +-
  net/ipv4/ip_output.c                               |   2 +
  net/ipv4/tcp_output.c                              |   1 +
- net/ipv6/esp6.c                                    |   3 +-
+ net/ipv6/esp6.c                                    |   8 +-
  net/ipv6/ip6_output.c                              |   2 +
  net/rxrpc/ar-internal.h                            |   1 -
  net/rxrpc/call_event.c                             |  20 +-
@@ -80,7 +80,7 @@
  security/lockdown/lockdown.c                       |  11 +
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 -
- 82 files changed, 2099 insertions(+), 576 deletions(-)
+ 82 files changed, 2107 insertions(+), 580 deletions(-)
 
 diff --git a/Documentation/hid/intel-ish-hid.rst b/Documentation/hid/intel-ish-hid.rst
 index 2adc174fb576..068a5906b177 100644
@@ -3936,7 +3936,7 @@ index ef61695fbdbb..9f77ac895aed 100644
  
  	return 0;
 diff --git a/net/core/skbuff.c b/net/core/skbuff.c
-index a95dc0638836..eb893e27b93f 100644
+index a95dc0638836..537131f4402d 100644
 --- a/net/core/skbuff.c
 +++ b/net/core/skbuff.c
 @@ -2226,6 +2226,7 @@ struct sk_buff *__pskb_copy_fclone(struct sk_buff *skb, int headroom,
@@ -3976,11 +3976,39 @@ index a95dc0638836..eb893e27b93f 100644
  				if (!skb_headlen(list_skb)) {
  					BUG_ON(!nfrags);
  				} else {
+@@ -6191,6 +6198,8 @@ bool skb_try_coalesce(struct sk_buff *to, struct sk_buff *from,
+ 	       from_shinfo->frags,
+ 	       from_shinfo->nr_frags * sizeof(skb_frag_t));
+ 	to_shinfo->nr_frags += from_shinfo->nr_frags;
++	if (from_shinfo->nr_frags)
++		to_shinfo->flags |= from_shinfo->flags & SKBFL_SHARED_FRAG;
+ 
+ 	if (!skb_cloned(from))
+ 		from_shinfo->nr_frags = 0;
 diff --git a/net/ipv4/esp4.c b/net/ipv4/esp4.c
-index 6dfc0bcdef65..6a5febbdbee4 100644
+index 6dfc0bcdef65..2d7daca8516c 100644
 --- a/net/ipv4/esp4.c
 +++ b/net/ipv4/esp4.c
-@@ -873,7 +873,8 @@ static int esp_input(struct xfrm_state *x, struct sk_buff *skb)
+@@ -410,6 +410,7 @@ int esp_output_head(struct xfrm_state *x, struct sk_buff *skb, struct esp_info *
+ 	struct page *page;
+ 	struct sk_buff *trailer;
+ 	int tailen = esp->tailen;
++	unsigned int allocsize;
+ 
+ 	/* this is non-NULL only with TCP/UDP Encapsulation */
+ 	if (x->encap) {
+@@ -419,8 +420,8 @@ int esp_output_head(struct xfrm_state *x, struct sk_buff *skb, struct esp_info *
+ 			return err;
+ 	}
+ 
+-	if (ALIGN(tailen, L1_CACHE_BYTES) > PAGE_SIZE ||
+-	    ALIGN(skb->data_len, L1_CACHE_BYTES) > PAGE_SIZE)
++	allocsize = ALIGN(skb->data_len + tailen, L1_CACHE_BYTES);
++	if (allocsize > PAGE_SIZE)
+ 		goto cow;
+ 
+ 	if (!skb_cloned(skb)) {
+@@ -873,7 +874,8 @@ static int esp_input(struct xfrm_state *x, struct sk_buff *skb)
  			nfrags = 1;
  
  			goto skip_cow;
@@ -4016,10 +4044,29 @@ index 479afb714bdf..968c5db581a3 100644
  			    skb_frag_page(fragfrom) == skb_frag_page(lastfrag) &&
  			    skb_frag_off(fragfrom) == skb_frag_off(lastfrag) +
 diff --git a/net/ipv6/esp6.c b/net/ipv6/esp6.c
-index 9f75313734f8..9c06c5a1419d 100644
+index 9f75313734f8..0fad1dc558b8 100644
 --- a/net/ipv6/esp6.c
 +++ b/net/ipv6/esp6.c
-@@ -915,7 +915,8 @@ static int esp6_input(struct xfrm_state *x, struct sk_buff *skb)
+@@ -440,6 +440,7 @@ int esp6_output_head(struct xfrm_state *x, struct sk_buff *skb, struct esp_info
+ 	struct page *page;
+ 	struct sk_buff *trailer;
+ 	int tailen = esp->tailen;
++	unsigned int allocsize;
+ 
+ 	if (x->encap) {
+ 		int err = esp6_output_encap(x, skb, esp);
+@@ -448,8 +449,8 @@ int esp6_output_head(struct xfrm_state *x, struct sk_buff *skb, struct esp_info
+ 			return err;
+ 	}
+ 
+-	if (ALIGN(tailen, L1_CACHE_BYTES) > PAGE_SIZE ||
+-	    ALIGN(skb->data_len, L1_CACHE_BYTES) > PAGE_SIZE)
++	allocsize = ALIGN(skb->data_len + tailen, L1_CACHE_BYTES);
++	if (allocsize > PAGE_SIZE)
+ 		goto cow;
+ 
+ 	if (!skb_cloned(skb)) {
+@@ -915,7 +916,8 @@ static int esp6_input(struct xfrm_state *x, struct sk_buff *skb)
  			nfrags = 1;
  
  			goto skip_cow;

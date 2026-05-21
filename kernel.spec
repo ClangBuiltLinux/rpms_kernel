@@ -187,13 +187,13 @@ Summary: The Linux kernel
 %define specrpmversion 6.19.14
 %define specversion 6.19.14
 %define patchversion 6.19
-%define pkgrelease 107
+%define pkgrelease 108
 %define kversion 6
 %define tarfile_release 6.19.14
 # This is needed to do merge window version magic
 %define patchlevel 19
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 107%{?buildid}%{?dist}
+%define specrelease 108%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.19.14
 
@@ -4695,7 +4695,10 @@ fi\
 #
 #
 %changelog
-* Tue May 19 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.14-107]
+* Thu May 21 2026 Justin M. Forbes <jforbes@fedoraproject.org> [6.19.14-8]
+- net: skbuff: preserve shared-frag marker during coalescing (William Bowling)
+- xfrm: esp: restore combined single-frag length gate (Jingguo Tan)
+- Just disable the UKI DTB bits for the 6.19 repository (Justin M. Forbes)
 - Revert "redhat/kernel.spec.template: Fix indentation of uki-virt generation code" (Justin M. Forbes)
 - Revert "redhat/kernel.spec.template: Simplify uki-virt signing" (Justin M. Forbes)
 - Revert "redhat/kernel.spec.template: Add kernel-uki-dtbloader sub-package" (Justin M. Forbes)
