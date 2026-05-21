@@ -75,14 +75,16 @@
  kernel/rh_messages.h                               | 334 +++++++++++++
  kernel/rh_waived.c                                 | 147 ++++++
  net/core/gro.c                                     |   4 +
- net/core/skbuff.c                                  |   9 +-
+ net/core/skbuff.c                                  |  11 +-
+ net/ipv4/esp4.c                                    |   5 +-
  net/ipv4/tcp_output.c                              |   1 +
+ net/ipv6/esp6.c                                    |   5 +-
  net/rxrpc/ar-internal.h                            |  14 +-
  net/rxrpc/call_event.c                             |  22 +-
  net/rxrpc/call_object.c                            |   2 +
  net/rxrpc/conn_event.c                             |  32 +-
  net/rxrpc/insecure.c                               |   8 +-
- net/rxrpc/recvmsg.c                                |  76 ++-
+ net/rxrpc/recvmsg.c                                |  68 ++-
  net/rxrpc/rxgk.c                                   | 160 +++---
  net/rxrpc/rxgk_app.c                               |  46 +-
  net/rxrpc/rxgk_common.h                            |  66 ++-
@@ -97,7 +99,7 @@
  tools/testing/selftests/bpf/DENYLIST.rhel          |  76 +++
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
- 99 files changed, 3255 insertions(+), 560 deletions(-)
+ 101 files changed, 3256 insertions(+), 563 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index 4d0f545fb3ec..767989050205 100644
@@ -4600,7 +4602,7 @@ index 31d21de5b15a..9f8960789b2c 100644
  
  	return 0;
 diff --git a/net/core/skbuff.c b/net/core/skbuff.c
-index 7dad68e3b518..256d5ba14c42 100644
+index 7dad68e3b518..44ac121cfccb 100644
 --- a/net/core/skbuff.c
 +++ b/net/core/skbuff.c
 @@ -2248,6 +2248,7 @@ struct sk_buff *__pskb_copy_fclone(struct sk_buff *skb, int headroom,
@@ -4640,6 +4642,38 @@ index 7dad68e3b518..256d5ba14c42 100644
  				if (!skb_headlen(list_skb)) {
  					BUG_ON(!nfrags);
  				} else {
+@@ -6200,6 +6207,8 @@ bool skb_try_coalesce(struct sk_buff *to, struct sk_buff *from,
+ 	       from_shinfo->frags,
+ 	       from_shinfo->nr_frags * sizeof(skb_frag_t));
+ 	to_shinfo->nr_frags += from_shinfo->nr_frags;
++	if (from_shinfo->nr_frags)
++		to_shinfo->flags |= from_shinfo->flags & SKBFL_SHARED_FRAG;
+ 
+ 	if (!skb_cloned(from))
+ 		from_shinfo->nr_frags = 0;
+diff --git a/net/ipv4/esp4.c b/net/ipv4/esp4.c
+index 6a5febbdbee4..2d7daca8516c 100644
+--- a/net/ipv4/esp4.c
++++ b/net/ipv4/esp4.c
+@@ -410,6 +410,7 @@ int esp_output_head(struct xfrm_state *x, struct sk_buff *skb, struct esp_info *
+ 	struct page *page;
+ 	struct sk_buff *trailer;
+ 	int tailen = esp->tailen;
++	unsigned int allocsize;
+ 
+ 	/* this is non-NULL only with TCP/UDP Encapsulation */
+ 	if (x->encap) {
+@@ -419,8 +420,8 @@ int esp_output_head(struct xfrm_state *x, struct sk_buff *skb, struct esp_info *
+ 			return err;
+ 	}
+ 
+-	if (ALIGN(tailen, L1_CACHE_BYTES) > PAGE_SIZE ||
+-	    ALIGN(skb->data_len, L1_CACHE_BYTES) > PAGE_SIZE)
++	allocsize = ALIGN(skb->data_len + tailen, L1_CACHE_BYTES);
++	if (allocsize > PAGE_SIZE)
+ 		goto cow;
+ 
+ 	if (!skb_cloned(skb)) {
 diff --git a/net/ipv4/tcp_output.c b/net/ipv4/tcp_output.c
 index f9d8755705f7..6e4bb411dc04 100644
 --- a/net/ipv4/tcp_output.c
@@ -4652,6 +4686,29 @@ index f9d8755705f7..6e4bb411dc04 100644
  			if (lastfrag &&
  			    skb_frag_page(fragfrom) == skb_frag_page(lastfrag) &&
  			    skb_frag_off(fragfrom) == skb_frag_off(lastfrag) +
+diff --git a/net/ipv6/esp6.c b/net/ipv6/esp6.c
+index 9c06c5a1419d..0fad1dc558b8 100644
+--- a/net/ipv6/esp6.c
++++ b/net/ipv6/esp6.c
+@@ -440,6 +440,7 @@ int esp6_output_head(struct xfrm_state *x, struct sk_buff *skb, struct esp_info
+ 	struct page *page;
+ 	struct sk_buff *trailer;
+ 	int tailen = esp->tailen;
++	unsigned int allocsize;
+ 
+ 	if (x->encap) {
+ 		int err = esp6_output_encap(x, skb, esp);
+@@ -448,8 +449,8 @@ int esp6_output_head(struct xfrm_state *x, struct sk_buff *skb, struct esp_info
+ 			return err;
+ 	}
+ 
+-	if (ALIGN(tailen, L1_CACHE_BYTES) > PAGE_SIZE ||
+-	    ALIGN(skb->data_len, L1_CACHE_BYTES) > PAGE_SIZE)
++	allocsize = ALIGN(skb->data_len + tailen, L1_CACHE_BYTES);
++	if (allocsize > PAGE_SIZE)
+ 		goto cow;
+ 
+ 	if (!skb_cloned(skb)) {
 diff --git a/net/rxrpc/ar-internal.h b/net/rxrpc/ar-internal.h
 index 27c2aa2dd023..98f2165159d7 100644
 --- a/net/rxrpc/ar-internal.h
@@ -4824,10 +4881,10 @@ index 0a260df45d25..0b39046bdc61 100644
  }
  
 diff --git a/net/rxrpc/recvmsg.c b/net/rxrpc/recvmsg.c
-index e1f7513a46db..0802f12cbbfc 100644
+index e1f7513a46db..c940600117a4 100644
 --- a/net/rxrpc/recvmsg.c
 +++ b/net/rxrpc/recvmsg.c
-@@ -147,15 +147,55 @@ static void rxrpc_rotate_rx_window(struct rxrpc_call *call)
+@@ -147,15 +147,52 @@ static void rxrpc_rotate_rx_window(struct rxrpc_call *call)
  }
  
  /*
@@ -4837,9 +4894,9 @@ index e1f7513a46db..0802f12cbbfc 100644
 + * has the advantage of aligning the buffer correctly for the crypto routines.
 + *
 + * We keep track of the sequence number of the packet currently decrypted into
-+ * the buffer in ->rx_dec_seq.  Unfortunately, this means that a MSG_PEEK of
-+ * more than one byte may cause a later packet to be decrypted into the buffer,
-+ * requiring the original to be re-decrypted when recvmsg() is called again.
++ * the buffer in ->rx_dec_seq.  If MSG_PEEK is used and steps onto a new
++ * packet, subsequent recvmsg() calls will have to go back and re-decrypt the
++ * current packet.
   */
  static int rxrpc_verify_data(struct rxrpc_call *call, struct sk_buff *skb)
  {
@@ -4847,15 +4904,13 @@ index e1f7513a46db..0802f12cbbfc 100644
 +	int ret;
  
 -	if (sp->flags & RXRPC_RX_VERIFIED)
-+	if (call->rx_dec_seq == sp->hdr.seq && call->rx_dec_buffer)
- 		return 0;
+-		return 0;
 -	return call->security->verify_packet(call, skb);
-+
 +	if (sp->len > call->rx_dec_bsize) {
 +		/* Make sure we can hold a 1412-byte jumbo subpacket and make
 +		 * sure that the buffer size is aligned to a crypto blocksize.
 +		 */
-+		size_t size = max(round_up(sp->len, 32), 2048);
++		size_t size = clamp(round_up(sp->len, 32), 2048, 65535);
 +		void *buffer = krealloc(call->rx_dec_buffer, size, GFP_NOFS);
 +
 +		if (!buffer)
@@ -4886,12 +4941,13 @@ index e1f7513a46db..0802f12cbbfc 100644
  }
  
  /*
-@@ -283,16 +323,19 @@ static int rxrpc_recvmsg_data(struct socket *sock, struct rxrpc_call *call,
+@@ -283,16 +320,21 @@ static int rxrpc_recvmsg_data(struct socket *sock, struct rxrpc_call *call,
  		if (msg)
  			sock_recv_timestamp(msg, sock->sk, skb);
  
 -		if (rx_pkt_offset == 0) {
-+		if (rx_pkt_offset == USHRT_MAX) {
++		if (call->rx_dec_seq != sp->hdr.seq ||
++		    !call->rx_dec_buffer) {
  			ret2 = rxrpc_verify_data(call, skb);
  			trace_rxrpc_recvdata(call, rxrpc_recvmsg_next, seq,
 -					     sp->offset, sp->len, ret2);
@@ -4903,14 +4959,15 @@ index e1f7513a46db..0802f12cbbfc 100644
  			}
 -			rx_pkt_offset = sp->offset;
 -			rx_pkt_len = sp->len;
-+			sp = rxrpc_skb(skb);
-+			seq = sp->hdr.seq;
++		}
++
++		if (rx_pkt_offset == USHRT_MAX) {
 +			rx_pkt_offset = call->rx_dec_offset;
 +			rx_pkt_len = call->rx_dec_len;
  		} else {
  			trace_rxrpc_recvdata(call, rxrpc_recvmsg_cont, seq,
  					     rx_pkt_offset, rx_pkt_len, 0);
-@@ -304,10 +347,10 @@ static int rxrpc_recvmsg_data(struct socket *sock, struct rxrpc_call *call,
+@@ -304,10 +346,10 @@ static int rxrpc_recvmsg_data(struct socket *sock, struct rxrpc_call *call,
  		if (copy > remain)
  			copy = remain;
  		if (copy > 0) {
@@ -4925,7 +4982,7 @@ index e1f7513a46db..0802f12cbbfc 100644
  				goto out;
  			}
  
-@@ -328,13 +371,18 @@ static int rxrpc_recvmsg_data(struct socket *sock, struct rxrpc_call *call,
+@@ -328,7 +370,7 @@ static int rxrpc_recvmsg_data(struct socket *sock, struct rxrpc_call *call,
  		/* The whole packet has been transferred. */
  		if (sp->hdr.flags & RXRPC_LAST_PACKET)
  			ret = 1;
@@ -4933,20 +4990,7 @@ index e1f7513a46db..0802f12cbbfc 100644
 +		rx_pkt_offset = USHRT_MAX;
  		rx_pkt_len = 0;
  
-+		/* Terminate the receive here for MSG_PEEK otherwise we'd have
-+		 * to replace the contents of ->rx_dec_buffer.
-+		 */
-+		if (unlikely(flags & MSG_PEEK))
-+			break;
-+
  		skb = skb_peek_next(skb, &call->recvmsg_queue);
- 
--		if (!(flags & MSG_PEEK))
--			rxrpc_rotate_rx_window(call);
-+		rxrpc_rotate_rx_window(call);
- 
- 		if (!rx->app_ops &&
- 		    !skb_queue_empty_lockless(&rx->recvmsg_oobq)) {
 diff --git a/net/rxrpc/rxgk.c b/net/rxrpc/rxgk.c
 index 0d5e654da918..a1ee102abae1 100644
 --- a/net/rxrpc/rxgk.c
@@ -5474,7 +5518,7 @@ index 1e257d7ab8ec..3deed5863f5a 100644
  		break;
  	case -EBADMSG: /* Checksum mismatch */
 diff --git a/net/rxrpc/rxkad.c b/net/rxrpc/rxkad.c
-index cba7935977f0..e970bf3ae78a 100644
+index cba7935977f0..6fbd883401ac 100644
 --- a/net/rxrpc/rxkad.c
 +++ b/net/rxrpc/rxkad.c
 @@ -430,27 +430,25 @@ static int rxkad_verify_packet_1(struct rxrpc_call *call, struct sk_buff *skb,
@@ -5714,7 +5758,7 @@ index cba7935977f0..e970bf3ae78a 100644
 -	if (skb_copy_bits(skb, sizeof(struct rxrpc_wire_header) + sizeof(*response),
 -			  ticket, ticket_len) < 0) {
 +	ticket = buffer;
-+	if (ticket_len >= len) {
++	if (ticket_len > len) {
  		ret = rxrpc_abort_conn(conn, skb, RXKADPACKETSHORT, -EPROTO,
  				       rxkad_abort_resp_short_tkt);
  		goto error;
