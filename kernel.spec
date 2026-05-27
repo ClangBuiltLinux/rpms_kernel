@@ -190,13 +190,13 @@ Summary: The Linux kernel
 %define specrpmversion 7.0.10
 %define specversion 7.0.10
 %define patchversion 7.0
-%define pkgrelease 100
+%define pkgrelease 101
 %define kversion 7
 %define tarfile_release 7.0.10
 # This is needed to do merge window version magic
 %define patchlevel 0
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 100%{?buildid}%{?dist}
+%define specrelease 101%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 7.0.10
 
@@ -4825,6 +4825,19 @@ fi\
 #
 #
 %changelog
+* Wed May 27 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.0.10-1]
+- ata: libata-scsi: do not needlessly defer commands when using PMP with FBS (Niklas Cassel)
+- ata: libata-scsi: do not use the deferred QC feature on PMPs with CBS (Niklas Cassel)
+- ata: libata-scsi: do not use the deferred QC feature for ATA_DEFER_PORT (Niklas Cassel)
+- ata: libata-scsi: improve readability of ata_scsi_qc_issue() (Niklas Cassel)
+- smb: client: reject userspace cifs.spnego descriptions (Asim Viladi Oglu Manizada)
+- ksmbd: close durable scavenger races against m_fp_list lookups (DaeMyung Kang)
+- iommu/amd: Remove latent out-of-bounds access in IOMMU debugfs (Eder Zulian)
+- iommu/amd: Fix illegal cap/mmio access in IOMMU debugfs (Guanghui Feng)
+- drm/i915/cx0: Rename intel_clear_response_ready flag (Suraj Kandpal)
+- drm/i915/cx0: Clear response ready & error bit (Suraj Kandpal)
+- drm/i915/pps: Enable panel power earlier (Mika Kahola)
+
 * Sat May 23 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.0.10-0]
 - Linux v7.0.10
 
