@@ -72,7 +72,7 @@
  kernel/rh_waived.c                                 | 147 ++++++
  net/ipv4/esp4.c                                    |   5 +-
  net/ipv6/esp6.c                                    |   5 +-
- net/sched/act_pedit.c                              |  54 +-
+ net/sched/act_pedit.c                              |  49 +-
  scripts/Makefile.lib                               |   3 +
  scripts/mod/modpost.c                              |   8 +
  scripts/tags.sh                                    |   2 +
@@ -82,7 +82,7 @@
  tools/testing/selftests/bpf/DENYLIST.rhel          |  76 +++
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
- 84 files changed, 2947 insertions(+), 260 deletions(-)
+ 84 files changed, 2938 insertions(+), 264 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index 4d0f545fb3ec..767989050205 100644
@@ -4462,7 +4462,7 @@ index 9c06c5a1419d..0fad1dc558b8 100644
  
  	if (!skb_cloned(skb)) {
 diff --git a/net/sched/act_pedit.c b/net/sched/act_pedit.c
-index bc20f08a2789..79921b8d89ba 100644
+index bc20f08a2789..719bee335e1f 100644
 --- a/net/sched/act_pedit.c
 +++ b/net/sched/act_pedit.c
 @@ -16,6 +16,7 @@
@@ -4473,20 +4473,16 @@ index bc20f08a2789..79921b8d89ba 100644
  #include <net/ipv6.h>
  #include <net/netlink.h>
  #include <net/pkt_sched.h>
-@@ -323,8 +324,10 @@ static bool offset_valid(struct sk_buff *skb, int offset)
+@@ -323,7 +324,7 @@ static bool offset_valid(struct sk_buff *skb, int offset)
  	if (offset > 0 && offset > skb->len)
  		return false;
  
 -	if  (offset < 0 && -offset > skb_headroom(skb))
--		return false;
-+	if (offset < 0) {
-+		if (offset == INT_MIN || -offset > skb_headroom(skb))
-+			return false;
-+	}
++	if (offset < 0 && offset < -(int)skb_headroom(skb))
+ 		return false;
  
  	return true;
- }
-@@ -393,17 +396,21 @@ TC_INDIRECT_SCOPE int tcf_pedit_act(struct sk_buff *skb,
+@@ -393,18 +394,10 @@ TC_INDIRECT_SCOPE int tcf_pedit_act(struct sk_buff *skb,
  	struct tcf_pedit_key_ex *tkey_ex;
  	struct tcf_pedit_parms *parms;
  	struct tc_pedit_key *tkey;
@@ -4501,29 +4497,23 @@ index bc20f08a2789..79921b8d89ba 100644
 -		     parms->tcfp_off_max_hint;
 -	if (skb_ensure_writable(skb, min(skb->len, max_offset)))
 -		goto done;
-+	/*
-+	 * If the skb has shared frags the user is likely using zero-copy
-+	 * (e.g. sendfile).  Those page frags may point to page-cache pages;
-+	 * writing into them would silently corrupt the page cache.
-+	 * Linearize so pedit operates on a private copy.
-+	 * TL;DR: if you want zero-copy, don't use pedit.
-+	 */
-+	if (skb_has_shared_frag(skb)) {
-+		if (__skb_linearize(skb))
-+			goto bad;
-+	}
- 
+-
  	tcf_lastuse_update(&p->tcf_tm);
  	tcf_action_update_bstats(&p->common, skb);
-@@ -412,6 +419,7 @@ TC_INDIRECT_SCOPE int tcf_pedit_act(struct sk_buff *skb,
+ 
+@@ -412,9 +405,10 @@ TC_INDIRECT_SCOPE int tcf_pedit_act(struct sk_buff *skb,
  	tkey_ex = parms->tcfp_keys_ex;
  
  	for (i = parms->tcfp_nkeys; i > 0; i--, tkey++) {
 +		int write_offset, write_len;
  		int offset = tkey->off;
  		int hoffset = 0;
- 		u32 *ptr, hdata;
-@@ -451,12 +459,32 @@ TC_INDIRECT_SCOPE int tcf_pedit_act(struct sk_buff *skb,
+-		u32 *ptr, hdata;
++		u32 *ptr;
+ 		u32 val;
+ 		int rc;
+ 
+@@ -451,15 +445,38 @@ TC_INDIRECT_SCOPE int tcf_pedit_act(struct sk_buff *skb,
  			}
  		}
  
@@ -4532,22 +4522,30 @@ index bc20f08a2789..79921b8d89ba 100644
 +		if (unlikely(check_add_overflow(hoffset, offset,
 +						&write_offset))) {
 +			pr_info_ratelimited("tc action pedit offset overflow\n");
-+			goto bad;
-+		}
-+
-+		if (!offset_valid(skb, write_offset)) {
-+			pr_info_ratelimited("tc action pedit offset %d out of bounds\n",
-+					    write_offset);
  			goto bad;
  		}
  
 -		ptr = skb_header_pointer(skb, hoffset + offset,
+-					 sizeof(hdata), &hdata);
+-		if (!ptr)
++		if (!offset_valid(skb, write_offset)) {
++			pr_info_ratelimited("tc action pedit offset %d out of bounds\n",
++					    write_offset);
+ 			goto bad;
++		}
++
 +		if (write_offset < 0) {
 +			if (skb_cow(skb, -write_offset))
 +				goto bad;
++			if (write_offset + (int)sizeof(*ptr) > 0) {
++				if (skb_ensure_writable(skb,
++							min(skb->len,
++							    write_offset + sizeof(*ptr))))
++					goto bad;
++			}
 +		} else {
 +			if (unlikely(check_add_overflow(write_offset,
-+							(int)sizeof(hdata),
++							(int)sizeof(*ptr),
 +							&write_len)))
 +				goto bad;
 +			if (skb_ensure_writable(skb, min_t(int, skb->len,
@@ -4555,16 +4553,16 @@ index bc20f08a2789..79921b8d89ba 100644
 +				goto bad;
 +		}
 +
-+		ptr = skb_header_pointer(skb, write_offset,
- 					 sizeof(hdata), &hdata);
- 		if (!ptr)
- 			goto bad;
-@@ -475,7 +503,7 @@ TC_INDIRECT_SCOPE int tcf_pedit_act(struct sk_buff *skb,
++		ptr = (u32 *)(skb->data + write_offset);
+ 		/* just do it, baby */
+ 		switch (cmd) {
+ 		case TCA_PEDIT_KEY_EX_CMD_SET:
+@@ -474,8 +491,6 @@ TC_INDIRECT_SCOPE int tcf_pedit_act(struct sk_buff *skb,
+ 		}
  
  		*ptr = ((*ptr & tkey->mask) ^ val);
- 		if (ptr == &hdata)
+-		if (ptr == &hdata)
 -			skb_store_bits(skb, hoffset + offset, ptr, 4);
-+			skb_store_bits(skb, write_offset, ptr, sizeof(hdata));
  	}
  
  	goto done;
