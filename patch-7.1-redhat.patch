@@ -70,8 +70,6 @@
  kernel/rh_messages.c                               | 414 ++++++++++++++++
  kernel/rh_messages.h                               | 334 +++++++++++++
  kernel/rh_waived.c                                 | 147 ++++++
- net/ipv4/esp4.c                                    |   5 +-
- net/ipv6/esp6.c                                    |   5 +-
  net/sched/act_pedit.c                              |  49 +-
  scripts/Makefile.lib                               |   3 +
  scripts/mod/modpost.c                              |   8 +
@@ -82,13 +80,13 @@
  tools/testing/selftests/bpf/DENYLIST.rhel          |  76 +++
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
- 84 files changed, 2938 insertions(+), 264 deletions(-)
+ 82 files changed, 2932 insertions(+), 260 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 4d0f545fb3ec..767989050205 100644
+index 97007f4f69d4..e4c6ab54589f 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -6674,6 +6674,20 @@ Kernel parameters
+@@ -6656,6 +6656,20 @@ Kernel parameters
  		2	The "airplane mode" button toggles between everything
  			blocked and everything unblocked.
  
@@ -109,7 +107,7 @@ index 4d0f545fb3ec..767989050205 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -8064,6 +8078,15 @@ Kernel parameters
+@@ -8046,6 +8060,15 @@ Kernel parameters
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -208,7 +206,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index f056c921ea9c..a8bb12f922aa 100644
+index d8da45199699..6f9a998d4f91 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -356,6 +356,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -4415,52 +4413,6 @@ index 000000000000..20966f7c7277
 +	return 0;
 +}
 +late_initcall(__add_rh_flag);
-diff --git a/net/ipv4/esp4.c b/net/ipv4/esp4.c
-index 6a5febbdbee4..2d7daca8516c 100644
---- a/net/ipv4/esp4.c
-+++ b/net/ipv4/esp4.c
-@@ -410,6 +410,7 @@ int esp_output_head(struct xfrm_state *x, struct sk_buff *skb, struct esp_info *
- 	struct page *page;
- 	struct sk_buff *trailer;
- 	int tailen = esp->tailen;
-+	unsigned int allocsize;
- 
- 	/* this is non-NULL only with TCP/UDP Encapsulation */
- 	if (x->encap) {
-@@ -419,8 +420,8 @@ int esp_output_head(struct xfrm_state *x, struct sk_buff *skb, struct esp_info *
- 			return err;
- 	}
- 
--	if (ALIGN(tailen, L1_CACHE_BYTES) > PAGE_SIZE ||
--	    ALIGN(skb->data_len, L1_CACHE_BYTES) > PAGE_SIZE)
-+	allocsize = ALIGN(skb->data_len + tailen, L1_CACHE_BYTES);
-+	if (allocsize > PAGE_SIZE)
- 		goto cow;
- 
- 	if (!skb_cloned(skb)) {
-diff --git a/net/ipv6/esp6.c b/net/ipv6/esp6.c
-index 9c06c5a1419d..0fad1dc558b8 100644
---- a/net/ipv6/esp6.c
-+++ b/net/ipv6/esp6.c
-@@ -440,6 +440,7 @@ int esp6_output_head(struct xfrm_state *x, struct sk_buff *skb, struct esp_info
- 	struct page *page;
- 	struct sk_buff *trailer;
- 	int tailen = esp->tailen;
-+	unsigned int allocsize;
- 
- 	if (x->encap) {
- 		int err = esp6_output_encap(x, skb, esp);
-@@ -448,8 +449,8 @@ int esp6_output_head(struct xfrm_state *x, struct sk_buff *skb, struct esp_info
- 			return err;
- 	}
- 
--	if (ALIGN(tailen, L1_CACHE_BYTES) > PAGE_SIZE ||
--	    ALIGN(skb->data_len, L1_CACHE_BYTES) > PAGE_SIZE)
-+	allocsize = ALIGN(skb->data_len + tailen, L1_CACHE_BYTES);
-+	if (allocsize > PAGE_SIZE)
- 		goto cow;
- 
- 	if (!skb_cloned(skb)) {
 diff --git a/net/sched/act_pedit.c b/net/sched/act_pedit.c
 index bc20f08a2789..719bee335e1f 100644
 --- a/net/sched/act_pedit.c
