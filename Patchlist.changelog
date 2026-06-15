@@ -1,14 +1,14 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/814173947a6fa4e5822e67449355426bd2bfa520
- 814173947a6fa4e5822e67449355426bd2bfa520 arm64: errata: Mitigate TLBI errata on NVIDIA Olympus CPU
+https://gitlab.com/cki-project/kernel-ark/-/commit/6ad5dcae1470b54bd18c5e635085bd044a7bba56
+ 6ad5dcae1470b54bd18c5e635085bd044a7bba56 arm64: errata: Mitigate TLBI errata on NVIDIA Olympus CPU
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/cfa6d79234afbbdab924698d3e8723bdccab6b2a
- cfa6d79234afbbdab924698d3e8723bdccab6b2a arm64: errata: Mitigate TLBI errata on various Arm CPUs
+https://gitlab.com/cki-project/kernel-ark/-/commit/160720108ae3dab673ab413127b3c8b7072374ae
+ 160720108ae3dab673ab413127b3c8b7072374ae arm64: errata: Mitigate TLBI errata on various Arm CPUs
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/1815e3e63b3b25c704c1fa4cdc5cd21a1e2bf33f
- 1815e3e63b3b25c704c1fa4cdc5cd21a1e2bf33f arm64: cputype: Add C1-Premium definitions
+https://gitlab.com/cki-project/kernel-ark/-/commit/63f3412d0e8d9c55ca8d9264c575bb48055f7f19
+ 63f3412d0e8d9c55ca8d9264c575bb48055f7f19 arm64: cputype: Add C1-Premium definitions
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/e1a3e12e45660af413a1ddd182ee9a76c88240c0
- e1a3e12e45660af413a1ddd182ee9a76c88240c0 arm64: cputype: Add C1-Ultra definitions
+https://gitlab.com/cki-project/kernel-ark/-/commit/e6aa656a7dbbec07818c90191be7f438ae6b3ff3
+ e6aa656a7dbbec07818c90191be7f438ae6b3ff3 arm64: cputype: Add C1-Ultra definitions
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/49dc112a24f8c571d32554e8a1dfdc74c0140b42
  49dc112a24f8c571d32554e8a1dfdc74c0140b42 redhat: rh_flags: mark !CONFIG_RHEL_DIFFERENCES stubs as static inline
