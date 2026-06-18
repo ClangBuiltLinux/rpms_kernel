@@ -1,13 +1,10 @@
  Documentation/admin-guide/kernel-parameters.txt    |  23 +
  Documentation/admin-guide/rh-waived-items.rst      |  29 ++
- Documentation/arch/arm64/silicon-errata.rst        |  44 ++
  Kconfig                                            |   2 +
  Kconfig.redhat                                     |  31 ++
  Makefile                                           |  38 +-
  arch/arm/Kconfig                                   |   4 +-
- arch/arm64/Kconfig                                 |  39 +-
- arch/arm64/include/asm/cputype.h                   |   4 +
- arch/arm64/kernel/cpu_errata.c                     |  33 +-
+ arch/arm64/Kconfig                                 |   2 +-
  arch/arm64/kernel/setup.c                          |  27 +
  arch/s390/include/asm/ipl.h                        |   1 +
  arch/s390/kernel/ipl.c                             |   5 +
@@ -16,8 +13,6 @@
  arch/x86/kernel/setup.c                            | 101 +++-
  crypto/akcipher.c                                  |   3 +-
  crypto/dh.c                                        |  25 +
- crypto/drbg.c                                      |  18 +-
- crypto/rng.c                                       | 155 +++++-
  crypto/seqiv.c                                     |  15 +-
  crypto/sig.c                                       |   3 +-
  crypto/testmgr.c                                   |   6 +-
@@ -44,12 +39,12 @@
  drivers/pci/quirks.c                               |  24 +
  drivers/scsi/hpsa.c                                |   4 +
  drivers/scsi/qla2xxx/qla_os.c                      |   6 +
- drivers/scsi/sd.c                                  |  13 +
+ drivers/scsi/sd.c                                  |  12 +
  drivers/usb/core/hub.c                             |   7 +
  fs/afs/main.c                                      |   3 +
  fs/erofs/super.c                                   |   9 +
  fs/ext4/super.c                                    |  11 +
- include/linux/crypto.h                             |   3 +
+ include/linux/crypto.h                             |   2 +
  include/linux/efi.h                                |  22 +-
  include/linux/kernel.h                             |  28 ++
  include/linux/lsm_hook_defs.h                      |   1 +
@@ -82,13 +77,13 @@
  tools/testing/selftests/bpf/DENYLIST.rhel          |  76 +++
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
- 84 files changed, 3016 insertions(+), 245 deletions(-)
+ 79 files changed, 2744 insertions(+), 224 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 97007f4f69d4..e4c6ab54589f 100644
+index 5a05b48d1684..bf841c53f9ad 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -6656,6 +6656,20 @@ Kernel parameters
+@@ -6638,6 +6638,20 @@ Kernel parameters
  		2	The "airplane mode" button toggles between everything
  			blocked and everything unblocked.
  
@@ -109,7 +104,7 @@ index 97007f4f69d4..e4c6ab54589f 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -8046,6 +8060,15 @@ Kernel parameters
+@@ -8038,6 +8052,15 @@ Kernel parameters
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -160,134 +155,6 @@ index 000000000000..7471c891419c
 +List of Red Hat Waived Items
 +============================
 +
-diff --git a/Documentation/arch/arm64/silicon-errata.rst b/Documentation/arch/arm64/silicon-errata.rst
-index 211119ce7adc..ad09bbb10da8 100644
---- a/Documentation/arch/arm64/silicon-errata.rst
-+++ b/Documentation/arch/arm64/silicon-errata.rst
-@@ -128,16 +128,28 @@ stable kernels.
- +----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Cortex-A76      | #3324349        | ARM64_ERRATUM_3194386       |
- +----------------+-----------------+-----------------+-----------------------------+
-+| ARM            | Cortex-A76      | #4193800        | ARM64_ERRATUM_4118414       |
-++----------------+-----------------+-----------------+-----------------------------+
-+| ARM            | Cortex-A76AE    | #4193801        | ARM64_ERRATUM_4118414       |
-++----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Cortex-A77      | #1491015        | N/A                         |
- +----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Cortex-A77      | #1508412        | ARM64_ERRATUM_1508412       |
- +----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Cortex-A77      | #3324348        | ARM64_ERRATUM_3194386       |
- +----------------+-----------------+-----------------+-----------------------------+
-+| ARM            | Cortex-A77      | #4193798        | ARM64_ERRATUM_4118414       |
-++----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Cortex-A78      | #3324344        | ARM64_ERRATUM_3194386       |
- +----------------+-----------------+-----------------+-----------------------------+
-+| ARM            | Cortex-A78      | #4193791        | ARM64_ERRATUM_4118414       |
-++----------------+-----------------+-----------------+-----------------------------+
-+| ARM            | Cortex-A78AE    | #4193793        | ARM64_ERRATUM_4118414       |
-++----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Cortex-A78C     | #3324346,3324347| ARM64_ERRATUM_3194386       |
- +----------------+-----------------+-----------------+-----------------------------+
-+| ARM            | Cortex-A78C     | #4193794        | ARM64_ERRATUM_4118414       |
-++----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Cortex-A710     | #2119858        | ARM64_ERRATUM_2119858       |
- +----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Cortex-A710     | #2054223        | ARM64_ERRATUM_2054223       |
-@@ -146,6 +158,8 @@ stable kernels.
- +----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Cortex-A710     | #3324338        | ARM64_ERRATUM_3194386       |
- +----------------+-----------------+-----------------+-----------------------------+
-+| ARM            | Cortex-A710     | #4193788        | ARM64_ERRATUM_4118414       |
-++----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Cortex-A715     | #2645198        | ARM64_ERRATUM_2645198       |
- +----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Cortex-A715     | #3456084        | ARM64_ERRATUM_3194386       |
-@@ -158,20 +172,32 @@ stable kernels.
- +----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Cortex-X1       | #3324344        | ARM64_ERRATUM_3194386       |
- +----------------+-----------------+-----------------+-----------------------------+
-+| ARM            | Cortex-X1       | #4193791        | ARM64_ERRATUM_4118414       |
-++----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Cortex-X1C      | #3324346        | ARM64_ERRATUM_3194386       |
- +----------------+-----------------+-----------------+-----------------------------+
-+| ARM            | Cortex-X1C      | #4193792        | ARM64_ERRATUM_4118414       |
-++----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Cortex-X2       | #2119858        | ARM64_ERRATUM_2119858       |
- +----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Cortex-X2       | #2224489        | ARM64_ERRATUM_2224489       |
- +----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Cortex-X2       | #3324338        | ARM64_ERRATUM_3194386       |
- +----------------+-----------------+-----------------+-----------------------------+
-+| ARM            | Cortex-X2       | #4193788        | ARM64_ERRATUM_4118414       |
-++----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Cortex-X3       | #3324335        | ARM64_ERRATUM_3194386       |
- +----------------+-----------------+-----------------+-----------------------------+
-+| ARM            | Cortex-X3       | #4193786        | ARM64_ERRATUM_4118414       |
-++----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Cortex-X4       | #3194386        | ARM64_ERRATUM_3194386       |
- +----------------+-----------------+-----------------+-----------------------------+
-+| ARM            | Cortex-X4       | #4118414        | ARM64_ERRATUM_4118414       |
-++----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Cortex-X925     | #3324334        | ARM64_ERRATUM_3194386       |
- +----------------+-----------------+-----------------+-----------------------------+
-+| ARM            | Cortex-X925     | #4193781        | ARM64_ERRATUM_4118414       |
-++----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Neoverse-N1     | #1188873,1418040| ARM64_ERRATUM_1418040       |
- +----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Neoverse-N1     | #1349291        | N/A                         |
-@@ -182,6 +208,8 @@ stable kernels.
- +----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Neoverse-N1     | #3324349        | ARM64_ERRATUM_3194386       |
- +----------------+-----------------+-----------------+-----------------------------+
-+| ARM            | Neoverse-N1     | #4193800        | ARM64_ERRATUM_4118414       |
-++----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Neoverse-N2     | #2139208        | ARM64_ERRATUM_2139208       |
- +----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Neoverse-N2     | #2067961        | ARM64_ERRATUM_2067961       |
-@@ -190,20 +218,34 @@ stable kernels.
- +----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Neoverse-N2     | #3324339        | ARM64_ERRATUM_3194386       |
- +----------------+-----------------+-----------------+-----------------------------+
-+| ARM            | Neoverse-N2     | #4193789        | ARM64_ERRATUM_4118414       |
-++----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Neoverse-N3     | #3456111        | ARM64_ERRATUM_3194386       |
- +----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Neoverse-V1     | #1619801        | N/A                         |
- +----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Neoverse-V1     | #3324341        | ARM64_ERRATUM_3194386       |
- +----------------+-----------------+-----------------+-----------------------------+
-+| ARM            | Neoverse-V1     | #4193790        | ARM64_ERRATUM_4118414       |
-++----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Neoverse-V2     | #3324336        | ARM64_ERRATUM_3194386       |
- +----------------+-----------------+-----------------+-----------------------------+
-+| ARM            | Neoverse-V2     | #4193787        | ARM64_ERRATUM_4118414       |
-++----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Neoverse-V3     | #3312417        | ARM64_ERRATUM_3194386       |
- +----------------+-----------------+-----------------+-----------------------------+
-+| ARM            | Neoverse-V3     | #4193784        | ARM64_ERRATUM_4118414       |
-++----------------+-----------------+-----------------+-----------------------------+
- | ARM            | Neoverse-V3AE   | #3312417        | ARM64_ERRATUM_3194386       |
- +----------------+-----------------+-----------------+-----------------------------+
-+| ARM            | Neoverse-V3AE   | #4193784        | ARM64_ERRATUM_4118414       |
-++----------------+-----------------+-----------------+-----------------------------+
-+| ARM            | C1-Premium      | #4193780        | ARM64_ERRATUM_4118414       |
-++----------------+-----------------+-----------------+-----------------------------+
- | ARM            | C1-Pro          | #4193714        | ARM64_ERRATUM_4193714       |
- +----------------+-----------------+-----------------+-----------------------------+
-+| ARM            | C1-Ultra        | #4193780        | ARM64_ERRATUM_4118414       |
-++----------------+-----------------+-----------------+-----------------------------+
- | ARM            | MMU-500         | #841119,826419  | ARM_SMMU_MMU_500_CPRE_ERRATA|
- |                |                 | #562869,1047329 |                             |
- +----------------+-----------------+-----------------+-----------------------------+
-@@ -256,6 +298,8 @@ stable kernels.
- +----------------+-----------------+-----------------+-----------------------------+
- | NVIDIA         | Carmel Core     | N/A             | NVIDIA_CARMEL_CNP_ERRATUM   |
- +----------------+-----------------+-----------------+-----------------------------+
-+| NVIDIA         | Olympus core    | T410-OLY-1029   | ARM64_ERRATUM_4118414       |
-++----------------+-----------------+-----------------+-----------------------------+
- | NVIDIA         | T241 GICv3/4.x  | T241-FABRIC-4   | N/A                         |
- +----------------+-----------------+-----------------+-----------------------------+
- | NVIDIA         | T241 MPAM       | T241-MPAM-1     | N/A                         |
 diff --git a/Kconfig b/Kconfig
 index 307e581144de..11e93e479ce4 100644
 --- a/Kconfig
@@ -336,10 +203,10 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 408f070d49b8..f2c5730f87d8 100644
+index d1c595db55c9..254a65e68975 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -356,6 +356,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
+@@ -358,6 +358,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
      endif
  endif
  
@@ -357,7 +224,7 @@ index 408f070d49b8..f2c5730f87d8 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1400,6 +1411,8 @@ uapi-asm-generic:
+@@ -1408,6 +1419,8 @@ uapi-asm-generic:
  # Generate some files
  # ---------------------------------------------------------------------------
  
@@ -366,7 +233,7 @@ index 408f070d49b8..f2c5730f87d8 100644
  # KERNELRELEASE can change from a few different places, meaning version.h
  # needs to be updated, so this check is forced on all builds
  
-@@ -1424,7 +1437,13 @@ define filechk_version.h
+@@ -1432,7 +1445,13 @@ define filechk_version.h
  	((c) > 255 ? 255 : (c)))';                                       \
  	echo \#define LINUX_VERSION_MAJOR $(VERSION);                    \
  	echo \#define LINUX_VERSION_PATCHLEVEL $(PATCHLEVEL);            \
@@ -381,7 +248,7 @@ index 408f070d49b8..f2c5730f87d8 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -2065,6 +2084,23 @@ endif
+@@ -2083,6 +2102,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -406,10 +273,10 @@ index 408f070d49b8..f2c5730f87d8 100644
  	@:
  
 diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index 73e6647bea46..32b90d43664c 100644
+index 9187240a02db..46d1258700af 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
-@@ -1214,9 +1214,9 @@ config HIGHMEM
+@@ -1216,9 +1216,9 @@ config HIGHMEM
  	  If unsure, say n.
  
  config HIGHPTE
@@ -422,54 +289,10 @@ index 73e6647bea46..32b90d43664c 100644
  	  The VM uses one page of physical memory for each page table.
  	  For systems with a lot of processes, this can use a lot of
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index fe60738e5943..29f28155a033 100644
+index b3afe0688919..d23a728aac03 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -1154,6 +1154,43 @@ config ARM64_ERRATUM_4193714
- 
- 	  If unsure, say Y.
- 
-+config ARM64_ERRATUM_4118414
-+	bool "Cortex-*/Neoverse-*/C1-*/Olympus: Completion of affected memory accesses might not be guaranteed by completion of a TLBI"
-+	default y
-+	select ARM64_WORKAROUND_REPEAT_TLBI
-+	help
-+	  This option adds a workaround for the following errata:
-+
-+	  * ARM C1-Premium erratum 4193780
-+	  * ARM C1-Ultra erratum 4193780
-+	  * ARM Cortex-A76 erratum 4193800
-+	  * ARM Cortex-A76AE erratum 4193801
-+	  * ARM Cortex-A77 erratum 4193798
-+	  * ARM Cortex-A78 erratum 4193791
-+	  * ARM Cortex-A78AE erratum 4193793
-+	  * ARM Cortex-A78C erratum 4193794
-+	  * ARM Cortex-A710 erratum 4193788
-+	  * ARM Cortex-X1 erratum 4193791
-+	  * ARM Cortex-X1C erratum 4193792
-+	  * ARM Cortex-X2 erratum 4193788
-+	  * ARM Cortex-X3 erratum 4193786
-+	  * ARM Cortex-X4 erratum 4118414
-+	  * ARM Cortex-X925 erratum 4193781
-+	  * ARM Neoverse-N1 erratum 4193800
-+	  * ARM Neoverse-N2 erratum 4193789
-+	  * ARM Neoverse-V1 erratum 4193790
-+	  * ARM Neoverse-V2 erratum 4193787
-+	  * ARM Neoverse-V3 erratum 4193784
-+	  * ARM Neoverse-V3AE erratum 4193784
-+	  * NVIDIA Olympus erratum T410-OLY-1029
-+
-+	  On affected cores, some memory accesses might not be completed by
-+	  broadcast TLB invalidation.
-+
-+	  This issue is also known as CVE-2025-10263.
-+
-+	  If unsure, say Y.
-+
- config CAVIUM_ERRATUM_22375
- 	bool "Cavium erratum 22375, 24313"
- 	default y
-@@ -1432,7 +1469,7 @@ endchoice
+@@ -1489,7 +1489,7 @@ endchoice
  
  config ARM64_FORCE_52BIT
  	bool "Force 52-bit virtual addresses for userspace"
@@ -478,83 +301,6 @@ index fe60738e5943..29f28155a033 100644
  	help
  	  For systems with 52-bit userspace VAs enabled, the kernel will attempt
  	  to maintain compatibility with older software by providing 48-bit VAs
-diff --git a/arch/arm64/include/asm/cputype.h b/arch/arm64/include/asm/cputype.h
-index 7b518e81dd15..1b9f0cda1336 100644
---- a/arch/arm64/include/asm/cputype.h
-+++ b/arch/arm64/include/asm/cputype.h
-@@ -97,8 +97,10 @@
- #define ARM_CPU_PART_CORTEX_X925	0xD85
- #define ARM_CPU_PART_CORTEX_A725	0xD87
- #define ARM_CPU_PART_CORTEX_A720AE	0xD89
-+#define ARM_CPU_PART_C1_ULTRA		0xD8C
- #define ARM_CPU_PART_NEOVERSE_N3	0xD8E
- #define ARM_CPU_PART_C1_PRO		0xD8B
-+#define ARM_CPU_PART_C1_PREMIUM		0xD90
- 
- #define APM_CPU_PART_XGENE		0x000
- #define APM_CPU_VAR_POTENZA		0x00
-@@ -189,8 +191,10 @@
- #define MIDR_CORTEX_X925 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_X925)
- #define MIDR_CORTEX_A725 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A725)
- #define MIDR_CORTEX_A720AE MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A720AE)
-+#define MIDR_C1_ULTRA MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_C1_ULTRA)
- #define MIDR_NEOVERSE_N3 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_NEOVERSE_N3)
- #define MIDR_C1_PRO MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_C1_PRO)
-+#define MIDR_C1_PREMIUM MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_C1_PREMIUM)
- #define MIDR_THUNDERX	MIDR_CPU_MODEL(ARM_CPU_IMP_CAVIUM, CAVIUM_CPU_PART_THUNDERX)
- #define MIDR_THUNDERX_81XX MIDR_CPU_MODEL(ARM_CPU_IMP_CAVIUM, CAVIUM_CPU_PART_THUNDERX_81XX)
- #define MIDR_THUNDERX_83XX MIDR_CPU_MODEL(ARM_CPU_IMP_CAVIUM, CAVIUM_CPU_PART_THUNDERX_83XX)
-diff --git a/arch/arm64/kernel/cpu_errata.c b/arch/arm64/kernel/cpu_errata.c
-index 5377e4c2eba2..d597896b0f7f 100644
---- a/arch/arm64/kernel/cpu_errata.c
-+++ b/arch/arm64/kernel/cpu_errata.c
-@@ -340,7 +340,36 @@ static const struct arm64_cpu_capabilities arm64_repeat_tlbi_list[] = {
- 		ERRATA_MIDR_RANGE(MIDR_CORTEX_A510, 0, 0, 1, 1),
- 	},
- #endif
--	{},
-+#ifdef CONFIG_ARM64_ERRATUM_4118414
-+	{
-+		ERRATA_MIDR_RANGE_LIST(((const struct midr_range[]) {
-+			MIDR_ALL_VERSIONS(MIDR_C1_PREMIUM),
-+			MIDR_ALL_VERSIONS(MIDR_C1_ULTRA),
-+			MIDR_ALL_VERSIONS(MIDR_CORTEX_A76),
-+			MIDR_ALL_VERSIONS(MIDR_CORTEX_A76AE),
-+			MIDR_ALL_VERSIONS(MIDR_CORTEX_A77),
-+			MIDR_ALL_VERSIONS(MIDR_CORTEX_A78),
-+			MIDR_ALL_VERSIONS(MIDR_CORTEX_A78AE),
-+			MIDR_ALL_VERSIONS(MIDR_CORTEX_A78C),
-+			MIDR_ALL_VERSIONS(MIDR_CORTEX_A710),
-+			MIDR_ALL_VERSIONS(MIDR_CORTEX_X1),
-+			MIDR_ALL_VERSIONS(MIDR_CORTEX_X1C),
-+			MIDR_ALL_VERSIONS(MIDR_CORTEX_X2),
-+			MIDR_ALL_VERSIONS(MIDR_CORTEX_X3),
-+			MIDR_ALL_VERSIONS(MIDR_CORTEX_X4),
-+			MIDR_ALL_VERSIONS(MIDR_CORTEX_X925),
-+			MIDR_ALL_VERSIONS(MIDR_NEOVERSE_N1),
-+			MIDR_ALL_VERSIONS(MIDR_NEOVERSE_N2),
-+			MIDR_ALL_VERSIONS(MIDR_NEOVERSE_V1),
-+			MIDR_ALL_VERSIONS(MIDR_NEOVERSE_V2),
-+			MIDR_ALL_VERSIONS(MIDR_NEOVERSE_V3),
-+			MIDR_ALL_VERSIONS(MIDR_NEOVERSE_V3AE),
-+			MIDR_ALL_VERSIONS(MIDR_NVIDIA_OLYMPUS),
-+			{}
-+		})),
-+	},
-+#endif
-+	{}
- };
- #endif
- 
-@@ -693,7 +722,7 @@ const struct arm64_cpu_capabilities arm64_errata[] = {
- #endif
- #ifdef CONFIG_ARM64_WORKAROUND_REPEAT_TLBI
- 	{
--		.desc = "Qualcomm erratum 1009, or ARM erratum 1286807, 2441009",
-+		.desc = "Broken broadcast TLBI completion",
- 		.capability = ARM64_WORKAROUND_REPEAT_TLBI,
- 		.type = ARM64_CPUCAP_LOCAL_CPU_ERRATUM,
- 		.matches = cpucap_multi_entry_cap_matches,
 diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
 index 23c05dc7a8f2..d7b7b2f39e16 100644
 --- a/arch/arm64/kernel/setup.c
@@ -655,10 +401,10 @@ index b60284328fe3..e4d37b08ca29 100644
  	/* boot_command_line has been already set up in early.c */
  	*cmdline_p = boot_command_line;
 diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
-index a4268c47f2bc..94127a3cd300 100644
+index a3df21d26460..a6e1f67a68a3 100644
 --- a/arch/x86/kernel/cpu/common.c
 +++ b/arch/x86/kernel/cpu/common.c
-@@ -1802,6 +1802,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
+@@ -1797,6 +1797,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
  		get_cpu_vendor(c);
  		intel_unlock_cpuid_leafs(c);
  		get_cpu_cap(c);
@@ -814,10 +560,10 @@ index 46882ce79c3a..49173ab3fcf7 100644
  }
  
 diff --git a/crypto/akcipher.c b/crypto/akcipher.c
-index dfe87b3ce183..cd1302ca3b36 100644
+index 630bb19738be..8da7eedce31e 100644
 --- a/crypto/akcipher.c
 +++ b/crypto/akcipher.c
-@@ -140,8 +140,7 @@ int crypto_register_akcipher(struct akcipher_alg *alg)
+@@ -138,8 +138,7 @@ int crypto_register_akcipher(struct akcipher_alg *alg)
  
  	if (!alg->encrypt)
  		alg->encrypt = akcipher_default_op;
@@ -867,286 +613,6 @@ index 7ad4768716c8..01ccc24db074 100644
  		}
  	}
  
-diff --git a/crypto/drbg.c b/crypto/drbg.c
-index 9204e6edb426..5c10baf70071 100644
---- a/crypto/drbg.c
-+++ b/crypto/drbg.c
-@@ -1270,13 +1270,14 @@ static int drbg_generate(struct drbg_state *drbg,
-  * Wrapper around drbg_generate which can pull arbitrary long strings
-  * from the DRBG without hitting the maximum request limitation.
-  *
-- * Parameters: see drbg_generate
-+ * Parameters: see drbg_generate, except @reseed, which triggers reseeding
-  * Return codes: see drbg_generate -- if one drbg_generate request fails,
-  *		 the entire drbg_generate_long request fails
-  */
- static int drbg_generate_long(struct drbg_state *drbg,
- 			      unsigned char *buf, unsigned int buflen,
--			      struct drbg_string *addtl)
-+			      struct drbg_string *addtl,
-+			      bool reseed)
- {
- 	unsigned int len = 0;
- 	unsigned int slice = 0;
-@@ -1286,6 +1287,8 @@ static int drbg_generate_long(struct drbg_state *drbg,
- 		slice = ((buflen - len) / drbg_max_request_bytes(drbg));
- 		chunk = slice ? drbg_max_request_bytes(drbg) : (buflen - len);
- 		mutex_lock(&drbg->drbg_mutex);
-+		if (reseed)
-+			drbg->seeded = DRBG_SEED_STATE_UNSEEDED;
- 		err = drbg_generate(drbg, buf + len, chunk, addtl);
- 		mutex_unlock(&drbg->drbg_mutex);
- 		if (0 > err)
-@@ -1687,6 +1690,7 @@ static int drbg_kcapi_random(struct crypto_rng *tfm,
- 	struct drbg_state *drbg = crypto_rng_ctx(tfm);
- 	struct drbg_string *addtl = NULL;
- 	struct drbg_string string;
-+	int err;
- 
- 	if (slen) {
- 		/* linked list variable is now local to allow modification */
-@@ -1694,7 +1698,15 @@ static int drbg_kcapi_random(struct crypto_rng *tfm,
- 		addtl = &string;
- 	}
- 
--	return drbg_generate_long(drbg, dst, dlen, addtl);
-+	err = drbg_generate_long(drbg, dst, dlen, addtl,
-+				 (crypto_tfm_get_flags(crypto_rng_tfm(tfm)) &
-+				  CRYPTO_TFM_REQ_NEED_RESEED) ==
-+				 CRYPTO_TFM_REQ_NEED_RESEED);
-+
-+	crypto_tfm_clear_flags(crypto_rng_tfm(tfm),
-+			       CRYPTO_TFM_REQ_NEED_RESEED);
-+
-+	return err;
- }
- 
- /*
-diff --git a/crypto/rng.c b/crypto/rng.c
-index 1d4b9177bad4..d9ca86086946 100644
---- a/crypto/rng.c
-+++ b/crypto/rng.c
-@@ -12,10 +12,13 @@
- #include <linux/atomic.h>
- #include <linux/cryptouser.h>
- #include <linux/err.h>
-+#include <linux/fips.h>
- #include <linux/kernel.h>
- #include <linux/module.h>
- #include <linux/mutex.h>
- #include <linux/random.h>
-+#include <linux/sched.h>
-+#include <linux/sched/signal.h>
- #include <linux/seq_file.h>
- #include <linux/slab.h>
- #include <linux/string.h>
-@@ -23,7 +26,9 @@
- 
- #include "internal.h"
- 
--static DEFINE_MUTEX(crypto_default_rng_lock);
-+static ____cacheline_aligned_in_smp DEFINE_MUTEX(crypto_reseed_rng_lock);
-+static struct crypto_rng *crypto_reseed_rng;
-+static ____cacheline_aligned_in_smp DEFINE_MUTEX(crypto_default_rng_lock);
- static struct crypto_rng *crypto_default_rng;
- static int crypto_default_rng_refcnt;
- 
-@@ -105,31 +110,37 @@ struct crypto_rng *crypto_alloc_rng(const char *alg_name, u32 type, u32 mask)
- }
- EXPORT_SYMBOL_GPL(crypto_alloc_rng);
- 
--static int crypto_get_default_rng(void)
-+static int crypto_get_rng(struct crypto_rng **rngp)
- {
- 	struct crypto_rng *rng;
- 	int err;
- 
--	mutex_lock(&crypto_default_rng_lock);
--	if (!crypto_default_rng) {
-+	if (!*rngp) {
- 		rng = crypto_alloc_rng("stdrng", 0, 0);
- 		err = PTR_ERR(rng);
- 		if (IS_ERR(rng))
--			goto unlock;
-+			return err;
- 
- 		err = crypto_rng_reset(rng, NULL, crypto_rng_seedsize(rng));
- 		if (err) {
- 			crypto_free_rng(rng);
--			goto unlock;
-+			return err;
- 		}
- 
--		crypto_default_rng = rng;
-+		*rngp = rng;
- 	}
- 
--	crypto_default_rng_refcnt++;
--	err = 0;
-+	return 0;
-+}
- 
--unlock:
-+static int crypto_get_default_rng(void)
-+{
-+	int err;
-+
-+	mutex_lock(&crypto_default_rng_lock);
-+	err = crypto_get_rng(&crypto_default_rng);
-+	if (!err)
-+		crypto_default_rng_refcnt++;
- 	mutex_unlock(&crypto_default_rng_lock);
- 
- 	return err;
-@@ -157,24 +168,33 @@ int __crypto_stdrng_get_bytes(void *buf, unsigned int len)
- EXPORT_SYMBOL_GPL(__crypto_stdrng_get_bytes);
- 
- #if defined(CONFIG_CRYPTO_RNG) || defined(CONFIG_CRYPTO_RNG_MODULE)
--int crypto_del_default_rng(void)
-+static int crypto_del_rng(struct crypto_rng **rngp, int *refcntp,
-+		      struct mutex *lock)
- {
- 	int err = -EBUSY;
- 
--	mutex_lock(&crypto_default_rng_lock);
--	if (crypto_default_rng_refcnt)
-+	mutex_lock(lock);
-+	if (refcntp && *refcntp)
- 		goto out;
- 
--	crypto_free_rng(crypto_default_rng);
--	crypto_default_rng = NULL;
-+	crypto_free_rng(*rngp);
-+	*rngp = NULL;
- 
- 	err = 0;
- 
- out:
--	mutex_unlock(&crypto_default_rng_lock);
-+	mutex_unlock(lock);
- 
- 	return err;
- }
-+
-+int crypto_del_default_rng(void)
-+{
-+	return crypto_del_rng(&crypto_default_rng, &crypto_default_rng_refcnt,
-+			      &crypto_default_rng_lock) ?:
-+	       crypto_del_rng(&crypto_reseed_rng, NULL,
-+			      &crypto_reseed_rng_lock);
-+}
- EXPORT_SYMBOL_GPL(crypto_del_default_rng);
- #endif
- 
-@@ -232,5 +252,108 @@ void crypto_unregister_rngs(struct rng_alg *algs, int count)
- }
- EXPORT_SYMBOL_GPL(crypto_unregister_rngs);
- 
-+static ssize_t crypto_devrandom_read_iter(struct iov_iter *iter, bool reseed)
-+{
-+	struct crypto_rng *rng;
-+	u8 tmp[256];
-+	ssize_t ret;
-+
-+	if (unlikely(!iov_iter_count(iter)))
-+		return 0;
-+
-+	if (reseed) {
-+		u32 flags = 0;
-+
-+		/* If reseeding is requested, acquire a lock on
-+		 * crypto_reseed_rng so it is not swapped out until
-+		 * the initial random bytes are generated.
-+		 *
-+		 * The algorithm implementation is also protected with
-+		 * a separate mutex (drbg->drbg_mutex) around the
-+		 * reseed-and-generate operation.
-+		 */
-+		mutex_lock(&crypto_reseed_rng_lock);
-+
-+		/* If crypto_default_rng is not set, it will be seeded
-+		 * at creation in __crypto_get_default_rng and thus no
-+		 * reseeding is needed.
-+		 */
-+		if (crypto_reseed_rng)
-+			flags |= CRYPTO_TFM_REQ_NEED_RESEED;
-+
-+		ret = crypto_get_rng(&crypto_reseed_rng);
-+		if (ret) {
-+			mutex_unlock(&crypto_reseed_rng_lock);
-+			return ret;
-+		}
-+
-+		rng = crypto_reseed_rng;
-+		crypto_tfm_set_flags(crypto_rng_tfm(rng), flags);
-+	} else {
-+		ret = crypto_get_default_rng();
-+		if (ret)
-+			return ret;
-+		rng = crypto_default_rng;
-+	}
-+
-+	for (;;) {
-+		size_t i, copied;
-+		int err;
-+
-+		i = min_t(size_t, iov_iter_count(iter), sizeof(tmp));
-+		err = crypto_rng_get_bytes(rng, tmp, i);
-+		if (err) {
-+			ret = ret ?: err;
-+			break;
-+		}
-+
-+		copied = copy_to_iter(tmp, i, iter);
-+		ret += copied;
-+		if (!iov_iter_count(iter) || copied != i)
-+			break;
-+
-+		BUILD_BUG_ON(PAGE_SIZE % sizeof(tmp) != 0);
-+		if (ret % PAGE_SIZE == 0) {
-+			if (signal_pending(current))
-+				break;
-+			cond_resched();
-+		}
-+	}
-+
-+	if (reseed)
-+		mutex_unlock(&crypto_reseed_rng_lock);
-+	else
-+		crypto_put_default_rng();
-+	memzero_explicit(tmp, sizeof(tmp));
-+	return ret ? ret : -EFAULT;
-+}
-+
-+static const struct random_extrng crypto_devrandom_rng = {
-+	.extrng_read_iter = crypto_devrandom_read_iter,
-+	.owner = THIS_MODULE,
-+};
-+
-+static int __init crypto_rng_init(void)
-+{
-+	int err;
-+
-+	if (fips_enabled) {
-+		err = crypto_get_default_rng();
-+		if (err)
-+			return err;
-+		crypto_put_default_rng();
-+		random_register_extrng(&crypto_devrandom_rng);
-+	}
-+	return 0;
-+}
-+
-+static void __exit crypto_rng_exit(void)
-+{
-+	random_unregister_extrng();
-+}
-+
-+late_initcall(crypto_rng_init);
-+module_exit(crypto_rng_exit);
-+
- MODULE_LICENSE("GPL");
- MODULE_DESCRIPTION("Random Number Generator");
 diff --git a/crypto/seqiv.c b/crypto/seqiv.c
 index 678bb4145d78..fcc059e7d3db 100644
 --- a/crypto/seqiv.c
@@ -1181,7 +647,7 @@ index 678bb4145d78..fcc059e7d3db 100644
  
  	inst->alg.base.cra_ctxsize = sizeof(struct aead_geniv_ctx);
 diff --git a/crypto/sig.c b/crypto/sig.c
-index beba745b6405..fd41f6d3abf9 100644
+index 7d2048da5c3a..6b4e2163fcc5 100644
 --- a/crypto/sig.c
 +++ b/crypto/sig.c
 @@ -112,8 +112,7 @@ static int sig_prepare_alg(struct sig_alg *alg)
@@ -1195,10 +661,10 @@ index beba745b6405..fd41f6d3abf9 100644
  		alg->verify = sig_default_verify;
  	if (!alg->set_priv_key)
 diff --git a/crypto/testmgr.c b/crypto/testmgr.c
-index 4d86efae65b2..31c6372c50dd 100644
+index 4958211fbfa9..ee6d34885696 100644
 --- a/crypto/testmgr.c
 +++ b/crypto/testmgr.c
-@@ -3843,7 +3843,7 @@ static int test_akcipher_one(struct crypto_akcipher *tfm,
+@@ -3831,7 +3831,7 @@ static int test_akcipher_one(struct crypto_akcipher *tfm,
  	 * Don't invoke decrypt test which requires a private key
  	 * for vectors with only a public key.
  	 */
@@ -1207,7 +673,7 @@ index 4d86efae65b2..31c6372c50dd 100644
  		err = 0;
  		goto free_all;
  	}
-@@ -3979,7 +3979,7 @@ static int test_sig_one(struct crypto_sig *tfm, const struct sig_testvec *vecs)
+@@ -3967,7 +3967,7 @@ static int test_sig_one(struct crypto_sig *tfm, const struct sig_testvec *vecs)
  	 * Don't invoke sign test (which requires a private key)
  	 * for vectors with only a public key.
  	 */
@@ -1216,7 +682,7 @@ index 4d86efae65b2..31c6372c50dd 100644
  		return 0;
  
  	sig_size = crypto_sig_maxsize(tfm);
-@@ -4909,14 +4909,12 @@ static const struct alg_test_desc alg_test_descs[] = {
+@@ -4790,14 +4790,12 @@ static const struct alg_test_desc alg_test_descs[] = {
  	}, {
  		.alg = "ecdh-nist-p256",
  		.test = alg_test_kpp,
@@ -1294,10 +760,10 @@ index d1595156c86a..9485212f1a6d 100644
  	return ctx.rc;
  }
 diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index 530547cda8b2..dc046780c74d 100644
+index 9a7ac2eb9ce0..6556c3d7b269 100644
 --- a/drivers/acpi/scan.c
 +++ b/drivers/acpi/scan.c
-@@ -1792,6 +1792,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
+@@ -1794,6 +1794,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
  	if (!acpi_match_device_ids(device, ignore_serial_bus_ids))
  		return false;
  
@@ -1627,7 +1093,7 @@ index 8efbcf699e4f..96d5a1ca981d 100644
  obj-$(CONFIG_EFI_RCI2_TABLE)		+= rci2-table.o
  obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
 diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 318d1cc9a066..eb41434d4f5e 100644
+index 0327a39d31fa..5b5332b4de78 100644
 --- a/drivers/firmware/efi/efi.c
 +++ b/drivers/firmware/efi/efi.c
 @@ -33,6 +33,7 @@
@@ -1638,7 +1104,7 @@ index 318d1cc9a066..eb41434d4f5e 100644
  
  #include <asm/early_ioremap.h>
  
-@@ -1018,40 +1019,101 @@ int efi_mem_type(unsigned long phys_addr)
+@@ -1017,40 +1018,101 @@ int efi_mem_type(unsigned long phys_addr)
  	return md.type;
  }
  
@@ -2213,7 +1679,7 @@ index ccd9338a44db..5c54e522e8a4 100644
  	if (data->f01_container->dev.driver) {
  		/* Driver already bound, so enable ATTN now. */
 diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
-index d1a9e713d3a0..940458370730 100644
+index e8f13dcebbde..dd7014ca962c 100644
 --- a/drivers/iommu/iommu.c
 +++ b/drivers/iommu/iommu.c
 @@ -8,6 +8,7 @@
@@ -2224,7 +1690,7 @@ index d1a9e713d3a0..940458370730 100644
  #include <linux/kernel.h>
  #include <linux/bits.h>
  #include <linux/bug.h>
-@@ -3136,6 +3137,27 @@ int iommu_fwspec_add_ids(struct device *dev, const u32 *ids, int num_ids)
+@@ -3135,6 +3136,27 @@ int iommu_fwspec_add_ids(struct device *dev, const u32 *ids, int num_ids)
  }
  EXPORT_SYMBOL_GPL(iommu_fwspec_add_ids);
  
@@ -2350,7 +1816,7 @@ index e3f59001785a..58b211d66fd9 100644
  		return rc;
  	if (rc < 0) {
 diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
-index caaed1a01dc0..ec7b94de5515 100644
+index c0242f3e9f06..626b0a204186 100644
 --- a/drivers/pci/quirks.c
 +++ b/drivers/pci/quirks.c
 @@ -4506,6 +4506,30 @@ static void quirk_aspeed_pci_bridge_no_alias(struct pci_dev *pdev)
@@ -2443,13 +1909,13 @@ index 72b1c28e4dae..2226c9dffa94 100644
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2271) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2261) },
 diff --git a/drivers/scsi/sd.c b/drivers/scsi/sd.c
-index 599e75f33334..c0a4b46dbf6f 100644
+index 599e75f33334..ec52c3a4fa14 100644
 --- a/drivers/scsi/sd.c
 +++ b/drivers/scsi/sd.c
-@@ -119,6 +119,14 @@ static const char *sd_cache_types[] = {
- 	"write back, no read (daft)"
- };
- 
+@@ -145,6 +145,13 @@ static void sd_large_pool_destroy(void)
+ 	}
+ 	mutex_unlock(&sd_mutex_lock);
+ }
 +#ifdef CONFIG_RHEL_DIFFERENCES
 +static char sd_probe_type[6] = "async";
 +module_param_string(probe, sd_probe_type, sizeof(sd_probe_type),
@@ -2457,11 +1923,10 @@ index 599e75f33334..c0a4b46dbf6f 100644
 +MODULE_PARM_DESC(probe, "async or sync. Setting to 'sync' disables asynchronous "
 +		 "device number assignments (sda, sdb, ...).");
 +#endif
-+
- static int sd_large_pool_create(void)
+ 
+ static void sd_disable_discard(struct scsi_disk *sdkp)
  {
- 	mutex_lock(&sd_mutex_lock);
-@@ -4460,6 +4468,11 @@ static int __init init_sd(void)
+@@ -4460,6 +4467,11 @@ static int __init init_sd(void)
  		goto err_out_class;
  	}
  
@@ -2533,7 +1998,7 @@ index 802add6652fd..b0244c658646 100644
  }
  
 diff --git a/fs/ext4/super.c b/fs/ext4/super.c
-index 6a77db4d3124..5798b0a12ddd 100644
+index 7283108d7609..792204378650 100644
 --- a/fs/ext4/super.c
 +++ b/fs/ext4/super.c
 @@ -5735,6 +5735,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
@@ -2555,19 +2020,18 @@ index 6a77db4d3124..5798b0a12ddd 100644
  	err = ext4_register_sysfs(sb);
  	if (err)
 diff --git a/include/linux/crypto.h b/include/linux/crypto.h
-index a2137e19be7d..df268ca70170 100644
+index b7c97f1c47c9..0a484f45b24a 100644
 --- a/include/linux/crypto.h
 +++ b/include/linux/crypto.h
-@@ -151,6 +151,9 @@
- #define CRYPTO_TFM_REQ_MAY_SLEEP	0x00000200
+@@ -152,6 +152,8 @@
  #define CRYPTO_TFM_REQ_MAY_BACKLOG	0x00000400
  #define CRYPTO_TFM_REQ_ON_STACK		0x00000800
-+#define CRYPTO_TFM_REQ_NEED_RESEED	0x00001000
-+
-+#define CRYPTO_TFM_FIPS_COMPLIANCE	0x80000000
  
++#define CRYPTO_TFM_FIPS_COMPLIANCE	0x80000000
++
  /*
   * Miscellaneous stuff.
+  */
 diff --git a/include/linux/efi.h b/include/linux/efi.h
 index ccbc35479684..8eb9a1276ba7 100644
 --- a/include/linux/efi.h
@@ -2674,7 +2138,7 @@ index e5570a16cbb1..82945b474e2e 100644
 +
  #endif
 diff --git a/include/linux/lsm_hook_defs.h b/include/linux/lsm_hook_defs.h
-index 2b8dfb35caed..47274c0e7900 100644
+index 65c9609ec207..2cc243ec73f6 100644
 --- a/include/linux/lsm_hook_defs.h
 +++ b/include/linux/lsm_hook_defs.h
 @@ -456,6 +456,7 @@ LSM_HOOK(int, 0, bpf_token_capable, const struct bpf_token *token, int cap)
@@ -3412,10 +2876,10 @@ index ab7eea01ab42..fff7c5f737fc 100644
  
  int rmi_register_transport_device(struct rmi_transport_dev *xport);
 diff --git a/include/linux/security.h b/include/linux/security.h
-index 41d7367cf403..ad6f69c6fcff 100644
+index 153e9043058f..2ee3a8990968 100644
 --- a/include/linux/security.h
 +++ b/include/linux/security.h
-@@ -2438,4 +2438,13 @@ static inline void security_initramfs_populated(void)
+@@ -2439,4 +2439,13 @@ static inline void security_initramfs_populated(void)
  }
  #endif /* CONFIG_SECURITY */
  
@@ -3430,10 +2894,10 @@ index 41d7367cf403..ad6f69c6fcff 100644
 +
  #endif /* ! __LINUX_SECURITY_H */
 diff --git a/init/main.c b/init/main.c
-index 96f93bb06c49..20dfcf6693f5 100644
+index e363232b428b..27d9d82b7658 100644
 --- a/init/main.c
 +++ b/init/main.c
-@@ -1281,8 +1281,10 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
+@@ -1236,8 +1236,10 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
  	char fn_name[KSYM_SYMBOL_LEN];
  	unsigned long addr;
  
@@ -3444,7 +2908,7 @@ index 96f93bb06c49..20dfcf6693f5 100644
  
  	addr = (unsigned long) dereference_function_descriptor(fn);
  	sprint_symbol_no_offset(fn_name, addr);
-@@ -1293,6 +1295,9 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
+@@ -1248,6 +1250,9 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
  	 */
  	strreplace(fn_name, ' ', '\0');
  
@@ -3455,10 +2919,10 @@ index 96f93bb06c49..20dfcf6693f5 100644
  		if (!strcmp(fn_name, entry->buf)) {
  			pr_debug("initcall %s blacklisted\n", fn_name);
 diff --git a/kernel/Makefile b/kernel/Makefile
-index 6785982013dc..edd073e471ba 100644
+index 1e1a31673577..60af4f6c2316 100644
 --- a/kernel/Makefile
 +++ b/kernel/Makefile
-@@ -12,6 +12,8 @@ obj-y     = fork.o exec_domain.o panic.o \
+@@ -12,6 +12,8 @@ obj-y     = fork.o exec_domain.o exec_state.o panic.o \
  	    notifier.o ksysfs.o cred.o reboot.o \
  	    async.o range.o smpboot.o ucount.o regset.o ksyms_common.o
  
@@ -3468,7 +2932,7 @@ index 6785982013dc..edd073e471ba 100644
  obj-$(CONFIG_VHOST_TASK) += vhost_task.o
  
 diff --git a/kernel/bpf/core.c b/kernel/bpf/core.c
-index 6aa2a8b24030..a63f1d7d9d2e 100644
+index 649cce41e13f..fb6de2073919 100644
 --- a/kernel/bpf/core.c
 +++ b/kernel/bpf/core.c
 @@ -546,7 +546,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
@@ -3485,7 +2949,7 @@ index 6aa2a8b24030..a63f1d7d9d2e 100644
  long bpf_jit_limit_max __read_mostly;
  
 diff --git a/kernel/bpf/syscall.c b/kernel/bpf/syscall.c
-index 630d530782fe..9e735b214769 100644
+index b44106c8ea75..03a12954196c 100644
 --- a/kernel/bpf/syscall.c
 +++ b/kernel/bpf/syscall.c
 @@ -28,6 +28,7 @@
@@ -3496,7 +2960,7 @@ index 630d530782fe..9e735b214769 100644
  #include <uapi/linux/btf.h>
  #include <linux/pgtable.h>
  #include <linux/bpf_lsm.h>
-@@ -65,6 +66,23 @@ static DEFINE_SPINLOCK(map_idr_lock);
+@@ -66,6 +67,23 @@ static DEFINE_SPINLOCK(map_idr_lock);
  static DEFINE_IDR(link_idr);
  static DEFINE_SPINLOCK(link_idr_lock);
  
@@ -3520,7 +2984,7 @@ index 630d530782fe..9e735b214769 100644
  int sysctl_unprivileged_bpf_disabled __read_mostly =
  	IS_BUILTIN(CONFIG_BPF_UNPRIV_DEFAULT_OFF) ? 2 : 0;
  
-@@ -6604,6 +6622,11 @@ static int bpf_unpriv_handler(const struct ctl_table *table, int write,
+@@ -6754,6 +6772,11 @@ static int bpf_unpriv_handler(const struct ctl_table *table, int write,
  	if (write && !ret) {
  		if (locked_state && unpriv_enable != 1)
  			return -EPERM;
@@ -3608,10 +3072,10 @@ index 590ba29c85ab..02153d857531 100644
  
  int module_sig_check(struct load_info *info, int flags)
 diff --git a/kernel/panic.c b/kernel/panic.c
-index 20feada5319d..fa6332e68570 100644
+index 213725b612aa..a823d01f1f05 100644
 --- a/kernel/panic.c
 +++ b/kernel/panic.c
-@@ -825,6 +825,18 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
+@@ -826,6 +826,18 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
  	TAINT_FLAG(RANDSTRUCT,			'T', ' '),
  	TAINT_FLAG(TEST,			'N', ' '),
  	TAINT_FLAG(FWCTL,			'J', ' '),
@@ -4665,13 +4129,13 @@ index 000000000000..20966f7c7277
 +}
 +late_initcall(__add_rh_flag);
 diff --git a/scripts/Makefile.lib b/scripts/Makefile.lib
-index 0718e39cedda..10e94a1b8b6e 100644
+index 0a4fdd8bd975..dcb12dad419f 100644
 --- a/scripts/Makefile.lib
 +++ b/scripts/Makefile.lib
-@@ -201,7 +201,10 @@ objtool-args-$(CONFIG_HAVE_STATIC_CALL_INLINE)		+= --static-call
+@@ -207,7 +207,10 @@ objtool-args-$(CONFIG_STACK_VALIDATION)			+= --stackval
+ objtool-args-$(CONFIG_HAVE_STATIC_CALL_INLINE)		+= --static-call
  objtool-args-$(CONFIG_HAVE_UACCESS_VALIDATION)		+= --uaccess
  objtool-args-$(or $(CONFIG_GCOV_KERNEL),$(CONFIG_KCOV))	+= --no-unreachable
- objtool-args-$(CONFIG_PREFIX_SYMBOLS)			+= --prefix=$(CONFIG_FUNCTION_PADDING_BYTES)
 +# RHEL-only: don't enforce OBJTOOL_WERROR for out of tree modules
 +ifeq ($(KBUILD_EXTMOD),)
  objtool-args-$(CONFIG_OBJTOOL_WERROR)			+= --werror
@@ -4680,7 +4144,7 @@ index 0718e39cedda..10e94a1b8b6e 100644
  objtool-args = $(objtool-args-y)					\
  	$(if $(delay-objtool), --link)					\
 diff --git a/scripts/mod/modpost.c b/scripts/mod/modpost.c
-index abbcd3fc1394..a2d2a436f2df 100644
+index d592548cbd60..39401d9a2053 100644
 --- a/scripts/mod/modpost.c
 +++ b/scripts/mod/modpost.c
 @@ -27,6 +27,7 @@
@@ -4691,7 +4155,7 @@ index abbcd3fc1394..a2d2a436f2df 100644
  
  #define MODULE_NS_PREFIX "module:"
  
-@@ -2046,6 +2047,12 @@ static void write_buf(struct buffer *b, const char *fname)
+@@ -2066,6 +2067,12 @@ static void write_buf(struct buffer *b, const char *fname)
  	}
  }
  
@@ -4704,7 +4168,7 @@ index abbcd3fc1394..a2d2a436f2df 100644
  static void write_if_changed(struct buffer *b, const char *fname)
  {
  	char *tmp;
-@@ -2130,6 +2137,7 @@ static void write_mod_c_file(struct module *mod)
+@@ -2150,6 +2157,7 @@ static void write_mod_c_file(struct module *mod)
  	}
  
  	add_srcversion(&buf, mod);
@@ -4878,10 +4342,10 @@ index 000000000000..9424a83c6f48
 +test_bpffs                                       # needs CONFIG_BPF_PRELOAD
 +tunnel                                           # needs CONFIG_NET_FOU
 diff --git a/tools/testing/selftests/bpf/Makefile b/tools/testing/selftests/bpf/Makefile
-index 6ef6872adbc3..bd76422a1f13 100644
+index b642ee489ea6..7e3204186a8b 100644
 --- a/tools/testing/selftests/bpf/Makefile
 +++ b/tools/testing/selftests/bpf/Makefile
-@@ -504,7 +504,7 @@ LSKELS := fexit_sleep.c trace_printk.c trace_vprintk.c map_ptr_kern.c 	\
+@@ -532,7 +532,7 @@ LSKELS := fexit_sleep.c trace_printk.c trace_vprintk.c map_ptr_kern.c 	\
  LSKELS_SIGNED := fentry_test.c fexit_test.c atomics.c
  
  # Generate both light skeleton and libbpf skeleton for these
