@@ -80,10 +80,10 @@
  79 files changed, 2744 insertions(+), 224 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 5a05b48d1684..bf841c53f9ad 100644
+index a68003c3599c..2bd9cdc72ecd 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -6638,6 +6638,20 @@ Kernel parameters
+@@ -6648,6 +6648,20 @@ Kernel parameters
  		2	The "airplane mode" button toggles between everything
  			blocked and everything unblocked.
  
@@ -104,7 +104,7 @@ index 5a05b48d1684..bf841c53f9ad 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -8038,6 +8052,15 @@ Kernel parameters
+@@ -8064,6 +8078,15 @@ Kernel parameters
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -203,7 +203,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index d1c595db55c9..254a65e68975 100644
+index d3e161ab8360..0c3b1381c89f 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -358,6 +358,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -224,7 +224,7 @@ index d1c595db55c9..254a65e68975 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1408,6 +1419,8 @@ uapi-asm-generic:
+@@ -1423,6 +1434,8 @@ uapi-asm-generic:
  # Generate some files
  # ---------------------------------------------------------------------------
  
@@ -233,7 +233,7 @@ index d1c595db55c9..254a65e68975 100644
  # KERNELRELEASE can change from a few different places, meaning version.h
  # needs to be updated, so this check is forced on all builds
  
-@@ -1432,7 +1445,13 @@ define filechk_version.h
+@@ -1447,7 +1460,13 @@ define filechk_version.h
  	((c) > 255 ? 255 : (c)))';                                       \
  	echo \#define LINUX_VERSION_MAJOR $(VERSION);                    \
  	echo \#define LINUX_VERSION_PATCHLEVEL $(PATCHLEVEL);            \
@@ -248,7 +248,7 @@ index d1c595db55c9..254a65e68975 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -2083,6 +2102,23 @@ endif
+@@ -2098,6 +2117,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -780,10 +780,10 @@ index 9a7ac2eb9ce0..6556c3d7b269 100644
  	acpi_dev_get_resources(device, &resource_list,
  			       acpi_check_serial_bus_slave,
 diff --git a/drivers/ata/libahci.c b/drivers/ata/libahci.c
-index c79abdfcd7a9..e23bfb7f94c7 100644
+index 6d72eb017b49..0a6701eb8d37 100644
 --- a/drivers/ata/libahci.c
 +++ b/drivers/ata/libahci.c
-@@ -731,6 +731,24 @@ int ahci_stop_engine(struct ata_port *ap)
+@@ -727,6 +727,24 @@ int ahci_stop_engine(struct ata_port *ap)
  	tmp &= ~PORT_CMD_START;
  	writel(tmp, port_mmio + PORT_CMD);
  
@@ -1998,10 +1998,10 @@ index 802add6652fd..b0244c658646 100644
  }
  
 diff --git a/fs/ext4/super.c b/fs/ext4/super.c
-index 7283108d7609..792204378650 100644
+index 245f67d10ded..f1e49d37b270 100644
 --- a/fs/ext4/super.c
 +++ b/fs/ext4/super.c
-@@ -5735,6 +5735,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
+@@ -5739,6 +5739,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
  	atomic_set(&sbi->s_warning_count, 0);
  	atomic_set(&sbi->s_msg_count, 0);
  
