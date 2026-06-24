@@ -203,7 +203,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index d3e161ab8360..0c3b1381c89f 100644
+index e3c24951d41b..99b6e33eaee7 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -358,6 +358,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -248,7 +248,7 @@ index d3e161ab8360..0c3b1381c89f 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -2098,6 +2117,23 @@ endif
+@@ -2099,6 +2118,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -1436,7 +1436,7 @@ index d4af17fdba46..154f0403cbf4 100644
  	data->xport.ops = &hid_rmi_ops;
  
 diff --git a/drivers/hwtracing/coresight/coresight-etm4x-core.c b/drivers/hwtracing/coresight/coresight-etm4x-core.c
-index d565a73f0042..0e64fc7c1004 100644
+index 14bb31bd6a0b..0529359d7440 100644
 --- a/drivers/hwtracing/coresight/coresight-etm4x-core.c
 +++ b/drivers/hwtracing/coresight/coresight-etm4x-core.c
 @@ -12,6 +12,7 @@
@@ -1447,7 +1447,7 @@ index d565a73f0042..0e64fc7c1004 100644
  #include <linux/io.h>
  #include <linux/err.h>
  #include <linux/fs.h>
-@@ -2527,6 +2528,16 @@ static const struct amba_id etm4_ids[] = {
+@@ -2447,6 +2448,16 @@ static const struct amba_id etm4_ids[] = {
  	{},
  };
  
@@ -1464,7 +1464,7 @@ index d565a73f0042..0e64fc7c1004 100644
  MODULE_DEVICE_TABLE(amba, etm4_ids);
  
  static struct amba_driver etm4x_amba_driver = {
-@@ -2601,6 +2612,11 @@ static int __init etm4x_init(void)
+@@ -2521,6 +2532,11 @@ static int __init etm4x_init(void)
  {
  	int ret;
  
@@ -1476,7 +1476,7 @@ index d565a73f0042..0e64fc7c1004 100644
  	ret = etm4_pm_setup();
  
  	/* etm4_pm_setup() does its own cleanup - exit on error */
-@@ -2627,6 +2643,9 @@ static int __init etm4x_init(void)
+@@ -2547,6 +2563,9 @@ static int __init etm4x_init(void)
  
  static void __exit etm4x_exit(void)
  {
@@ -1971,10 +1971,10 @@ index 7a883c59976f..907ec60e500a 100644
  
  error_proc:
 diff --git a/fs/erofs/super.c b/fs/erofs/super.c
-index 802add6652fd..b0244c658646 100644
+index 86fa5c6a0c70..9cba33defd32 100644
 --- a/fs/erofs/super.c
 +++ b/fs/erofs/super.c
-@@ -636,6 +636,9 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
+@@ -610,6 +610,9 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
  {
  	struct inode *inode;
  	struct erofs_sb_info *sbi = EROFS_SB(sb);
@@ -1984,7 +1984,7 @@ index 802add6652fd..b0244c658646 100644
  	int err;
  
  	sb->s_magic = EROFS_SUPER_MAGIC;
-@@ -788,6 +791,12 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
+@@ -747,6 +750,12 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
  
  	sbi->dir_ra_bytes = EROFS_DIR_RA_BYTES;
  	erofs_info(sb, "mounted with root inode @ nid %llu.", sbi->root_nid);
