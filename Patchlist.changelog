@@ -1,3 +1,6 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/75c8343f66def9d6ab14cd59f464c872593298df
+ 75c8343f66def9d6ab14cd59f464c872593298df Revert "Input: rmi4 - remove the need for artificial IRQ in case of HID"
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/91f7589ddc98d53780b37dd67962c9cd62251a61
  91f7589ddc98d53780b37dd67962c9cd62251a61 Revert "crypto: rng - Override drivers/char/random in FIPS mode"
 
