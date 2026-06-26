@@ -200,7 +200,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index fae409cd524d..43d77c8da613 100644
+index 12fd3d2d47b5..937e21c147ca 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -358,6 +358,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -221,7 +221,7 @@ index fae409cd524d..43d77c8da613 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1426,6 +1437,8 @@ uapi-asm-generic:
+@@ -1429,6 +1440,8 @@ uapi-asm-generic:
  # Generate some files
  # ---------------------------------------------------------------------------
  
@@ -230,7 +230,7 @@ index fae409cd524d..43d77c8da613 100644
  # KERNELRELEASE can change from a few different places, meaning version.h
  # needs to be updated, so this check is forced on all builds
  
-@@ -1450,7 +1463,13 @@ define filechk_version.h
+@@ -1453,7 +1466,13 @@ define filechk_version.h
  	((c) > 255 ? 255 : (c)))';                                       \
  	echo \#define LINUX_VERSION_MAJOR $(VERSION);                    \
  	echo \#define LINUX_VERSION_PATCHLEVEL $(PATCHLEVEL);            \
@@ -245,7 +245,7 @@ index fae409cd524d..43d77c8da613 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -2102,6 +2121,23 @@ endif
+@@ -2105,6 +2124,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -832,7 +832,7 @@ index 505e32911c34..26f7ee0ccf40 100644
  		dmi_decode_ipmi((const struct dmi_header *) dev->device_data);
  
 diff --git a/drivers/char/ipmi/ipmi_msghandler.c b/drivers/char/ipmi/ipmi_msghandler.c
-index 869ac87a4b6a..64908c1ae88f 100644
+index ab4c85f3d6fe..92de1165f6ef 100644
 --- a/drivers/char/ipmi/ipmi_msghandler.c
 +++ b/drivers/char/ipmi/ipmi_msghandler.c
 @@ -34,6 +34,7 @@
@@ -2640,7 +2640,7 @@ index 649cce41e13f..fb6de2073919 100644
  long bpf_jit_limit_max __read_mostly;
  
 diff --git a/kernel/bpf/syscall.c b/kernel/bpf/syscall.c
-index b44106c8ea75..03a12954196c 100644
+index 6db306d23b47..a758feebfe03 100644
 --- a/kernel/bpf/syscall.c
 +++ b/kernel/bpf/syscall.c
 @@ -28,6 +28,7 @@
@@ -3835,7 +3835,7 @@ index 0a4fdd8bd975..dcb12dad419f 100644
  objtool-args = $(objtool-args-y)					\
  	$(if $(delay-objtool), --link)					\
 diff --git a/scripts/mod/modpost.c b/scripts/mod/modpost.c
-index d592548cbd60..39401d9a2053 100644
+index a7b72a81d248..9b62ee078734 100644
 --- a/scripts/mod/modpost.c
 +++ b/scripts/mod/modpost.c
 @@ -27,6 +27,7 @@
