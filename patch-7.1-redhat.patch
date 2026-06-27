@@ -25,9 +25,8 @@
  drivers/firmware/efi/libstub/fdt.c                 |   5 +
  drivers/firmware/efi/libstub/secureboot.c          |  14 +-
  drivers/firmware/efi/secureboot.c                  |  38 +++++
- drivers/hid/hid-rmi.c                              |  66 ---------
+ drivers/gpu/drm/i915/display/intel_ddi.c           |  11 +-
  drivers/hwtracing/coresight/coresight-etm4x-core.c |  19 +++
- drivers/input/rmi4/rmi_driver.c                    | 124 ++++++++++-------
  drivers/iommu/iommu.c                              |  22 +++
  drivers/pci/quirks.c                               |  24 ++++
  drivers/usb/core/hub.c                             |   7 +
@@ -35,7 +34,6 @@
  include/linux/efi.h                                |  22 ++-
  include/linux/lsm_hook_defs.h                      |   1 +
  include/linux/random.h                             |  10 ++
- include/linux/rmi.h                                |   1 +
  include/linux/security.h                           |   9 ++
  kernel/module/signing.c                            |   9 +-
  scripts/Makefile.lib                               |   3 +
@@ -43,13 +41,15 @@
  security/integrity/platform_certs/load_uefi.c      |   6 +-
  security/lockdown/Kconfig                          |  13 ++
  security/lockdown/lockdown.c                       |  11 ++
+ sound/soc/codecs/rt722-sdca.c                      |  77 ++++++++--
+ sound/soc/codecs/rt722-sdca.h                      |   4 +
  tools/testing/selftests/bpf/DENYLIST.rhel          |  76 ++++++++++
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 -----
- 48 files changed, 931 insertions(+), 241 deletions(-)
+ 48 files changed, 931 insertions(+), 142 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index 39baa3275447..e773a86c68ef 100644
+index 78662694be58..6b19d87229d5 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -356,6 +356,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -1332,108 +1332,35 @@ index 000000000000..de0a3714a5d4
 +		}
 +	}
 +}
-diff --git a/drivers/hid/hid-rmi.c b/drivers/hid/hid-rmi.c
-index d4af17fdba46..154f0403cbf4 100644
---- a/drivers/hid/hid-rmi.c
-+++ b/drivers/hid/hid-rmi.c
-@@ -321,21 +321,12 @@ static int rmi_input_event(struct hid_device *hdev, u8 *data, int size)
- {
- 	struct rmi_data *hdata = hid_get_drvdata(hdev);
- 	struct rmi_device *rmi_dev = hdata->xport.rmi_dev;
--	unsigned long flags;
+diff --git a/drivers/gpu/drm/i915/display/intel_ddi.c b/drivers/gpu/drm/i915/display/intel_ddi.c
+index ebefa889bc8c..0987eee38bd1 100644
+--- a/drivers/gpu/drm/i915/display/intel_ddi.c
++++ b/drivers/gpu/drm/i915/display/intel_ddi.c
+@@ -2652,9 +2652,6 @@ static void mtl_ddi_pre_enable_dp(struct intel_atomic_state *state,
+ 	/* 3. Select Thunderbolt */
+ 	mtl_port_buf_ctl_io_selection(encoder);
  
- 	if (!(test_bit(RMI_STARTED, &hdata->flags)))
- 		return 0;
+-	/* 4. Enable Panel Power if PPS is required */
+-	intel_pps_on(intel_dp);
+-
+ 	/* 5. Enable the port PLL */
+ 	intel_ddi_enable_clock(encoder, crtc_state);
  
--	pm_wakeup_event(hdev->dev.parent, 0);
--
--	local_irq_save(flags);
--
- 	rmi_set_attn_data(rmi_dev, data[1], &data[2], size - 2);
- 
--	generic_handle_irq(hdata->rmi_irq);
--
--	local_irq_restore(flags);
--
- 	return 1;
+@@ -3710,6 +3707,14 @@ intel_ddi_pre_pll_enable(struct intel_atomic_state *state,
+ 	else if (display->platform.geminilake || display->platform.broxton)
+ 		bxt_dpio_phy_set_lane_optim_mask(encoder,
+ 						 crtc_state->lane_lat_optim_mask);
++
++	/*
++	 * There is no direct connection between the PLL and PPS, however
++	 * enabling PPS before PLL is required to avoid PLL/DDI BUF timeouts
++	 * during system resume. Do that matching the Bspec order as well.
++	 */
++	if (DISPLAY_VER(display) >= 14)
++		intel_pps_on(&dig_port->dp);
  }
  
-@@ -589,56 +580,6 @@ static const struct rmi_transport_ops hid_rmi_ops = {
- 	.reset		= rmi_hid_reset,
- };
- 
--static void rmi_irq_teardown(void *data)
--{
--	struct rmi_data *hdata = data;
--	struct irq_domain *domain = hdata->domain;
--
--	if (!domain)
--		return;
--
--	irq_dispose_mapping(irq_find_mapping(domain, 0));
--
--	irq_domain_remove(domain);
--	hdata->domain = NULL;
--	hdata->rmi_irq = 0;
--}
--
--static int rmi_irq_map(struct irq_domain *h, unsigned int virq,
--		       irq_hw_number_t hw_irq_num)
--{
--	irq_set_chip_and_handler(virq, &dummy_irq_chip, handle_simple_irq);
--
--	return 0;
--}
--
--static const struct irq_domain_ops rmi_irq_ops = {
--	.map = rmi_irq_map,
--};
--
--static int rmi_setup_irq_domain(struct hid_device *hdev)
--{
--	struct rmi_data *hdata = hid_get_drvdata(hdev);
--	int ret;
--
--	hdata->domain = irq_domain_create_linear(hdev->dev.fwnode, 1,
--						 &rmi_irq_ops, hdata);
--	if (!hdata->domain)
--		return -ENOMEM;
--
--	ret = devm_add_action_or_reset(&hdev->dev, &rmi_irq_teardown, hdata);
--	if (ret)
--		return ret;
--
--	hdata->rmi_irq = irq_create_mapping(hdata->domain, 0);
--	if (hdata->rmi_irq <= 0) {
--		hid_err(hdev, "Can't allocate an IRQ\n");
--		return hdata->rmi_irq < 0 ? hdata->rmi_irq : -ENXIO;
--	}
--
--	return 0;
--}
--
- static int rmi_probe(struct hid_device *hdev, const struct hid_device_id *id)
- {
- 	struct rmi_data *data = NULL;
-@@ -711,18 +652,11 @@ static int rmi_probe(struct hid_device *hdev, const struct hid_device_id *id)
- 
- 	mutex_init(&data->page_mutex);
- 
--	ret = rmi_setup_irq_domain(hdev);
--	if (ret) {
--		hid_err(hdev, "failed to allocate IRQ domain\n");
--		return ret;
--	}
--
- 	if (data->device_flags & RMI_DEVICE_HAS_PHYS_BUTTONS)
- 		rmi_hid_pdata.gpio_data.disable = true;
- 
- 	data->xport.dev = hdev->dev.parent;
- 	data->xport.pdata = rmi_hid_pdata;
--	data->xport.pdata.irq = data->rmi_irq;
- 	data->xport.proto_name = "hid";
- 	data->xport.ops = &hid_rmi_ops;
- 
+ static void adlp_tbt_to_dp_alt_switch_wa(struct intel_encoder *encoder)
 diff --git a/drivers/hwtracing/coresight/coresight-etm4x-core.c b/drivers/hwtracing/coresight/coresight-etm4x-core.c
 index d565a73f0042..0e64fc7c1004 100644
 --- a/drivers/hwtracing/coresight/coresight-etm4x-core.c
@@ -1485,198 +1412,6 @@ index d565a73f0042..0e64fc7c1004 100644
  	amba_driver_unregister(&etm4x_amba_driver);
  	platform_driver_unregister(&etm4_platform_driver);
  	etm4_pm_clear();
-diff --git a/drivers/input/rmi4/rmi_driver.c b/drivers/input/rmi4/rmi_driver.c
-index ccd9338a44db..5c54e522e8a4 100644
---- a/drivers/input/rmi4/rmi_driver.c
-+++ b/drivers/input/rmi4/rmi_driver.c
-@@ -183,34 +183,47 @@ void rmi_set_attn_data(struct rmi_device *rmi_dev, unsigned long irq_status,
- 	attn_data.data = fifo_data;
- 
- 	kfifo_put(&drvdata->attn_fifo, attn_data);
-+
-+	schedule_work(&drvdata->attn_work);
- }
- EXPORT_SYMBOL_GPL(rmi_set_attn_data);
- 
--static irqreturn_t rmi_irq_fn(int irq, void *dev_id)
-+static void attn_callback(struct work_struct *work)
- {
--	struct rmi_device *rmi_dev = dev_id;
--	struct rmi_driver_data *drvdata = dev_get_drvdata(&rmi_dev->dev);
-+	struct rmi_driver_data *drvdata = container_of(work,
-+							struct rmi_driver_data,
-+							attn_work);
- 	struct rmi4_attn_data attn_data = {0};
- 	int ret, count;
- 
- 	count = kfifo_get(&drvdata->attn_fifo, &attn_data);
--	if (count) {
--		*(drvdata->irq_status) = attn_data.irq_status;
--		drvdata->attn_data = attn_data;
--	}
-+	if (!count)
-+		return;
- 
--	ret = rmi_process_interrupt_requests(rmi_dev);
-+	*(drvdata->irq_status) = attn_data.irq_status;
-+	drvdata->attn_data = attn_data;
-+
-+	ret = rmi_process_interrupt_requests(drvdata->rmi_dev);
- 	if (ret)
--		rmi_dbg(RMI_DEBUG_CORE, &rmi_dev->dev,
-+		rmi_dbg(RMI_DEBUG_CORE, &drvdata->rmi_dev->dev,
- 			"Failed to process interrupt request: %d\n", ret);
- 
--	if (count) {
--		kfree(attn_data.data);
--		drvdata->attn_data.data = NULL;
--	}
-+	kfree(attn_data.data);
-+	drvdata->attn_data.data = NULL;
- 
- 	if (!kfifo_is_empty(&drvdata->attn_fifo))
--		return rmi_irq_fn(irq, dev_id);
-+		schedule_work(&drvdata->attn_work);
-+}
-+
-+static irqreturn_t rmi_irq_fn(int irq, void *dev_id)
-+{
-+	struct rmi_device *rmi_dev = dev_id;
-+	int ret;
-+
-+	ret = rmi_process_interrupt_requests(rmi_dev);
-+	if (ret)
-+		rmi_dbg(RMI_DEBUG_CORE, &rmi_dev->dev,
-+			"Failed to process interrupt request: %d\n", ret);
- 
- 	return IRQ_HANDLED;
- }
-@@ -218,7 +231,6 @@ static irqreturn_t rmi_irq_fn(int irq, void *dev_id)
- static int rmi_irq_init(struct rmi_device *rmi_dev)
- {
- 	struct rmi_device_platform_data *pdata = rmi_get_platform_data(rmi_dev);
--	struct rmi_driver_data *data = dev_get_drvdata(&rmi_dev->dev);
- 	int irq_flags = irq_get_trigger_type(pdata->irq);
- 	int ret;
- 
-@@ -236,8 +248,6 @@ static int rmi_irq_init(struct rmi_device *rmi_dev)
- 		return ret;
- 	}
- 
--	data->enabled = true;
--
- 	return 0;
- }
- 
-@@ -887,23 +897,27 @@ void rmi_enable_irq(struct rmi_device *rmi_dev, bool clear_wake)
- 	if (data->enabled)
- 		goto out;
- 
--	enable_irq(irq);
--	data->enabled = true;
--	if (clear_wake && device_may_wakeup(rmi_dev->xport->dev)) {
--		retval = disable_irq_wake(irq);
--		if (retval)
--			dev_warn(&rmi_dev->dev,
--				 "Failed to disable irq for wake: %d\n",
--				 retval);
--	}
-+	if (irq) {
-+		enable_irq(irq);
-+		data->enabled = true;
-+		if (clear_wake && device_may_wakeup(rmi_dev->xport->dev)) {
-+			retval = disable_irq_wake(irq);
-+			if (retval)
-+				dev_warn(&rmi_dev->dev,
-+					 "Failed to disable irq for wake: %d\n",
-+					 retval);
-+		}
- 
--	/*
--	 * Call rmi_process_interrupt_requests() after enabling irq,
--	 * otherwise we may lose interrupt on edge-triggered systems.
--	 */
--	irq_flags = irq_get_trigger_type(pdata->irq);
--	if (irq_flags & IRQ_TYPE_EDGE_BOTH)
--		rmi_process_interrupt_requests(rmi_dev);
-+		/*
-+		 * Call rmi_process_interrupt_requests() after enabling irq,
-+		 * otherwise we may lose interrupt on edge-triggered systems.
-+		 */
-+		irq_flags = irq_get_trigger_type(pdata->irq);
-+		if (irq_flags & IRQ_TYPE_EDGE_BOTH)
-+			rmi_process_interrupt_requests(rmi_dev);
-+	} else {
-+		data->enabled = true;
-+	}
- 
- out:
- 	mutex_unlock(&data->enabled_mutex);
-@@ -923,20 +937,22 @@ void rmi_disable_irq(struct rmi_device *rmi_dev, bool enable_wake)
- 		goto out;
- 
- 	data->enabled = false;
--	disable_irq(irq);
--	if (enable_wake && device_may_wakeup(rmi_dev->xport->dev)) {
--		retval = enable_irq_wake(irq);
--		if (retval)
--			dev_warn(&rmi_dev->dev,
--				 "Failed to enable irq for wake: %d\n",
--				 retval);
--	}
--
--	/* make sure the fifo is clean */
--	while (!kfifo_is_empty(&data->attn_fifo)) {
--		count = kfifo_get(&data->attn_fifo, &attn_data);
--		if (count)
--			kfree(attn_data.data);
-+	if (irq) {
-+		disable_irq(irq);
-+		if (enable_wake && device_may_wakeup(rmi_dev->xport->dev)) {
-+			retval = enable_irq_wake(irq);
-+			if (retval)
-+				dev_warn(&rmi_dev->dev,
-+					 "Failed to enable irq for wake: %d\n",
-+					 retval);
-+		}
-+	} else {
-+		/* make sure the fifo is clean */
-+		while (!kfifo_is_empty(&data->attn_fifo)) {
-+			count = kfifo_get(&data->attn_fifo, &attn_data);
-+			if (count)
-+				kfree(attn_data.data);
-+		}
- 	}
- 
- out:
-@@ -979,6 +995,8 @@ static int rmi_driver_remove(struct device *dev)
- 
- 	rmi_disable_irq(rmi_dev, false);
- 
-+	cancel_work_sync(&data->attn_work);
-+
- 	rmi_f34_remove_sysfs(rmi_dev);
- 	rmi_free_function_list(rmi_dev);
- 
-@@ -1224,9 +1242,15 @@ static int rmi_driver_probe(struct device *dev)
- 		}
- 	}
- 
--	retval = rmi_irq_init(rmi_dev);
--	if (retval < 0)
--		goto err_destroy_functions;
-+	if (pdata->irq) {
-+		retval = rmi_irq_init(rmi_dev);
-+		if (retval < 0)
-+			goto err_destroy_functions;
-+	}
-+
-+	data->enabled = true;
-+
-+	INIT_WORK(&data->attn_work, attn_callback);
- 
- 	if (data->f01_container->dev.driver) {
- 		/* Driver already bound, so enable ATTN now. */
 diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
 index d1a9e713d3a0..940458370730 100644
 --- a/drivers/iommu/iommu.c
@@ -1892,18 +1627,6 @@ index 8a8064dc3970..3238fab8f749 100644
  #ifndef MODULE
  extern const struct file_operations random_fops, urandom_fops;
  #endif
-diff --git a/include/linux/rmi.h b/include/linux/rmi.h
-index ab7eea01ab42..fff7c5f737fc 100644
---- a/include/linux/rmi.h
-+++ b/include/linux/rmi.h
-@@ -364,6 +364,7 @@ struct rmi_driver_data {
- 
- 	struct rmi4_attn_data attn_data;
- 	DECLARE_KFIFO(attn_fifo, struct rmi4_attn_data, 16);
-+	struct work_struct attn_work;
- };
- 
- int rmi_register_transport_device(struct rmi_transport_dev *xport);
 diff --git a/include/linux/security.h b/include/linux/security.h
 index 41d7367cf403..ad6f69c6fcff 100644
 --- a/include/linux/security.h
@@ -2043,6 +1766,137 @@ index 8d46886d2cca..14a9cdff942b 100644
  static struct security_hook_list lockdown_hooks[] __ro_after_init = {
  	LSM_HOOK_INIT(locked_down, lockdown_is_locked_down),
  };
+diff --git a/sound/soc/codecs/rt722-sdca.c b/sound/soc/codecs/rt722-sdca.c
+index 79b8b7e70a33..23d2f63d68ef 100644
+--- a/sound/soc/codecs/rt722-sdca.c
++++ b/sound/soc/codecs/rt722-sdca.c
+@@ -517,6 +517,61 @@ static int rt722_sdca_fu1e_capture_put(struct snd_kcontrol *kcontrol,
+ 	return changed;
+ }
+ 
++static int rt722_sdca_set_fu06_playback_ctl(struct rt722_sdca_priv *rt722)
++{
++	int err;
++	unsigned int ch_l, ch_r;
++
++	ch_l = (rt722->fu06_dapm_mute || rt722->fu06_mixer_l_mute) ? 0x01 : 0x00;
++	ch_r = (rt722->fu06_dapm_mute || rt722->fu06_mixer_r_mute) ? 0x01 : 0x00;
++
++	err = regmap_write(rt722->regmap,
++			SDW_SDCA_CTL(FUNC_NUM_AMP, RT722_SDCA_ENT_USER_FU06,
++			RT722_SDCA_CTL_FU_MUTE, CH_L), ch_l);
++	if (err < 0)
++		return err;
++
++	err = regmap_write(rt722->regmap,
++			SDW_SDCA_CTL(FUNC_NUM_AMP, RT722_SDCA_ENT_USER_FU06,
++			RT722_SDCA_CTL_FU_MUTE, CH_R), ch_r);
++	if (err < 0)
++		return err;
++
++	return 0;
++}
++
++static int rt722_sdca_fu06_playback_get(struct snd_kcontrol *kcontrol,
++			struct snd_ctl_elem_value *ucontrol)
++{
++	struct snd_soc_component *component = snd_kcontrol_chip(kcontrol);
++	struct rt722_sdca_priv *rt722 = snd_soc_component_get_drvdata(component);
++
++	ucontrol->value.integer.value[0] = !rt722->fu06_mixer_l_mute;
++	ucontrol->value.integer.value[1] = !rt722->fu06_mixer_r_mute;
++	return 0;
++}
++
++static int rt722_sdca_fu06_playback_put(struct snd_kcontrol *kcontrol,
++			struct snd_ctl_elem_value *ucontrol)
++{
++	struct snd_soc_component *component = snd_kcontrol_chip(kcontrol);
++	struct rt722_sdca_priv *rt722 = snd_soc_component_get_drvdata(component);
++	int err, changed = 0;
++
++	if (rt722->fu06_mixer_l_mute != !ucontrol->value.integer.value[0] ||
++		rt722->fu06_mixer_r_mute != !ucontrol->value.integer.value[1])
++		changed = 1;
++
++	rt722->fu06_mixer_l_mute = !ucontrol->value.integer.value[0];
++	rt722->fu06_mixer_r_mute = !ucontrol->value.integer.value[1];
++
++	err = rt722_sdca_set_fu06_playback_ctl(rt722);
++	if (err < 0)
++		return err;
++
++	return changed;
++}
++
+ static int rt722_sdca_set_fu0f_capture_ctl(struct rt722_sdca_priv *rt722)
+ {
+ 	int err;
+@@ -718,6 +773,8 @@ static const struct snd_kcontrol_new rt722_sdca_controls[] = {
+ 			RT722_SDCA_CTL_FU_CH_GAIN, CH_R), 8, 3, 0,
+ 		rt722_sdca_set_gain_get, rt722_sdca_set_gain_put, boost_vol_tlv),
+ 	/* AMP playback settings */
++	SOC_DOUBLE_EXT("FU06 Playback Switch", SND_SOC_NOPM, 0, 1, 1, 0,
++		rt722_sdca_fu06_playback_get, rt722_sdca_fu06_playback_put),
+ 	SOC_DOUBLE_R_EXT_TLV("FU06 Playback Volume",
+ 		SDW_SDCA_CTL(FUNC_NUM_AMP, RT722_SDCA_ENT_USER_FU06,
+ 			RT722_SDCA_CTL_FU_VOLUME, CH_L),
+@@ -807,27 +864,17 @@ static int rt722_sdca_fu21_event(struct snd_soc_dapm_widget *w,
+ 	struct snd_soc_component *component =
+ 		snd_soc_dapm_to_component(w->dapm);
+ 	struct rt722_sdca_priv *rt722 = snd_soc_component_get_drvdata(component);
+-	unsigned char unmute = 0x0, mute = 0x1;
+ 
+ 	switch (event) {
+ 	case SND_SOC_DAPM_POST_PMU:
+-		regmap_write(rt722->regmap,
+-			SDW_SDCA_CTL(FUNC_NUM_AMP, RT722_SDCA_ENT_USER_FU06,
+-				RT722_SDCA_CTL_FU_MUTE, CH_L), unmute);
+-		regmap_write(rt722->regmap,
+-			SDW_SDCA_CTL(FUNC_NUM_AMP, RT722_SDCA_ENT_USER_FU06,
+-				RT722_SDCA_CTL_FU_MUTE, CH_R), unmute);
++		rt722->fu06_dapm_mute = false;
+ 		break;
+ 	case SND_SOC_DAPM_PRE_PMD:
+-		regmap_write(rt722->regmap,
+-			SDW_SDCA_CTL(FUNC_NUM_AMP, RT722_SDCA_ENT_USER_FU06,
+-				RT722_SDCA_CTL_FU_MUTE, CH_L), mute);
+-		regmap_write(rt722->regmap,
+-			SDW_SDCA_CTL(FUNC_NUM_AMP, RT722_SDCA_ENT_USER_FU06,
+-				RT722_SDCA_CTL_FU_MUTE, CH_R), mute);
++		rt722->fu06_dapm_mute = true;
+ 		break;
+ 	}
+-	return 0;
++
++	return rt722_sdca_set_fu06_playback_ctl(rt722);
+ }
+ 
+ static int rt722_sdca_fu113_event(struct snd_soc_dapm_widget *w,
+@@ -1324,6 +1371,8 @@ int rt722_sdca_init(struct device *dev, struct regmap *regmap, struct sdw_slave
+ 	rt722->first_hw_init = false;
+ 	rt722->fu1e_dapm_mute = true;
+ 	rt722->fu0f_dapm_mute = true;
++	rt722->fu06_dapm_mute = true;
++	rt722->fu06_mixer_l_mute = rt722->fu06_mixer_r_mute = false;
+ 	rt722->fu0f_mixer_l_mute = rt722->fu0f_mixer_r_mute = true;
+ 	rt722->fu1e_mixer_mute[0] = rt722->fu1e_mixer_mute[1] =
+ 		rt722->fu1e_mixer_mute[2] = rt722->fu1e_mixer_mute[3] = true;
+diff --git a/sound/soc/codecs/rt722-sdca.h b/sound/soc/codecs/rt722-sdca.h
+index 823abee9ab76..fc50beff9424 100644
+--- a/sound/soc/codecs/rt722-sdca.h
++++ b/sound/soc/codecs/rt722-sdca.h
+@@ -36,6 +36,10 @@ struct  rt722_sdca_priv {
+ 	bool fu0f_dapm_mute;
+ 	bool fu0f_mixer_l_mute;
+ 	bool fu0f_mixer_r_mute;
++	/* For AMP */
++	bool fu06_dapm_mute;
++	bool fu06_mixer_l_mute;
++	bool fu06_mixer_r_mute;
+ 	/* For DMIC */
+ 	bool fu1e_dapm_mute;
+ 	bool fu1e_mixer_mute[4];
 diff --git a/tools/testing/selftests/bpf/DENYLIST.rhel b/tools/testing/selftests/bpf/DENYLIST.rhel
 new file mode 100644
 index 000000000000..9424a83c6f48

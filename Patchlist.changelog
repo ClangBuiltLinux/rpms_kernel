@@ -1,3 +1,12 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/6222fdcaf90eebe751f3561d012542e5748e860a
+ 6222fdcaf90eebe751f3561d012542e5748e860a Revert "Input: rmi4 - remove the need for artificial IRQ in case of HID"
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/811ad51adaa3b9e95ec9f6f1f9a7a81b77ad04f6
+ 811ad51adaa3b9e95ec9f6f1f9a7a81b77ad04f6 drm/i915/mtl+: Enable PPS before PLL
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/9039d7f937b1473ba4ece6e4ec3e2151557bce53
+ 9039d7f937b1473ba4ece6e4ec3e2151557bce53 ASoC: rt722-sdca: add FU06 Playback Switch for speaker mute control
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/efaebaa97e68fc4da25bab9cd2715ee539d380fb
  efaebaa97e68fc4da25bab9cd2715ee539d380fb Fix up rebase issues with rng.c
 
