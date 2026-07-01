@@ -1,3 +1,9 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/7a09b757ef198b2dfc48dad4a1d3e908e26af396
+ 7a09b757ef198b2dfc48dad4a1d3e908e26af396 ipv6: account for fraggap on the paged allocation path
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/8123ee94b7edcbb90e11f2b2f096b19c35b40468
+ 8123ee94b7edcbb90e11f2b2f096b19c35b40468 ipv4: account for fraggap on the paged allocation path
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/6222fdcaf90eebe751f3561d012542e5748e860a
  6222fdcaf90eebe751f3561d012542e5748e860a Revert "Input: rmi4 - remove the need for artificial IRQ in case of HID"
 

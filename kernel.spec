@@ -190,13 +190,13 @@ Summary: The Linux kernel
 %define specrpmversion 7.1.2
 %define specversion 7.1.2
 %define patchversion 7.1
-%define pkgrelease 200
+%define pkgrelease 201
 %define kversion 7
 %define tarfile_release 7.1.2
 # This is needed to do merge window version magic
 %define patchlevel 1
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 200%{?buildid}%{?dist}
+%define specrelease 201%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 7.1.2
 
@@ -4857,6 +4857,10 @@ fi\
 #
 #
 %changelog
+* Wed Jul 01 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.1.2-1]
+- ipv6: account for fraggap on the paged allocation path (Wongi Lee)
+- ipv4: account for fraggap on the paged allocation path (Wongi Lee)
+
 * Sat Jun 27 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.1.2-0]
 - Revert "Input: rmi4 - remove the need for artificial IRQ in case of HID" (Justin M. Forbes)
 - drm/i915/mtl+: Enable PPS before PLL (Imre Deak)
