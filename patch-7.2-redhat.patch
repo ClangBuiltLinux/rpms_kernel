@@ -200,7 +200,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index b9c5792c79e0..a5e44719b2ca 100644
+index b4035d3cef26..e1747f30b6d0 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -358,6 +358,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -1904,7 +1904,7 @@ index f1dd417e54b2..95344281ed2c 100644
  
  struct taint_flag {
 diff --git a/include/linux/pci.h b/include/linux/pci.h
-index ebb5b9d76360..e30618e10268 100644
+index 64b308b6e61c..0967f9be0b54 100644
 --- a/include/linux/pci.h
 +++ b/include/linux/pci.h
 @@ -1715,6 +1715,7 @@ int pci_add_dynid(struct pci_driver *drv,
@@ -2623,10 +2623,10 @@ index 1e1a31673577..60af4f6c2316 100644
  obj-$(CONFIG_VHOST_TASK) += vhost_task.o
  
 diff --git a/kernel/bpf/core.c b/kernel/bpf/core.c
-index 649cce41e13f..fb6de2073919 100644
+index 6e19a030da6f..840338c51e6c 100644
 --- a/kernel/bpf/core.c
 +++ b/kernel/bpf/core.c
-@@ -546,7 +546,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
+@@ -547,7 +547,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
  /* All BPF JIT sysctl knobs here. */
  int bpf_jit_enable   __read_mostly = IS_BUILTIN(CONFIG_BPF_JIT_DEFAULT_ON);
  int bpf_jit_kallsyms __read_mostly = IS_BUILTIN(CONFIG_BPF_JIT_DEFAULT_ON);
