@@ -190,13 +190,13 @@ Summary: The Linux kernel
 %define specrpmversion 7.2.0
 %define specversion 7.2.0
 %define patchversion 7.2
-%define pkgrelease 0.rc3.26
+%define pkgrelease 0.rc3.28
 %define kversion 7
 %define tarfile_release 7.2-rc3
 # This is needed to do merge window version magic
 %define patchlevel 2
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 0.rc3.26%{?buildid}%{?dist}
+%define specrelease 0.rc3.28%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 7.2.0
 
@@ -4942,6 +4942,9 @@ fi\
 #
 #
 %changelog
+* Tue Jul 14 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.2.0-0.rc3.28]
+- xfs: resample the data fork mapping after cycling ILOCK (Darrick J. Wong)
+
 * Mon Jul 13 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.2.0-0.rc3.26]
 - redhat/kernel.spec: require libbabeltrace2-devel (Yaakov Selkowitz)
 - automotive: enable HUGETLBFS to workaround build error (Scott Weaver)
