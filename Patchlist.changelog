@@ -1,5 +1,5 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/574ab950559725f66b8fd169f5a6e51069ba4e28
- 574ab950559725f66b8fd169f5a6e51069ba4e28 xfs: resample the data fork mapping after cycling ILOCK
+https://gitlab.com/cki-project/kernel-ark/-/commit/d37a2061513888b0f7b3a557531009e9b4e0d3b0
+ d37a2061513888b0f7b3a557531009e9b4e0d3b0 xfs: resample the data fork mapping after cycling ILOCK
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/75c8343f66def9d6ab14cd59f464c872593298df
  75c8343f66def9d6ab14cd59f464c872593298df Revert "Input: rmi4 - remove the need for artificial IRQ in case of HID"
