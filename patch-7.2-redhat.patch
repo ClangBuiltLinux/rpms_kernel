@@ -200,7 +200,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index bfb47ad8cb9a..cb87a00571bd 100644
+index 11539c3fd405..15a546689db8 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -358,6 +358,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -1554,7 +1554,7 @@ index b09f27f7846f..b54fe538511a 100644
   * Intersil/Techwell TW686[4589]-based video capture cards have an empty (zero)
   * class code.  Fix it.
 diff --git a/drivers/scsi/hpsa.c b/drivers/scsi/hpsa.c
-index a1b116cd4723..736707eafaab 100644
+index 8edad1830abe..e558acedfa44 100644
 --- a/drivers/scsi/hpsa.c
 +++ b/drivers/scsi/hpsa.c
 @@ -82,7 +82,9 @@ MODULE_DESCRIPTION("Driver for HP Smart Array Controller version " \

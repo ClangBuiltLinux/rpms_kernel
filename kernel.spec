@@ -190,13 +190,13 @@ Summary: The Linux kernel
 %define specrpmversion 7.2.0
 %define specversion 7.2.0
 %define patchversion 7.2
-%define pkgrelease 0.rc3.260718g1229e2e57a5c.32
+%define pkgrelease 0.rc4.34
 %define kversion 7
-%define tarfile_release 7.2-rc3-495-g1229e2e57a5c
+%define tarfile_release 7.2-rc4
 # This is needed to do merge window version magic
 %define patchlevel 2
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 0.rc3.260718g1229e2e57a5c.32%{?buildid}%{?dist}
+%define specrelease 0.rc4.34%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 7.2.0
 
@@ -4962,8 +4962,14 @@ fi\
 #
 #
 %changelog
-* Sat Jul 18 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.2.0-0.rc3.1229e2e57a5c.32]
+* Mon Jul 20 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.2.0-0.rc4.34]
 - automotive: enable HUGETLBFS to workaround build error (Scott Weaver)
+
+* Mon Jul 20 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.2.0-0.rc4.33]
+- Linux v7.2.0-0.rc4
+
+* Sun Jul 19 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.2.0-0.rc3.c6859eed755d.32]
+- Linux v7.2.0-0.rc3.c6859eed755d
 
 * Sat Jul 18 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.2.0-0.rc3.1229e2e57a5c.31]
 - Linux v7.2.0-0.rc3.1229e2e57a5c
