@@ -190,13 +190,13 @@ Summary: The Linux kernel
 %define specrpmversion 7.1.4
 %define specversion 7.1.4
 %define patchversion 7.1
-%define pkgrelease 100
+%define pkgrelease 101
 %define kversion 7
 %define tarfile_release 7.1.4
 # This is needed to do merge window version magic
 %define patchlevel 1
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 100%{?buildid}%{?dist}
+%define specrelease 101%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 7.1.4
 
@@ -4857,6 +4857,9 @@ fi\
 #
 #
 %changelog
+* Mon Jul 20 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.1.4-1]
+- can: bcm: defer rx_op deallocation to workqueue to fix thrtimer UAF (Lee Jones)
+
 * Sat Jul 18 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.1.4-0]
 - KVM: nVMX: Put vmcs12 pages if nested VM-Enter fails due to invalid guest state (Sean Christopherson)
 - drm/amd: Create a device link between APU display and XHCI devices (Mario Limonciello)
