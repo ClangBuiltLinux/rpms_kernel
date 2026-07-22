@@ -190,13 +190,13 @@ Summary: The Linux kernel
 %define specrpmversion 7.1.4
 %define specversion 7.1.4
 %define patchversion 7.1
-%define pkgrelease 202
+%define pkgrelease 203
 %define kversion 7
 %define tarfile_release 7.1.4
 # This is needed to do merge window version magic
 %define patchlevel 1
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 202%{?buildid}%{?dist}
+%define specrelease 203%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 7.1.4
 
@@ -4857,6 +4857,9 @@ fi\
 #
 #
 %changelog
+* Wed Jul 22 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.1.4-3]
+- net/sched: cls_api: Handle TC_ACT_CONSUMED in tcf_qevent_handle (Jamal Hadi Salim)
+
 * Tue Jul 21 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.1.4-2]
 - Revert "PCI/MSI: Unmap MSI-X region on error" (Yuanhe Shu)
 - Revert "btrfs: fix the file offset calculation inside btrfs_decompress_buf2page()" (Matthew Wilcox (Oracle))
