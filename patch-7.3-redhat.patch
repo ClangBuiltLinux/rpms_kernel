@@ -22,7 +22,7 @@
  drivers/ata/libahci.c                              |  18 +
  drivers/char/ipmi/ipmi_dmi.c                       |  15 +
  drivers/char/ipmi/ipmi_msghandler.c                |  16 +-
- drivers/char/random.c                              | 126 ++++-
+ drivers/char/random.c                              | 128 ++++-
  drivers/firmware/efi/Makefile                      |   1 +
  drivers/firmware/efi/efi.c                         | 124 +++--
  drivers/firmware/efi/libstub/fdt.c                 |   5 +
@@ -75,7 +75,7 @@
  tools/testing/selftests/bpf/DENYLIST.rhel          |  76 +++
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
- 77 files changed, 2677 insertions(+), 113 deletions(-)
+ 77 files changed, 2679 insertions(+), 113 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index 68647ff4bdd2..a786aad83a2b 100644
@@ -868,7 +868,7 @@ index 152dd6b5bb27..e1ceb726eb51 100644
  	rv = ipmi_register_driver();
  	mutex_unlock(&ipmi_interfaces_mutex);
 diff --git a/drivers/char/random.c b/drivers/char/random.c
-index b4da1fb976c1..1e112e2b405b 100644
+index b4da1fb976c1..7ff4dd4d9836 100644
 --- a/drivers/char/random.c
 +++ b/drivers/char/random.c
 @@ -51,9 +51,11 @@
@@ -943,7 +943,7 @@ index b4da1fb976c1..1e112e2b405b 100644
  
  	if (flags & ~(GRND_NONBLOCK | GRND_RANDOM | GRND_INSECURE))
  		return -EINVAL;
-@@ -1392,6 +1417,21 @@ SYSCALL_DEFINE3(getrandom, char __user *, ubuf, size_t, len, unsigned int, flags
+@@ -1392,6 +1417,23 @@ SYSCALL_DEFINE3(getrandom, char __user *, ubuf, size_t, len, unsigned int, flags
  	if ((flags & (GRND_INSECURE | GRND_RANDOM)) == (GRND_INSECURE | GRND_RANDOM))
  		return -EINVAL;
  
@@ -955,8 +955,10 @@ index b4da1fb976c1..1e112e2b405b 100644
 +
 +	if (rng) {
 +		ret = import_ubuf(ITER_DEST, ubuf, len, &iter);
-+		if (unlikely(ret))
++		if (unlikely(ret)) {
++			module_put(rng->owner);
 +			return ret;
++		}
 +		ret = rng->extrng_read_iter(&iter, !!(flags & GRND_RANDOM));
 +		module_put(rng->owner);
 +		return ret;
@@ -965,7 +967,7 @@ index b4da1fb976c1..1e112e2b405b 100644
  	if (!crng_ready() && !(flags & GRND_INSECURE)) {
  		if (flags & GRND_NONBLOCK)
  			return -EAGAIN;
-@@ -1412,6 +1452,12 @@ static __poll_t random_poll(struct file *file, poll_table *wait)
+@@ -1412,6 +1454,12 @@ static __poll_t random_poll(struct file *file, poll_table *wait)
  	return crng_ready() ? EPOLLIN | EPOLLRDNORM : EPOLLOUT | EPOLLWRNORM;
  }
  
@@ -978,7 +980,7 @@ index b4da1fb976c1..1e112e2b405b 100644
  static ssize_t write_pool_user(struct iov_iter *iter)
  {
  	u8 block[BLAKE2S_BLOCK_SIZE];
-@@ -1552,7 +1598,58 @@ static int random_fasync(int fd, struct file *filp, int on)
+@@ -1552,7 +1600,58 @@ static int random_fasync(int fd, struct file *filp, int on)
  	return fasync_helper(fd, filp, on, &fasync);
  }
  
@@ -1037,7 +1039,7 @@ index b4da1fb976c1..1e112e2b405b 100644
  	.read_iter = random_read_iter,
  	.write_iter = random_write_iter,
  	.poll = random_poll,
-@@ -1565,6 +1662,7 @@ const struct file_operations random_fops = {
+@@ -1565,6 +1664,7 @@ const struct file_operations random_fops = {
  };
  
  const struct file_operations urandom_fops = {
@@ -1045,7 +1047,7 @@ index b4da1fb976c1..1e112e2b405b 100644
  	.read_iter = urandom_read_iter,
  	.write_iter = random_write_iter,
  	.unlocked_ioctl = random_ioctl,
-@@ -1575,6 +1673,32 @@ const struct file_operations urandom_fops = {
+@@ -1575,6 +1675,32 @@ const struct file_operations urandom_fops = {
  	.splice_write = iter_file_splice_write,
  };
  

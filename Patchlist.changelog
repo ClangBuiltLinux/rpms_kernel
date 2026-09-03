@@ -1,8 +1,11 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/fe11014184d9278da200f90f13bb3f7778083431
- fe11014184d9278da200f90f13bb3f7778083431 sched: move stack_canary to the start of the randomizable region
+https://gitlab.com/cki-project/kernel-ark/-/commit/c7380bb9169953627c83cb0c254369b67c393cc3
+ c7380bb9169953627c83cb0c254369b67c393cc3 sched: move stack_canary to the start of the randomizable region
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/9808fe72c0679f9080848ecd2f336e476a758e26
  9808fe72c0679f9080848ecd2f336e476a758e26 rh_messages.h: Disable ConnectX-10 NVLink-C2C device
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/4da487a9779812e22db8d6565ec188e786357392
+ 4da487a9779812e22db8d6565ec188e786357392 random: Drop the extrng module reference when import_ubuf() fails
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/6a744b3f3df25c802e864b296473adc6751586c2
  6a744b3f3df25c802e864b296473adc6751586c2 [redhat] drivers/scsi/sd.c: cleanup
