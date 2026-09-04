@@ -364,10 +364,10 @@ index b0d00032479d..afb9544fb007 100644
  /*
   * DIAG 308 support
 diff --git a/arch/s390/kernel/ipl.c b/arch/s390/kernel/ipl.c
-index d74ef30155aa..1829810b185a 100644
+index b1e798f8e1dd..c11298f71f62 100644
 --- a/arch/s390/kernel/ipl.c
 +++ b/arch/s390/kernel/ipl.c
-@@ -2545,3 +2545,8 @@ int ipl_report_free(struct ipl_report *report)
+@@ -2551,3 +2551,8 @@ int ipl_report_free(struct ipl_report *report)
  }
  
  #endif
@@ -758,10 +758,10 @@ index e4293458bf61..5e97e8aa7f63 100644
  	return ctx.rc;
  }
 diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index f48715ed827c..a64ca4014304 100644
+index 163a3cccf197..cce23a1b5d71 100644
 --- a/drivers/acpi/scan.c
 +++ b/drivers/acpi/scan.c
-@@ -1800,6 +1800,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
+@@ -1796,6 +1796,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
  	if (!acpi_match_device_ids(device, ignore_serial_bus_ids))
  		return false;
  
