@@ -1,6 +1,3 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/258588b4dfab3b010410016b52f1978e148ceef8
- 258588b4dfab3b010410016b52f1978e148ceef8 sched: move stack_canary to the start of the randomizable region
-
 https://gitlab.com/cki-project/kernel-ark/-/commit/9808fe72c0679f9080848ecd2f336e476a758e26
  9808fe72c0679f9080848ecd2f336e476a758e26 rh_messages.h: Disable ConnectX-10 NVLink-C2C device
 
