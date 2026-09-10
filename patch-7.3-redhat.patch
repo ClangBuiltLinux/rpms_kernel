@@ -53,6 +53,7 @@
  include/linux/rh_flags.h                           |  34 ++
  include/linux/rh_kabi.h                            | 541 +++++++++++++++++++++
  include/linux/rh_waived.h                          |  19 +
+ include/linux/sched.h                              |  12 +-
  include/linux/security.h                           |   9 +
  init/main.c                                        |   5 +
  kernel/Makefile                                    |   2 +
@@ -74,7 +75,7 @@
  tools/testing/selftests/bpf/DENYLIST.rhel          |  76 +++
  tools/testing/selftests/bpf/Makefile               |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
- 76 files changed, 2672 insertions(+), 108 deletions(-)
+ 77 files changed, 2679 insertions(+), 113 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index 68647ff4bdd2..a786aad83a2b 100644
@@ -2568,6 +2569,38 @@ index 000000000000..d62a9e896b5e
 +bool is_rh_waived(enum rh_waived_items feat);
 +
 +#endif /* _RH_WAIVED_H */
+diff --git a/include/linux/sched.h b/include/linux/sched.h
+index 705970d07614..51306ab30293 100644
+--- a/include/linux/sched.h
++++ b/include/linux/sched.h
+@@ -867,9 +867,15 @@ struct task_struct {
+ 	u8				__pad;
+ 
+ 	struct __call_single_node	wake_entry;
+-	unsigned int			wakee_flips;
++
++#ifdef CONFIG_STACKPROTECTOR
++	/* Canary value for the -fstack-protector GCC feature: */
++	unsigned long			stack_canary;
++#endif
++
+ 	unsigned long			wakee_flip_decay_ts;
+ 	struct task_struct		*last_wakee;
++	unsigned int			wakee_flips;
+ 
+ 	/*
+ 	 * recent_used_cpu is initially set as the last CPU used by a task
+@@ -1080,10 +1086,6 @@ struct task_struct {
+ 	pid_t				pid;
+ 	pid_t				tgid;
+ 
+-#ifdef CONFIG_STACKPROTECTOR
+-	/* Canary value for the -fstack-protector GCC feature: */
+-	unsigned long			stack_canary;
+-#endif
+ 	/*
+ 	 * Pointers to the (original) parent process, youngest child, younger sibling,
+ 	 * older sibling, respectively.  (p->father can be replaced with
 diff --git a/include/linux/security.h b/include/linux/security.h
 index 153e9043058f..2ee3a8990968 100644
 --- a/include/linux/security.h
@@ -2587,7 +2620,7 @@ index 153e9043058f..2ee3a8990968 100644
 +
  #endif /* ! __LINUX_SECURITY_H */
 diff --git a/init/main.c b/init/main.c
-index 2613d3f9b3ce..6b9f62f36903 100644
+index c05e63b8ea06..ff7a1bb0a359 100644
 --- a/init/main.c
 +++ b/init/main.c
 @@ -1246,8 +1246,10 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
