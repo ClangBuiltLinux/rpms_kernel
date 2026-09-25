@@ -80,10 +80,10 @@
  79 files changed, 2737 insertions(+), 123 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 33cd30996e47..ac78c658c2ca 100644
+index c6d636b0d709..dddf8e58064f 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -6689,6 +6689,20 @@ Kernel parameters
+@@ -6692,6 +6692,20 @@ Kernel parameters
  		2	The "airplane mode" button toggles between everything
  			blocked and everything unblocked.
  
@@ -104,7 +104,7 @@ index 33cd30996e47..ac78c658c2ca 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -8094,6 +8108,15 @@ Kernel parameters
+@@ -8097,6 +8111,15 @@ Kernel parameters
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -2795,10 +2795,10 @@ index 1e1a31673577..60af4f6c2316 100644
  obj-$(CONFIG_VHOST_TASK) += vhost_task.o
  
 diff --git a/kernel/bpf/core.c b/kernel/bpf/core.c
-index 8b294dfc1ad4..f76a5dd8c170 100644
+index 2e3bf8113ae9..bee32ded79c1 100644
 --- a/kernel/bpf/core.c
 +++ b/kernel/bpf/core.c
-@@ -548,7 +548,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
+@@ -549,7 +549,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
  /* All BPF JIT sysctl knobs here. */
  int bpf_jit_enable   __read_mostly = IS_BUILTIN(CONFIG_BPF_JIT_DEFAULT_ON);
  int bpf_jit_kallsyms __read_mostly = IS_BUILTIN(CONFIG_BPF_JIT_DEFAULT_ON);
@@ -2812,7 +2812,7 @@ index 8b294dfc1ad4..f76a5dd8c170 100644
  long bpf_jit_limit_max __read_mostly;
  
 diff --git a/kernel/bpf/syscall.c b/kernel/bpf/syscall.c
-index c7bc9ba9b331..14331c681253 100644
+index 244a939b9d2d..08684630820b 100644
 --- a/kernel/bpf/syscall.c
 +++ b/kernel/bpf/syscall.c
 @@ -28,6 +28,7 @@
@@ -2847,7 +2847,7 @@ index c7bc9ba9b331..14331c681253 100644
  int sysctl_unprivileged_bpf_disabled __read_mostly =
  	IS_BUILTIN(CONFIG_BPF_UNPRIV_DEFAULT_OFF) ? 2 : 0;
  
-@@ -6704,6 +6722,11 @@ static int bpf_unpriv_handler(const struct ctl_table *table, int write,
+@@ -6707,6 +6725,11 @@ static int bpf_unpriv_handler(const struct ctl_table *table, int write,
  	if (write && !ret) {
  		if (locked_state && unpriv_enable != 1)
  			return -EPERM;
