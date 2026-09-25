@@ -1,5 +1,5 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/255c49eb3949b3295353f647eda8bdc2e998f240
- 255c49eb3949b3295353f647eda8bdc2e998f240 Revert af_alg_restrict sysctl for F43/44
+https://gitlab.com/cki-project/kernel-ark/-/commit/962642a695a8315800965c1fa5ba9acb8805f9c6
+ 962642a695a8315800965c1fa5ba9acb8805f9c6 Revert af_alg_restrict sysctl for F43/44
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/152641e14276a813a9983f45e4d5095c489e8a85
  152641e14276a813a9983f45e4d5095c489e8a85 media: i2c: cvs: Add Lattice device quirk for VID:0x2ac1 PID:0x20d1
