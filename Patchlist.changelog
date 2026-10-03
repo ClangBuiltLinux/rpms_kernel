@@ -1,5 +1,11 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/962642a695a8315800965c1fa5ba9acb8805f9c6
- 962642a695a8315800965c1fa5ba9acb8805f9c6 Revert af_alg_restrict sysctl for F43/44
+https://gitlab.com/cki-project/kernel-ark/-/commit/712e5108089805b77ced3d113c001bfec8054aec
+ 712e5108089805b77ced3d113c001bfec8054aec Revert af_alg_restrict sysctl for F43/44
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/1ed622d5cb862ab7ee615fadaa07face64dba67a
+ 1ed622d5cb862ab7ee615fadaa07face64dba67a Allow hmac(sha512) for unpriviledged users
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/5130944cf8e71a57a9b7966fdf31ea9e264c3dd5
+ 5130944cf8e71a57a9b7966fdf31ea9e264c3dd5 ASoC: SOF: ipc4-topology: Fix shift-out-of-bounds for aggregated ALH capture
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/152641e14276a813a9983f45e4d5095c489e8a85
  152641e14276a813a9983f45e4d5095c489e8a85 media: i2c: cvs: Add Lattice device quirk for VID:0x2ac1 PID:0x20d1

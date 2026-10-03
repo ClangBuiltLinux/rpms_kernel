@@ -192,18 +192,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 7.2.8
-%define specversion 7.2.8
+%define specrpmversion 7.2.9
+%define specversion 7.2.9
 %define patchversion 7.2
 %define pkgrelease 100
 %define kversion 7
-%define tarfile_release 7.2.8
+%define tarfile_release 7.2.9
 # This is needed to do merge window version magic
 %define patchlevel 2
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 100%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 7.2.8
+%define kabiversion 7.2.9
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4964,8 +4964,14 @@ fi\
 #
 #
 %changelog
-* Fri Sep 25 2026 Augusto Caringi <acaringi@redhat.com> [7.2.8-100]
+* Sat Oct 03 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.2.9-100]
 - Revert af_alg_restrict sysctl for F43/44 (Justin M. Forbes)
+- Add updates to revert al_alg_restrict patch for f43-44 (Justin M. Forbes)
+
+* Sat Oct 03 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.2.9-0]
+- Allow hmac(sha512) for unpriviledged users (Justin M. Forbes)
+- ASoC: SOF: ipc4-topology: Fix shift-out-of-bounds for aggregated ALH capture (Peter Ujfalusi)
+- Linux v7.2.9
 
 * Fri Sep 25 2026 Augusto Caringi <acaringi@redhat.com> [7.2.8-0]
 - Linux v7.2.8
