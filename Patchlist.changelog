@@ -1,8 +1,8 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/c1b4b5339481dd8a9b41253bac4af716545cb3dc
- c1b4b5339481dd8a9b41253bac4af716545cb3dc Reapply "drm/pagemap: Guard HPAGE_PMD_ORDER use with CONFIG_ARCH_ENABLE_THP_MIGRATION"
+https://gitlab.com/cki-project/kernel-ark/-/commit/b6a75a2e8850b0006ce22ad53d6ae442a280187d
+ b6a75a2e8850b0006ce22ad53d6ae442a280187d Reapply "drm/pagemap: Guard HPAGE_PMD_ORDER use with CONFIG_ARCH_ENABLE_THP_MIGRATION"
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/61fee4304990413bf7cc45fdd2f6ca5a83302893
- 61fee4304990413bf7cc45fdd2f6ca5a83302893 sched: move stack_canary to the start of the randomizable region
+https://gitlab.com/cki-project/kernel-ark/-/commit/87410e01626936f8d276d01d3e1ef574a60773ba
+ 87410e01626936f8d276d01d3e1ef574a60773ba sched: move stack_canary to the start of the randomizable region
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/2ae85a8196f764c91e04e9d4612fcbe75e792166
  2ae85a8196f764c91e04e9d4612fcbe75e792166 random: set vdso is_ready later during boot process

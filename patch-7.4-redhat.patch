@@ -74,15 +74,15 @@
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |  11 +
  tools/testing/selftests/bpf/DENYLIST.rhel          |  76 +++
- tools/testing/selftests/bpf/Makefile               |   4 +-
+ tools/testing/selftests/bpf/Makefile.skel          |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
- 78 files changed, 2694 insertions(+), 116 deletions(-)
+ 78 files changed, 2693 insertions(+), 115 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 1b2ae71def21..b27be6993d6c 100644
+index 2e8ee12e06de..941d797c72d0 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -6647,6 +6647,20 @@ Kernel parameters
+@@ -6693,6 +6693,20 @@ Kernel parameters
  		2	The "airplane mode" button toggles between everything
  			blocked and everything unblocked.
  
@@ -103,7 +103,7 @@ index 1b2ae71def21..b27be6993d6c 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -8064,6 +8078,15 @@ Kernel parameters
+@@ -8110,6 +8124,15 @@ Kernel parameters
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -202,7 +202,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 0319cd716d73..4db94623382b 100644
+index 77caa3b0e992..5336792a46f7 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -359,6 +359,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -247,7 +247,7 @@ index 0319cd716d73..4db94623382b 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -2183,6 +2202,23 @@ endif
+@@ -2184,6 +2203,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -272,10 +272,10 @@ index 0319cd716d73..4db94623382b 100644
  	@:
  
 diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index ffbc7f386131..abff04320b4e 100644
+index 0cc289a7184a..bc8f17748d25 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
-@@ -1227,9 +1227,9 @@ config HIGHMEM
+@@ -1225,9 +1225,9 @@ config HIGHMEM
  	  If unsure, say n.
  
  config HIGHPTE
@@ -288,10 +288,10 @@ index ffbc7f386131..abff04320b4e 100644
  	  The VM uses one page of physical memory for each page table.
  	  For systems with a lot of processes, this can use a lot of
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index d5ccf1d040c6..0d52f6d97af0 100644
+index 292392ded42f..6f33e50d4ef6 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -1609,7 +1609,7 @@ endchoice
+@@ -1607,7 +1607,7 @@ endchoice
  
  config ARM64_FORCE_52BIT
  	bool "Force 52-bit virtual addresses for userspace"
@@ -412,7 +412,7 @@ index 9bd50c68cd7e..59ea485c076a 100644
  		get_cpu_address_sizes(c);
  		cpu_parse_early_param();
 diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index cda6adb9f69c..ec8d0bb4351a 100644
+index 19fc8e1714e6..625aa463005a 100644
 --- a/arch/x86/kernel/setup.c
 +++ b/arch/x86/kernel/setup.c
 @@ -23,6 +23,7 @@
@@ -759,10 +759,10 @@ index a670722ddd5a..748d1250a852 100644
  	return ctx.rc;
  }
 diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index 30bfef67cbaa..b1238499277d 100644
+index 0b17a7e51956..d91e3b834b6b 100644
 --- a/drivers/acpi/scan.c
 +++ b/drivers/acpi/scan.c
-@@ -1795,6 +1795,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
+@@ -1796,6 +1796,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
  	if (!acpi_match_device_ids(device, ignore_serial_bus_ids))
  		return false;
  
@@ -1108,7 +1108,7 @@ index 8efbcf699e4f..96d5a1ca981d 100644
  obj-$(CONFIG_EFI_RCI2_TABLE)		+= rci2-table.o
  obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
 diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 0327a39d31fa..5b5332b4de78 100644
+index 9bc22de0d67e..69b3bebcd503 100644
 --- a/drivers/firmware/efi/efi.c
 +++ b/drivers/firmware/efi/efi.c
 @@ -33,6 +33,7 @@
@@ -1119,7 +1119,7 @@ index 0327a39d31fa..5b5332b4de78 100644
  
  #include <asm/early_ioremap.h>
  
-@@ -1017,40 +1018,101 @@ int efi_mem_type(unsigned long phys_addr)
+@@ -1046,40 +1047,101 @@ int efi_mem_type(unsigned long phys_addr)
  	return md.type;
  }
  
@@ -1253,7 +1253,7 @@ index 0327a39d31fa..5b5332b4de78 100644
  EXPORT_SYMBOL_GPL(efi_status_to_err);
  
 diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-index 23b3543d3041..0d08a549a10b 100644
+index f01450b49975..db12fcc9580d 100644
 --- a/drivers/firmware/efi/libstub/fdt.c
 +++ b/drivers/firmware/efi/libstub/fdt.c
 @@ -132,6 +132,11 @@ static efi_status_t update_fdt(void *orig_fdt, unsigned long orig_fdt_size,
@@ -1349,7 +1349,7 @@ index 000000000000..de0a3714a5d4
 +	}
 +}
 diff --git a/drivers/gpu/drm/drm_pagemap.c b/drivers/gpu/drm/drm_pagemap.c
-index a0546955d0b9..f764b7b01628 100644
+index bbef0c225b7e..cebbade265e4 100644
 --- a/drivers/gpu/drm/drm_pagemap.c
 +++ b/drivers/gpu/drm/drm_pagemap.c
 @@ -12,6 +12,12 @@
@@ -1389,7 +1389,7 @@ index a0546955d0b9..f764b7b01628 100644
  
  			for (j = 1; j < NR_PAGES(order) && i + j < npages; j++)
 diff --git a/drivers/hwtracing/coresight/coresight-etm4x-core.c b/drivers/hwtracing/coresight/coresight-etm4x-core.c
-index 2247ad55d444..5f9da88479e8 100644
+index e21be6468e95..76bdc536e955 100644
 --- a/drivers/hwtracing/coresight/coresight-etm4x-core.c
 +++ b/drivers/hwtracing/coresight/coresight-etm4x-core.c
 @@ -12,6 +12,7 @@
@@ -1400,7 +1400,7 @@ index 2247ad55d444..5f9da88479e8 100644
  #include <linux/io.h>
  #include <linux/err.h>
  #include <linux/fs.h>
-@@ -2458,6 +2459,16 @@ static const struct amba_id etm4_ids[] = {
+@@ -2501,6 +2502,16 @@ static const struct amba_id etm4_ids[] = {
  	{},
  };
  
@@ -1417,7 +1417,7 @@ index 2247ad55d444..5f9da88479e8 100644
  MODULE_DEVICE_TABLE(amba, etm4_ids);
  
  static struct amba_driver etm4x_amba_driver = {
-@@ -2532,6 +2543,11 @@ static int __init etm4x_init(void)
+@@ -2575,6 +2586,11 @@ static int __init etm4x_init(void)
  {
  	int ret;
  
@@ -1429,7 +1429,7 @@ index 2247ad55d444..5f9da88479e8 100644
  	ret = etm4_pm_setup();
  
  	/* etm4_pm_setup() does its own cleanup - exit on error */
-@@ -2558,6 +2574,9 @@ static int __init etm4x_init(void)
+@@ -2601,6 +2617,9 @@ static int __init etm4x_init(void)
  
  static void __exit etm4x_exit(void)
  {
@@ -1440,7 +1440,7 @@ index 2247ad55d444..5f9da88479e8 100644
  	platform_driver_unregister(&etm4_platform_driver);
  	etm4_pm_clear();
 diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
-index cd1bca7ede9a..821027f45794 100644
+index b486b8bbd1fc..79faf9296c55 100644
 --- a/drivers/iommu/iommu.c
 +++ b/drivers/iommu/iommu.c
 @@ -8,6 +8,7 @@
@@ -1549,7 +1549,7 @@ index a00671b58701..eeef2766b8b3 100644
  	if (ret < 0)
  		goto err_allowedips;
 diff --git a/drivers/pci/pci-driver.c b/drivers/pci/pci-driver.c
-index e16aa59dd7ac..5edbf7eb64fc 100644
+index 7efe808cdf0c..176272029472 100644
 --- a/drivers/pci/pci-driver.c
 +++ b/drivers/pci/pci-driver.c
 @@ -19,6 +19,7 @@
@@ -1577,10 +1577,10 @@ index e16aa59dd7ac..5edbf7eb64fc 100644
  		return rc;
  	if (rc < 0) {
 diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
-index 1aa87a3ef9ed..59ed9c2bf2d4 100644
+index 7f1f47ea2ee4..cea40e1ae689 100644
 --- a/drivers/pci/quirks.c
 +++ b/drivers/pci/quirks.c
-@@ -4510,6 +4510,30 @@ static void quirk_aspeed_pci_bridge_no_alias(struct pci_dev *pdev)
+@@ -4652,6 +4652,30 @@ static void quirk_aspeed_pci_bridge_no_alias(struct pci_dev *pdev)
  }
  DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_ASPEED, 0x1150, quirk_aspeed_pci_bridge_no_alias);
  
@@ -1612,7 +1612,7 @@ index 1aa87a3ef9ed..59ed9c2bf2d4 100644
   * Intersil/Techwell TW686[4589]-based video capture cards have an empty (zero)
   * class code.  Fix it.
 diff --git a/drivers/scsi/hpsa.c b/drivers/scsi/hpsa.c
-index 8edad1830abe..e558acedfa44 100644
+index 4009edcfd2b1..bd49fe95d606 100644
 --- a/drivers/scsi/hpsa.c
 +++ b/drivers/scsi/hpsa.c
 @@ -82,7 +82,9 @@ MODULE_DESCRIPTION("Driver for HP Smart Array Controller version " \
@@ -1670,7 +1670,7 @@ index 3c412c7fb6fe..b7a037802763 100644
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2271) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2261) },
 diff --git a/drivers/scsi/sd.c b/drivers/scsi/sd.c
-index a1b21ea14e54..3076237c435d 100644
+index b0d2542fd317..494b60158f5e 100644
 --- a/drivers/scsi/sd.c
 +++ b/drivers/scsi/sd.c
 @@ -145,6 +145,13 @@ static void sd_large_pool_destroy(void)
@@ -1687,7 +1687,7 @@ index a1b21ea14e54..3076237c435d 100644
  
  static void sd_disable_discard(struct scsi_disk *sdkp)
  {
-@@ -4475,6 +4482,11 @@ static int __init init_sd(void)
+@@ -4473,6 +4480,11 @@ static int __init init_sd(void)
  		goto err_out_class;
  	}
  
@@ -1700,7 +1700,7 @@ index a1b21ea14e54..3076237c435d 100644
  	if (err)
  		goto err_out_driver;
 diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
-index b446905b48be..20e60bc403b4 100644
+index 199d3f535a89..de41496a6abf 100644
 --- a/drivers/usb/core/hub.c
 +++ b/drivers/usb/core/hub.c
 @@ -5912,6 +5912,13 @@ static void hub_event(struct work_struct *work)
@@ -1759,10 +1759,10 @@ index 16fa3b853f1b..4d21c8054a51 100644
  }
  
 diff --git a/fs/ext4/super.c b/fs/ext4/super.c
-index 3ace06b4f9e3..36ee3f0a52d1 100644
+index 9cae52471dee..aa17b6eea2fe 100644
 --- a/fs/ext4/super.c
 +++ b/fs/ext4/super.c
-@@ -5769,6 +5769,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
+@@ -5803,6 +5803,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
  	atomic_set(&sbi->s_warning_count, 0);
  	atomic_set(&sbi->s_msg_count, 0);
  
@@ -1794,7 +1794,7 @@ index b7c97f1c47c9..0a484f45b24a 100644
   * Miscellaneous stuff.
   */
 diff --git a/include/linux/efi.h b/include/linux/efi.h
-index aa15ff88539b..08ae6d9c9af1 100644
+index cc1df1577d5f..d1128f538e01 100644
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
 @@ -45,6 +45,8 @@ struct screen_info;
@@ -1806,7 +1806,7 @@ index aa15ff88539b..08ae6d9c9af1 100644
  typedef unsigned long efi_status_t;
  typedef u8 efi_bool_t;
  typedef u16 efi_char16_t;		/* UNICODE character */
-@@ -847,6 +849,14 @@ extern int __init parse_efi_signature_list(
+@@ -854,6 +856,14 @@ extern int __init parse_efi_signature_list(
  #define EFI_MEM_ATTR		9	/* Did firmware publish an EFI_MEMORY_ATTRIBUTES table? */
  #define EFI_MEM_NO_SOFT_RESERVE	10	/* Is the kernel configured to ignore soft reservations? */
  #define EFI_PRESERVE_BS_REGIONS	11	/* Are EFI boot-services memory segments available? */
@@ -1821,7 +1821,7 @@ index aa15ff88539b..08ae6d9c9af1 100644
  
  #ifdef CONFIG_EFI
  /*
-@@ -858,6 +868,8 @@ static inline bool efi_enabled(int feature)
+@@ -865,6 +875,8 @@ static inline bool efi_enabled(int feature)
  }
  extern void efi_reboot(enum reboot_mode reboot_mode, const char *__unused);
  
@@ -1830,7 +1830,7 @@ index aa15ff88539b..08ae6d9c9af1 100644
  bool __pure __efi_soft_reserve_enabled(void);
  
  static inline bool __pure efi_soft_reserve_enabled(void)
-@@ -879,6 +891,8 @@ static inline bool efi_enabled(int feature)
+@@ -886,6 +898,8 @@ static inline bool efi_enabled(int feature)
  static inline void
  efi_reboot(enum reboot_mode reboot_mode, const char *__unused) {}
  
@@ -1839,7 +1839,7 @@ index aa15ff88539b..08ae6d9c9af1 100644
  static inline bool efi_soft_reserve_enabled(void)
  {
  	return false;
-@@ -893,6 +907,7 @@ static inline void efi_find_mirror(void) {}
+@@ -900,6 +914,7 @@ static inline void efi_find_mirror(void) {}
  #endif
  
  extern int efi_status_to_err(efi_status_t status);
@@ -1847,9 +1847,9 @@ index aa15ff88539b..08ae6d9c9af1 100644
  
  /*
   * Variable Attributes
-@@ -1110,13 +1125,6 @@ extern unsigned long efi_call_virt_save_flags(void);
- 
+@@ -1140,13 +1155,6 @@ extern unsigned long efi_call_virt_save_flags(void);
  void efi_runtime_assert_lock_held(void);
+ efi_status_t efi_runtime_set_enable_flag(bool enable);
  
 -enum efi_secureboot_mode {
 -	efi_secureboot_mode_unset,
@@ -1911,10 +1911,10 @@ index 87d9d06710cb..a0dca6e06628 100644
  LSM_HOOK(int, 0, perf_event_open, int type)
  LSM_HOOK(int, 0, perf_event_alloc, struct perf_event *event)
 diff --git a/include/linux/module.h b/include/linux/module.h
-index f6f90cd88f15..f488d81dc95b 100644
+index 76f4f3596477..ea17e84823f8 100644
 --- a/include/linux/module.h
 +++ b/include/linux/module.h
-@@ -414,6 +414,7 @@ struct module {
+@@ -413,6 +413,7 @@ struct module {
  	struct module_attribute *modinfo_attrs;
  	const char *version;
  	const char *srcversion;
@@ -1922,7 +1922,7 @@ index f6f90cd88f15..f488d81dc95b 100644
  	const char *imported_namespaces;
  	struct kobject *holders_dir;
  
-@@ -1026,6 +1027,10 @@ static inline unsigned long find_kallsyms_symbol_value(struct module *mod,
+@@ -1029,6 +1030,10 @@ static inline unsigned long find_kallsyms_symbol_value(struct module *mod,
  
  #endif  /* CONFIG_MODULES && CONFIG_KALLSYMS */
  
@@ -1961,7 +1961,7 @@ index 8e7250b0e913..c4b24d3941ab 100644
  
  struct taint_flag {
 diff --git a/include/linux/pci.h b/include/linux/pci.h
-index 5ffcf5ce8c96..c0aa72f6eac5 100644
+index ef6327205520..c71cbac7312a 100644
 --- a/include/linux/pci.h
 +++ b/include/linux/pci.h
 @@ -1724,6 +1724,7 @@ int pci_add_dynid(struct pci_driver *drv,
@@ -1972,7 +1972,7 @@ index 5ffcf5ce8c96..c0aa72f6eac5 100644
  int pci_scan_bridge(struct pci_bus *bus, struct pci_dev *dev, int max,
  		    int pass);
  
-@@ -2918,6 +2919,10 @@ static inline bool pci_is_thunderbolt_attached(struct pci_dev *pdev)
+@@ -2920,6 +2921,10 @@ static inline bool pci_is_thunderbolt_attached(struct pci_dev *pdev)
  	return false;
  }
  
@@ -2624,7 +2624,7 @@ index 000000000000..d62a9e896b5e
 +
 +#endif /* _RH_WAIVED_H */
 diff --git a/include/linux/sched.h b/include/linux/sched.h
-index 12a7e094a3e6..aaa0fee5d90f 100644
+index 1c93da75226e..d318e7138f50 100644
 --- a/include/linux/sched.h
 +++ b/include/linux/sched.h
 @@ -868,9 +868,15 @@ struct task_struct {
@@ -2674,10 +2674,10 @@ index 40831fab5470..5f1e561d57ae 100644
 +
  #endif /* ! __LINUX_SECURITY_H */
 diff --git a/init/main.c b/init/main.c
-index 31f2bf54976a..9f8b7f7bedb6 100644
+index 27f4cb392349..ccf8d183a331 100644
 --- a/init/main.c
 +++ b/init/main.c
-@@ -1251,8 +1251,10 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
+@@ -1312,8 +1312,10 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
  	char fn_name[KSYM_SYMBOL_LEN];
  	unsigned long addr;
  
@@ -2688,7 +2688,7 @@ index 31f2bf54976a..9f8b7f7bedb6 100644
  
  	addr = (unsigned long) dereference_function_descriptor(fn);
  	sprint_symbol_no_offset(fn_name, addr);
-@@ -1263,6 +1265,9 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
+@@ -1324,6 +1326,9 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
  	 */
  	strreplace(fn_name, ' ', '\0');
  
@@ -2712,7 +2712,7 @@ index 4ff92e24680c..cdafe39a38f0 100644
  obj-$(CONFIG_VHOST_TASK) += vhost_task.o
  
 diff --git a/kernel/bpf/core.c b/kernel/bpf/core.c
-index 7f11555a5070..837156259663 100644
+index 3030beb531d9..89c89367f559 100644
 --- a/kernel/bpf/core.c
 +++ b/kernel/bpf/core.c
 @@ -549,7 +549,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
@@ -2729,7 +2729,7 @@ index 7f11555a5070..837156259663 100644
  long bpf_jit_limit_max __read_mostly;
  
 diff --git a/kernel/bpf/syscall.c b/kernel/bpf/syscall.c
-index 96217b99399d..7d56cfc40ed3 100644
+index 90bc7230afa8..9cc1bd0d371c 100644
 --- a/kernel/bpf/syscall.c
 +++ b/kernel/bpf/syscall.c
 @@ -28,6 +28,7 @@
@@ -2764,7 +2764,7 @@ index 96217b99399d..7d56cfc40ed3 100644
  int sysctl_unprivileged_bpf_disabled __read_mostly =
  	IS_BUILTIN(CONFIG_BPF_UNPRIV_DEFAULT_OFF) ? 2 : 0;
  
-@@ -6724,6 +6742,11 @@ static int bpf_unpriv_handler(const struct ctl_table *table, int write,
+@@ -6804,6 +6822,11 @@ static int bpf_unpriv_handler(const struct ctl_table *table, int write,
  	if (write && !ret) {
  		if (locked_state && unpriv_enable != 1)
  			return -EPERM;
@@ -2777,10 +2777,10 @@ index 96217b99399d..7d56cfc40ed3 100644
  	}
  
 diff --git a/kernel/module/main.c b/kernel/module/main.c
-index 0d720b33d648..63d0b2c99166 100644
+index 34e0204ea37c..fa46faf7a97e 100644
 --- a/kernel/module/main.c
 +++ b/kernel/module/main.c
-@@ -66,6 +66,8 @@
+@@ -67,6 +67,8 @@
  #define CREATE_TRACE_POINTS
  #include <trace/events/module.h>
  
@@ -2789,7 +2789,7 @@ index 0d720b33d648..63d0b2c99166 100644
  /*
   * Mutex protects:
   * 1) List of modules (also safely readable within RCU read section),
-@@ -615,6 +617,7 @@ static const struct module_attribute modinfo_##field = {              \
+@@ -616,6 +618,7 @@ static const struct module_attribute modinfo_##field = {              \
  
  MODINFO_ATTR(version);
  MODINFO_ATTR(srcversion);
@@ -2797,7 +2797,7 @@ index 0d720b33d648..63d0b2c99166 100644
  
  static void setup_modinfo_import_ns(struct module *mod, const char *s)
  {
-@@ -1097,6 +1100,7 @@ const struct module_attribute *const modinfo_attrs[] = {
+@@ -1098,6 +1101,7 @@ const struct module_attribute *const modinfo_attrs[] = {
  	&module_uevent,
  	&modinfo_version,
  	&modinfo_srcversion,
@@ -2805,7 +2805,7 @@ index 0d720b33d648..63d0b2c99166 100644
  	&modinfo_import_ns,
  	&modinfo_initstate,
  	&modinfo_coresize,
-@@ -3418,6 +3422,11 @@ static int early_mod_check(struct load_info *info, int flags)
+@@ -3426,6 +3430,11 @@ static int early_mod_check(struct load_info *info, int flags)
  		return -EPERM;
  	}
  
@@ -2817,7 +2817,7 @@ index 0d720b33d648..63d0b2c99166 100644
  	err = rewrite_section_headers(info, flags);
  	if (err)
  		return err;
-@@ -4002,6 +4011,10 @@ void print_modules(void)
+@@ -4010,6 +4019,10 @@ void print_modules(void)
  		pr_cont(" [last unloaded: %s%s]", last_unloaded_module.name,
  			last_unloaded_module.taints);
  	pr_cont("\n");
@@ -4121,21 +4121,19 @@ index 000000000000..9424a83c6f48
 +libbpf_probe_prog_types/BPF_PROG_TYPE_LIRC_MODE2 # needs CONFIG_BPF_LIRC_MODE2
 +test_bpffs                                       # needs CONFIG_BPF_PRELOAD
 +tunnel                                           # needs CONFIG_NET_FOU
-diff --git a/tools/testing/selftests/bpf/Makefile b/tools/testing/selftests/bpf/Makefile
-index 93c707116fad..d9168137151b 100644
---- a/tools/testing/selftests/bpf/Makefile
-+++ b/tools/testing/selftests/bpf/Makefile
-@@ -529,8 +529,8 @@ LSKELS := fexit_sleep.c trace_printk.c trace_vprintk.c map_ptr_kern.c 	\
+diff --git a/tools/testing/selftests/bpf/Makefile.skel b/tools/testing/selftests/bpf/Makefile.skel
+index 6570c48f92b0..bdd006606916 100644
+--- a/tools/testing/selftests/bpf/Makefile.skel
++++ b/tools/testing/selftests/bpf/Makefile.skel
+@@ -39,7 +39,7 @@ LSKELS := fexit_sleep.c trace_printk.c trace_vprintk.c map_ptr_kern.c 	\
  LSKELS_SIGNED := fentry_test.c fexit_test.c atomics.c
  
  # Generate both light skeleton and libbpf skeleton for these
 -LSKELS_EXTRA := test_ksyms_module.c test_ksyms_weak.c kfunc_call_test.c \
--	kfunc_call_test_subprog.c test_global_percpu_data.c
 +LSKELS_EXTRA := test_ksyms_module.c kfunc_call_test.c \
-+	kfunc_call_test_subprog.c
- SKEL_BLACKLIST += $$(LSKELS) $$(LSKELS_SIGNED)
+ 	kfunc_call_test_subprog.c test_global_percpu_data.c
+ SKEL_BLACKLIST += $(LSKELS) $(LSKELS_SIGNED)
  
- test_static_linked.skel.h-deps := test_static_linked1.bpf.o test_static_linked2.bpf.o
 diff --git a/tools/testing/selftests/bpf/prog_tests/ksyms_btf.c b/tools/testing/selftests/bpf/prog_tests/ksyms_btf.c
 index 1d7a2f1e0731..b22f3a9cb8b8 100644
 --- a/tools/testing/selftests/bpf/prog_tests/ksyms_btf.c
