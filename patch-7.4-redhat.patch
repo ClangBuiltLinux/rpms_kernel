@@ -65,7 +65,7 @@
  kernel/panic.c                                     |  11 +
  kernel/rh_flags.c                                  | 115 +++++
  kernel/rh_messages.c                               | 414 ++++++++++++++++
- kernel/rh_messages.h                               | 335 +++++++++++++
+ kernel/rh_messages.h                               | 334 +++++++++++++
  kernel/rh_waived.c                                 | 147 ++++++
  scripts/Makefile.lib                               |   3 +
  scripts/mod/modpost.c                              |   8 +
@@ -76,10 +76,10 @@
  tools/testing/selftests/bpf/DENYLIST.rhel          |  76 +++
  tools/testing/selftests/bpf/Makefile.skel          |   2 +-
  tools/testing/selftests/bpf/prog_tests/ksyms_btf.c |  31 --
- 78 files changed, 2693 insertions(+), 115 deletions(-)
+ 78 files changed, 2692 insertions(+), 115 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 2e8ee12e06de..941d797c72d0 100644
+index fce0d52b9cfe..8760ccc63712 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
 @@ -6693,6 +6693,20 @@ Kernel parameters
@@ -103,7 +103,7 @@ index 2e8ee12e06de..941d797c72d0 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -8110,6 +8124,15 @@ Kernel parameters
+@@ -8115,6 +8129,15 @@ Kernel parameters
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -202,7 +202,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 77caa3b0e992..5336792a46f7 100644
+index 7e6baa461b91..e240b191818a 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -359,6 +359,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -223,7 +223,7 @@ index 77caa3b0e992..5336792a46f7 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1460,6 +1471,8 @@ uapi-asm-generic:
+@@ -1440,6 +1451,8 @@ uapi-asm-generic:
  # Generate some files
  # ---------------------------------------------------------------------------
  
@@ -232,7 +232,7 @@ index 77caa3b0e992..5336792a46f7 100644
  # KERNELRELEASE can change from a few different places, meaning version.h
  # needs to be updated, so this check is forced on all builds
  
-@@ -1484,7 +1497,13 @@ define filechk_version.h
+@@ -1464,7 +1477,13 @@ define filechk_version.h
  	((c) > 255 ? 255 : (c)))';                                       \
  	echo \#define LINUX_VERSION_MAJOR $(VERSION);                    \
  	echo \#define LINUX_VERSION_PATCHLEVEL $(PATCHLEVEL);            \
@@ -247,7 +247,7 @@ index 77caa3b0e992..5336792a46f7 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -2184,6 +2203,23 @@ endif
+@@ -2164,6 +2183,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -288,7 +288,7 @@ index 0cc289a7184a..bc8f17748d25 100644
  	  The VM uses one page of physical memory for each page table.
  	  For systems with a lot of processes, this can use a lot of
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 292392ded42f..6f33e50d4ef6 100644
+index cfef22aee709..18b827134101 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
 @@ -1607,7 +1607,7 @@ endchoice
@@ -779,10 +779,10 @@ index 0b17a7e51956..d91e3b834b6b 100644
  	acpi_dev_get_resources(device, &resource_list,
  			       acpi_check_serial_bus_slave,
 diff --git a/drivers/ata/libahci.c b/drivers/ata/libahci.c
-index 08ab56e95566..3d29a2511800 100644
+index 001a6f5e4172..718687626f9f 100644
 --- a/drivers/ata/libahci.c
 +++ b/drivers/ata/libahci.c
-@@ -727,6 +727,24 @@ int ahci_stop_engine(struct ata_port *ap)
+@@ -728,6 +728,24 @@ int ahci_stop_engine(struct ata_port *ap)
  	tmp &= ~PORT_CMD_START;
  	writel(tmp, port_mmio + PORT_CMD);
  
@@ -1732,7 +1732,7 @@ index 7a883c59976f..907ec60e500a 100644
  
  error_proc:
 diff --git a/fs/erofs/super.c b/fs/erofs/super.c
-index 16fa3b853f1b..4d21c8054a51 100644
+index ce05557bd998..a34bb2e90fa3 100644
 --- a/fs/erofs/super.c
 +++ b/fs/erofs/super.c
 @@ -659,6 +659,9 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
@@ -1934,10 +1934,10 @@ index 76f4f3596477..ea17e84823f8 100644
  DEFINE_FREE(module_put, struct module *, if (_T) module_put(_T))
  
 diff --git a/include/linux/panic.h b/include/linux/panic.h
-index 8e7250b0e913..c4b24d3941ab 100644
+index 23976b1dfdb6..0324c3bb0466 100644
 --- a/include/linux/panic.h
 +++ b/include/linux/panic.h
-@@ -89,7 +89,21 @@ static inline void set_arch_panic_timeout(int timeout, int arch_default_timeout)
+@@ -90,7 +90,21 @@ static inline void set_arch_panic_timeout(int timeout, int arch_default_timeout)
  #define TAINT_TEST			18
  #define TAINT_FWCTL			19
  #define TAINT_FORCED_BIND		20
@@ -1961,7 +1961,7 @@ index 8e7250b0e913..c4b24d3941ab 100644
  
  struct taint_flag {
 diff --git a/include/linux/pci.h b/include/linux/pci.h
-index ef6327205520..c71cbac7312a 100644
+index 97a1096d5a8a..104ba185a910 100644
 --- a/include/linux/pci.h
 +++ b/include/linux/pci.h
 @@ -1724,6 +1724,7 @@ int pci_add_dynid(struct pci_driver *drv,
@@ -2674,10 +2674,10 @@ index 40831fab5470..5f1e561d57ae 100644
 +
  #endif /* ! __LINUX_SECURITY_H */
 diff --git a/init/main.c b/init/main.c
-index 27f4cb392349..ccf8d183a331 100644
+index d7bf1ffc5f50..b536ccd26d35 100644
 --- a/init/main.c
 +++ b/init/main.c
-@@ -1312,8 +1312,10 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
+@@ -1308,8 +1308,10 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
  	char fn_name[KSYM_SYMBOL_LEN];
  	unsigned long addr;
  
@@ -2688,7 +2688,7 @@ index 27f4cb392349..ccf8d183a331 100644
  
  	addr = (unsigned long) dereference_function_descriptor(fn);
  	sprint_symbol_no_offset(fn_name, addr);
-@@ -1324,6 +1326,9 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
+@@ -1320,6 +1322,9 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
  	 */
  	strreplace(fn_name, ' ', '\0');
  
@@ -2852,10 +2852,10 @@ index 590ba29c85ab..02153d857531 100644
  
  int module_sig_check(struct load_info *info, int flags)
 diff --git a/kernel/panic.c b/kernel/panic.c
-index a4dbb6b8cd2b..2a2a920b2e89 100644
+index b824b68fcb08..5132a22a830f 100644
 --- a/kernel/panic.c
 +++ b/kernel/panic.c
-@@ -827,6 +827,17 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
+@@ -826,6 +826,17 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
  	TAINT_FLAG(TEST,			'N', ' '),
  	TAINT_FLAG(FWCTL,			'J', ' '),
  	TAINT_FLAG(FORCED_BIND,			'Y', ' '),
@@ -3416,10 +3416,10 @@ index 000000000000..bb69e8965748
 +}
 diff --git a/kernel/rh_messages.h b/kernel/rh_messages.h
 new file mode 100644
-index 000000000000..117354de4c59
+index 000000000000..f741e7e1ef27
 --- /dev/null
 +++ b/kernel/rh_messages.h
-@@ -0,0 +1,335 @@
+@@ -0,0 +1,334 @@
 +/*
 + * WARNING: This file is auto-generated by an internal Red Hat script and,
 + * in general, should not be modified by hand.
@@ -3441,7 +3441,6 @@ index 000000000000..117354de4c59
 +#ifndef __RH_MESSAGES_H
 +#define __RH_MESSAGES_H
 +
-+#include <linux/version.h>
 +#include <linux/pci.h>
 +
 +#define DEV_DESC_LEN 256
