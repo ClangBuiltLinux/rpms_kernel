@@ -169,18 +169,18 @@ Summary: The Linux kernel
 #  unreleased kernel development snapshot.
 %global released_kernel 1
 # define buildid .local
-%define specrpmversion 7.3.0
-%define specversion 7.3.0
+%define specrpmversion 7.3.1
+%define specversion 7.3.1
 %define patchversion 7.3
 %define pkgrelease 200
 %define kversion 7
-%define tarfile_release 7.3
+%define tarfile_release 7.3.1
 # This is needed to do merge window version magic
 %define patchlevel 3
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 200%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 7.3.0
+%define kabiversion 7.3.1
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4827,13 +4827,14 @@ fi\
 #
 #
 %changelog
-* Thu Oct 29 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.3.0-200]
+* Fri Oct 30 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.3.1-0]
 - Initial setup for stable Fedora release (Justin M. Forbes)
 - Allow hmac(sha512) for unpriviledged users (Justin M. Forbes)
 - Reset RHEL_RELEASE for 7.4 series (Justin M. Forbes)
 - redhat: fix builds by disabling HYPERV_MOUSE_KUNIT_TEST (Nico Pache)
 - Merge configs into common for 7.3 (Justin M. Forbes)
 - Turn on EROFS_FS_PAGE_CACHE_SHARE for Fedora (Justin M. Forbes)
+- Linux v7.3.1
 
 * Mon Oct 19 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.3.0-64]
 - Linux v7.3.0
