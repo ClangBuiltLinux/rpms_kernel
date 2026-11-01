@@ -1,5 +1,5 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/6314f5f1cb8cd24fcecec5bd363e9eaa439b838d
- 6314f5f1cb8cd24fcecec5bd363e9eaa439b838d Revert af_alg_restrict sysctl for F43/44
+https://gitlab.com/cki-project/kernel-ark/-/commit/3b4de4cd45efa515c1505fcab2221f2d169c5527
+ 3b4de4cd45efa515c1505fcab2221f2d169c5527 Revert af_alg_restrict sysctl for F43/44
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/64e49685d0fb8eba5827eaf213f196db929ab481
  64e49685d0fb8eba5827eaf213f196db929ab481 media: cvs: Default selection to VIDEO_INTEL_IPU6
