@@ -79,10 +79,10 @@
  78 files changed, 2692 insertions(+), 115 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index fce0d52b9cfe..8760ccc63712 100644
+index 0b3c140babd9..6d4022df1d28 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -6693,6 +6693,20 @@ Kernel parameters
+@@ -6703,6 +6703,20 @@ Kernel parameters
  		2	The "airplane mode" button toggles between everything
  			blocked and everything unblocked.
  
@@ -103,7 +103,7 @@ index fce0d52b9cfe..8760ccc63712 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -8115,6 +8129,15 @@ Kernel parameters
+@@ -8125,6 +8139,15 @@ Kernel parameters
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -202,7 +202,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 7e6baa461b91..e240b191818a 100644
+index f895752d4b05..bf37866e3b66 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -359,6 +359,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -223,7 +223,7 @@ index 7e6baa461b91..e240b191818a 100644
  ifdef mixed-build
  # ===========================================================================
  # We're called with mixed targets (*config and build targets).
-@@ -1440,6 +1451,8 @@ uapi-asm-generic:
+@@ -1441,6 +1452,8 @@ uapi-asm-generic:
  # Generate some files
  # ---------------------------------------------------------------------------
  
@@ -232,7 +232,7 @@ index 7e6baa461b91..e240b191818a 100644
  # KERNELRELEASE can change from a few different places, meaning version.h
  # needs to be updated, so this check is forced on all builds
  
-@@ -1464,7 +1477,13 @@ define filechk_version.h
+@@ -1465,7 +1478,13 @@ define filechk_version.h
  	((c) > 255 ? 255 : (c)))';                                       \
  	echo \#define LINUX_VERSION_MAJOR $(VERSION);                    \
  	echo \#define LINUX_VERSION_PATCHLEVEL $(PATCHLEVEL);            \
@@ -247,7 +247,7 @@ index 7e6baa461b91..e240b191818a 100644
  endef
  
  $(version_h): private PATCHLEVEL := $(or $(PATCHLEVEL), 0)
-@@ -2164,6 +2183,23 @@ endif
+@@ -2165,6 +2184,23 @@ endif
  
  ifdef CONFIG_MODULES
  
@@ -288,10 +288,10 @@ index 0cc289a7184a..bc8f17748d25 100644
  	  The VM uses one page of physical memory for each page table.
  	  For systems with a lot of processes, this can use a lot of
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index cfef22aee709..18b827134101 100644
+index 1075bc661833..8ae79503c23f 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -1607,7 +1607,7 @@ endchoice
+@@ -1608,7 +1608,7 @@ endchoice
  
  config ARM64_FORCE_52BIT
  	bool "Force 52-bit virtual addresses for userspace"
@@ -759,10 +759,10 @@ index a670722ddd5a..748d1250a852 100644
  	return ctx.rc;
  }
 diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index 0b17a7e51956..d91e3b834b6b 100644
+index 96b8b0dfe339..ca74314437bc 100644
 --- a/drivers/acpi/scan.c
 +++ b/drivers/acpi/scan.c
-@@ -1796,6 +1796,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
+@@ -1799,6 +1799,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
  	if (!acpi_match_device_ids(device, ignore_serial_bus_ids))
  		return false;
  
@@ -1612,7 +1612,7 @@ index 7f1f47ea2ee4..cea40e1ae689 100644
   * Intersil/Techwell TW686[4589]-based video capture cards have an empty (zero)
   * class code.  Fix it.
 diff --git a/drivers/scsi/hpsa.c b/drivers/scsi/hpsa.c
-index 4009edcfd2b1..bd49fe95d606 100644
+index 187505950b63..9657fca8838d 100644
 --- a/drivers/scsi/hpsa.c
 +++ b/drivers/scsi/hpsa.c
 @@ -82,7 +82,9 @@ MODULE_DESCRIPTION("Driver for HP Smart Array Controller version " \
@@ -1670,7 +1670,7 @@ index 3c412c7fb6fe..b7a037802763 100644
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2271) },
  	{ PCI_DEVICE(PCI_VENDOR_ID_QLOGIC, PCI_DEVICE_ID_QLOGIC_ISP2261) },
 diff --git a/drivers/scsi/sd.c b/drivers/scsi/sd.c
-index b0d2542fd317..494b60158f5e 100644
+index dc45df819c42..a7094f942a22 100644
 --- a/drivers/scsi/sd.c
 +++ b/drivers/scsi/sd.c
 @@ -145,6 +145,13 @@ static void sd_large_pool_destroy(void)
@@ -1687,7 +1687,7 @@ index b0d2542fd317..494b60158f5e 100644
  
  static void sd_disable_discard(struct scsi_disk *sdkp)
  {
-@@ -4473,6 +4480,11 @@ static int __init init_sd(void)
+@@ -4481,6 +4488,11 @@ static int __init init_sd(void)
  		goto err_out_class;
  	}
  
@@ -1934,37 +1934,37 @@ index 76f4f3596477..ea17e84823f8 100644
  DEFINE_FREE(module_put, struct module *, if (_T) module_put(_T))
  
 diff --git a/include/linux/panic.h b/include/linux/panic.h
-index 23976b1dfdb6..0324c3bb0466 100644
+index 17e61b61c45f..0aec9148a1bd 100644
 --- a/include/linux/panic.h
 +++ b/include/linux/panic.h
-@@ -90,7 +90,21 @@ static inline void set_arch_panic_timeout(int timeout, int arch_default_timeout)
+@@ -89,7 +89,21 @@ static inline void set_arch_panic_timeout(int timeout, int arch_default_timeout)
+ #define TAINT_RANDSTRUCT		17
  #define TAINT_TEST			18
  #define TAINT_FWCTL			19
- #define TAINT_FORCED_BIND		20
--#define TAINT_FLAGS_COUNT		21
+-#define TAINT_FLAGS_COUNT		20
 +/* Start of Red Hat-specific taint flags */
++#define TAINT_20			20
 +#define TAINT_21			21
 +#define TAINT_22			22
 +#define TAINT_23			23
 +#define TAINT_24			24
-+#define TAINT_25			25
-+#define TAINT_PARTNER_SUPPORTED 	26
-+#define TAINT_SUPPORT_REMOVED		27
-+/* Bits 28 - 31 are reserved for Red Hat use only */
++#define TAINT_PARTNER_SUPPORTED 	25
++#define TAINT_SUPPORT_REMOVED		26
++/* Bits 27 - 30 are reserved for Red Hat use only */
++#define TAINT_RESERVED27		27
 +#define TAINT_RESERVED28		28
 +#define TAINT_RESERVED29		29
-+#define TAINT_RESERVED30		30
-+#define TAINT_UNPRIVILEGED_BPF		31
++#define TAINT_UNPRIVILEGED_BPF		30
 +/* End of Red Hat-specific taint flags */
-+#define TAINT_FLAGS_COUNT		32
++#define TAINT_FLAGS_COUNT		31
  #define TAINT_FLAGS_MAX			((1UL << TAINT_FLAGS_COUNT) - 1)
  
  struct taint_flag {
 diff --git a/include/linux/pci.h b/include/linux/pci.h
-index 97a1096d5a8a..104ba185a910 100644
+index aa3765a20a96..4f5ad2fb7c32 100644
 --- a/include/linux/pci.h
 +++ b/include/linux/pci.h
-@@ -1724,6 +1724,7 @@ int pci_add_dynid(struct pci_driver *drv,
+@@ -1727,6 +1727,7 @@ int pci_add_dynid(struct pci_driver *drv,
  		  unsigned long driver_data);
  const struct pci_device_id *pci_match_id(const struct pci_device_id *ids,
  					 struct pci_dev *dev);
@@ -1972,7 +1972,7 @@ index 97a1096d5a8a..104ba185a910 100644
  int pci_scan_bridge(struct pci_bus *bus, struct pci_dev *dev, int max,
  		    int pass);
  
-@@ -2920,6 +2921,10 @@ static inline bool pci_is_thunderbolt_attached(struct pci_dev *pdev)
+@@ -2923,6 +2924,10 @@ static inline bool pci_is_thunderbolt_attached(struct pci_dev *pdev)
  	return false;
  }
  
@@ -2674,7 +2674,7 @@ index 40831fab5470..5f1e561d57ae 100644
 +
  #endif /* ! __LINUX_SECURITY_H */
 diff --git a/init/main.c b/init/main.c
-index d7bf1ffc5f50..b536ccd26d35 100644
+index 7b0c8c34e6a9..1934f7ce76b7 100644
 --- a/init/main.c
 +++ b/init/main.c
 @@ -1308,8 +1308,10 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
@@ -2712,10 +2712,10 @@ index 4ff92e24680c..cdafe39a38f0 100644
  obj-$(CONFIG_VHOST_TASK) += vhost_task.o
  
 diff --git a/kernel/bpf/core.c b/kernel/bpf/core.c
-index 3030beb531d9..89c89367f559 100644
+index 7cf37690d41f..3f76f4e6a49d 100644
 --- a/kernel/bpf/core.c
 +++ b/kernel/bpf/core.c
-@@ -549,7 +549,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
+@@ -548,7 +548,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
  /* All BPF JIT sysctl knobs here. */
  int bpf_jit_enable   __read_mostly = IS_BUILTIN(CONFIG_BPF_JIT_DEFAULT_ON);
  int bpf_jit_kallsyms __read_mostly = IS_BUILTIN(CONFIG_BPF_JIT_DEFAULT_ON);
@@ -2729,7 +2729,7 @@ index 3030beb531d9..89c89367f559 100644
  long bpf_jit_limit_max __read_mostly;
  
 diff --git a/kernel/bpf/syscall.c b/kernel/bpf/syscall.c
-index 90bc7230afa8..9cc1bd0d371c 100644
+index 60c4d84b9aba..03eea6e74086 100644
 --- a/kernel/bpf/syscall.c
 +++ b/kernel/bpf/syscall.c
 @@ -28,6 +28,7 @@
@@ -2764,7 +2764,7 @@ index 90bc7230afa8..9cc1bd0d371c 100644
  int sysctl_unprivileged_bpf_disabled __read_mostly =
  	IS_BUILTIN(CONFIG_BPF_UNPRIV_DEFAULT_OFF) ? 2 : 0;
  
-@@ -6804,6 +6822,11 @@ static int bpf_unpriv_handler(const struct ctl_table *table, int write,
+@@ -6800,6 +6818,11 @@ static int bpf_unpriv_handler(const struct ctl_table *table, int write,
  	if (write && !ret) {
  		if (locked_state && unpriv_enable != 1)
  			return -EPERM;
@@ -2852,23 +2852,23 @@ index 590ba29c85ab..02153d857531 100644
  
  int module_sig_check(struct load_info *info, int flags)
 diff --git a/kernel/panic.c b/kernel/panic.c
-index b824b68fcb08..5132a22a830f 100644
+index 574ee5a12f92..b4cd6726ecc9 100644
 --- a/kernel/panic.c
 +++ b/kernel/panic.c
-@@ -826,6 +826,17 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
+@@ -825,6 +825,17 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
+ 	TAINT_FLAG(RANDSTRUCT,			'T', ' '),
  	TAINT_FLAG(TEST,			'N', ' '),
  	TAINT_FLAG(FWCTL,			'J', ' '),
- 	TAINT_FLAG(FORCED_BIND,			'Y', ' '),
++	TAINT_FLAG(20,				'?', '-'),
 +	TAINT_FLAG(21,				'?', '-'),
 +	TAINT_FLAG(22,				'?', '-'),
 +	TAINT_FLAG(23,				'?', '-'),
 +	TAINT_FLAG(24,				'?', '-'),
-+	TAINT_FLAG(25,				'?', '-'),
 +	TAINT_FLAG(PARTNER_SUPPORTED,		'p', ' '),
 +	TAINT_FLAG(SUPPORT_REMOVED,		'h', ' '),
++	TAINT_FLAG(RESERVED27,			'?', '-'),
 +	TAINT_FLAG(RESERVED28,			'?', '-'),
 +	TAINT_FLAG(RESERVED29,			'?', '-'),
-+	TAINT_FLAG(RESERVED30,			'?', '-'),
 +	TAINT_FLAG(UNPRIVILEGED_BPF,		'u', ' '),
  };
  
@@ -4121,10 +4121,10 @@ index 000000000000..9424a83c6f48
 +test_bpffs                                       # needs CONFIG_BPF_PRELOAD
 +tunnel                                           # needs CONFIG_NET_FOU
 diff --git a/tools/testing/selftests/bpf/Makefile.skel b/tools/testing/selftests/bpf/Makefile.skel
-index 6570c48f92b0..bdd006606916 100644
+index e8699903feef..652a11625831 100644
 --- a/tools/testing/selftests/bpf/Makefile.skel
 +++ b/tools/testing/selftests/bpf/Makefile.skel
-@@ -39,7 +39,7 @@ LSKELS := fexit_sleep.c trace_printk.c trace_vprintk.c map_ptr_kern.c 	\
+@@ -38,7 +38,7 @@ LSKELS := fexit_sleep.c trace_printk.c trace_vprintk.c map_ptr_kern.c 	\
  LSKELS_SIGNED := fentry_test.c fexit_test.c atomics.c
  
  # Generate both light skeleton and libbpf skeleton for these
