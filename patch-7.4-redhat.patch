@@ -2712,10 +2712,10 @@ index 4ff92e24680c..cdafe39a38f0 100644
  obj-$(CONFIG_VHOST_TASK) += vhost_task.o
  
 diff --git a/kernel/bpf/core.c b/kernel/bpf/core.c
-index 7cf37690d41f..3f76f4e6a49d 100644
+index 831f73f82599..1e456741f66b 100644
 --- a/kernel/bpf/core.c
 +++ b/kernel/bpf/core.c
-@@ -548,7 +548,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
+@@ -551,7 +551,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
  /* All BPF JIT sysctl knobs here. */
  int bpf_jit_enable   __read_mostly = IS_BUILTIN(CONFIG_BPF_JIT_DEFAULT_ON);
  int bpf_jit_kallsyms __read_mostly = IS_BUILTIN(CONFIG_BPF_JIT_DEFAULT_ON);
