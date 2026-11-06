@@ -1,5 +1,5 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/f53f0e111004619effb8ee621cd59243c21e6ec3
- f53f0e111004619effb8ee621cd59243c21e6ec3 Default af_alg_restrict to unrestricted for F44 and older
+https://gitlab.com/cki-project/kernel-ark/-/commit/1b0e39c4bcc5a3f22c0e4feae608b61fd3171837
+ 1b0e39c4bcc5a3f22c0e4feae608b61fd3171837 Default af_alg_restrict to unrestricted for F44 and older
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/4b2ceb8e419608f3bb30ccce795612c15647cc48
  4b2ceb8e419608f3bb30ccce795612c15647cc48 rtc: Add Raspberry Pi 5 RTC driver

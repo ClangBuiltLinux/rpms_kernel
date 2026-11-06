@@ -169,18 +169,18 @@ Summary: The Linux kernel
 #  unreleased kernel development snapshot.
 %global released_kernel 1
 # define buildid .local
-%define specrpmversion 7.3.2
-%define specversion 7.3.2
+%define specrpmversion 7.3.3
+%define specversion 7.3.3
 %define patchversion 7.3
 %define pkgrelease 100
 %define kversion 7
-%define tarfile_release 7.3.2
+%define tarfile_release 7.3.3
 # This is needed to do merge window version magic
 %define patchlevel 3
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 100%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 7.3.2
+%define kabiversion 7.3.3
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4827,8 +4827,11 @@ fi\
 #
 #
 %changelog
-* Fri Nov 06 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.3.2-100]
+* Fri Nov 06 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.3.3-100]
 - Default af_alg_restrict to unrestricted for F44 and older (Justin M. Forbes)
+
+* Fri Nov 06 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.3.3-0]
+- Linux v7.3.3
 
 * Fri Nov 06 2026 Justin M. Forbes <jforbes@fedoraproject.org> [7.3.2-0]
 - Switch to changing the default for af_alg_restrict on F44 (Justin M. Forbes)
