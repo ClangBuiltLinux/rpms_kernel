@@ -1,8 +1,8 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/b9e5eaa20283f0fcd5539d57bcf1e518e8ad1006
- b9e5eaa20283f0fcd5539d57bcf1e518e8ad1006 Reapply "drm/pagemap: Guard HPAGE_PMD_ORDER use with CONFIG_ARCH_ENABLE_THP_MIGRATION"
+https://gitlab.com/cki-project/kernel-ark/-/commit/d4d97a6aa35951f87e20790ac3ba42b7b97ec2ff
+ d4d97a6aa35951f87e20790ac3ba42b7b97ec2ff Reapply "drm/pagemap: Guard HPAGE_PMD_ORDER use with CONFIG_ARCH_ENABLE_THP_MIGRATION"
 
-https://gitlab.com/cki-project/kernel-ark/-/commit/cf896d838df62af913ceb3140a030aab8142c7c7
- cf896d838df62af913ceb3140a030aab8142c7c7 sched: move stack_canary to the start of the randomizable region
+https://gitlab.com/cki-project/kernel-ark/-/commit/aa083b72a051dae20e7e0795cf16f8c64d4c8805
+ aa083b72a051dae20e7e0795cf16f8c64d4c8805 sched: move stack_canary to the start of the randomizable region
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/344afe0f30cf2afb77bc8ac97c35bc687282ff14
  344afe0f30cf2afb77bc8ac97c35bc687282ff14 rh_messages.h: remove linux/version.h

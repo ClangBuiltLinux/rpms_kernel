@@ -2852,7 +2852,7 @@ index 590ba29c85ab..02153d857531 100644
  
  int module_sig_check(struct load_info *info, int flags)
 diff --git a/kernel/panic.c b/kernel/panic.c
-index 574ee5a12f92..b4cd6726ecc9 100644
+index 91e48d33b7db..b19fcc0d8d4e 100644
 --- a/kernel/panic.c
 +++ b/kernel/panic.c
 @@ -825,6 +825,17 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
