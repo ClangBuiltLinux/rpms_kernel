@@ -202,7 +202,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index f895752d4b05..bf37866e3b66 100644
+index 7d8c4667e79f..80fbcaf7c2f0 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -359,6 +359,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -779,7 +779,7 @@ index 96b8b0dfe339..ca74314437bc 100644
  	acpi_dev_get_resources(device, &resource_list,
  			       acpi_check_serial_bus_slave,
 diff --git a/drivers/ata/libahci.c b/drivers/ata/libahci.c
-index 001a6f5e4172..718687626f9f 100644
+index 5ce34683d468..093978371360 100644
 --- a/drivers/ata/libahci.c
 +++ b/drivers/ata/libahci.c
 @@ -728,6 +728,24 @@ int ahci_stop_engine(struct ata_port *ap)
@@ -1389,7 +1389,7 @@ index bbef0c225b7e..cebbade265e4 100644
  
  			for (j = 1; j < NR_PAGES(order) && i + j < npages; j++)
 diff --git a/drivers/hwtracing/coresight/coresight-etm4x-core.c b/drivers/hwtracing/coresight/coresight-etm4x-core.c
-index e21be6468e95..76bdc536e955 100644
+index 726b0ec9cc2d..f23a6031b2ca 100644
 --- a/drivers/hwtracing/coresight/coresight-etm4x-core.c
 +++ b/drivers/hwtracing/coresight/coresight-etm4x-core.c
 @@ -12,6 +12,7 @@
@@ -1400,7 +1400,7 @@ index e21be6468e95..76bdc536e955 100644
  #include <linux/io.h>
  #include <linux/err.h>
  #include <linux/fs.h>
-@@ -2501,6 +2502,16 @@ static const struct amba_id etm4_ids[] = {
+@@ -2500,6 +2501,16 @@ static const struct amba_id etm4_ids[] = {
  	{},
  };
  
@@ -1417,7 +1417,7 @@ index e21be6468e95..76bdc536e955 100644
  MODULE_DEVICE_TABLE(amba, etm4_ids);
  
  static struct amba_driver etm4x_amba_driver = {
-@@ -2575,6 +2586,11 @@ static int __init etm4x_init(void)
+@@ -2574,6 +2585,11 @@ static int __init etm4x_init(void)
  {
  	int ret;
  
@@ -1429,7 +1429,7 @@ index e21be6468e95..76bdc536e955 100644
  	ret = etm4_pm_setup();
  
  	/* etm4_pm_setup() does its own cleanup - exit on error */
-@@ -2601,6 +2617,9 @@ static int __init etm4x_init(void)
+@@ -2600,6 +2616,9 @@ static int __init etm4x_init(void)
  
  static void __exit etm4x_exit(void)
  {
@@ -1612,7 +1612,7 @@ index 7f1f47ea2ee4..cea40e1ae689 100644
   * Intersil/Techwell TW686[4589]-based video capture cards have an empty (zero)
   * class code.  Fix it.
 diff --git a/drivers/scsi/hpsa.c b/drivers/scsi/hpsa.c
-index 187505950b63..9657fca8838d 100644
+index 14e9ba693169..5c673c2b8232 100644
 --- a/drivers/scsi/hpsa.c
 +++ b/drivers/scsi/hpsa.c
 @@ -82,7 +82,9 @@ MODULE_DESCRIPTION("Driver for HP Smart Array Controller version " \
@@ -2624,7 +2624,7 @@ index 000000000000..d62a9e896b5e
 +
 +#endif /* _RH_WAIVED_H */
 diff --git a/include/linux/sched.h b/include/linux/sched.h
-index 1c93da75226e..d318e7138f50 100644
+index e4f6323d7855..6fde6e33fbae 100644
 --- a/include/linux/sched.h
 +++ b/include/linux/sched.h
 @@ -868,9 +868,15 @@ struct task_struct {
@@ -2644,7 +2644,7 @@ index 1c93da75226e..d318e7138f50 100644
  
  	/*
  	 * recent_used_cpu is initially set as the last CPU used by a task
-@@ -1081,10 +1087,6 @@ struct task_struct {
+@@ -1083,10 +1089,6 @@ struct task_struct {
  	pid_t				pid;
  	pid_t				tgid;
  
@@ -2712,7 +2712,7 @@ index 4ff92e24680c..cdafe39a38f0 100644
  obj-$(CONFIG_VHOST_TASK) += vhost_task.o
  
 diff --git a/kernel/bpf/core.c b/kernel/bpf/core.c
-index 831f73f82599..1e456741f66b 100644
+index 0b8456f2dce9..9fe89f5cce04 100644
 --- a/kernel/bpf/core.c
 +++ b/kernel/bpf/core.c
 @@ -551,7 +551,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
