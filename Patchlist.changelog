@@ -1,5 +1,8 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/1b0e39c4bcc5a3f22c0e4feae608b61fd3171837
- 1b0e39c4bcc5a3f22c0e4feae608b61fd3171837 Default af_alg_restrict to unrestricted for F44 and older
+https://gitlab.com/cki-project/kernel-ark/-/commit/d6033745887fe7266f9054d00ae1b089462c443e
+ d6033745887fe7266f9054d00ae1b089462c443e Default af_alg_restrict to unrestricted for F44 and older
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/f03e29f2bf5f5bad488b745c5a9188f895cfde76
+ f03e29f2bf5f5bad488b745c5a9188f895cfde76 crypto: testmgr - fix trailing whitespace from merge conflict resolution
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/4b2ceb8e419608f3bb30ccce795612c15647cc48
  4b2ceb8e419608f3bb30ccce795612c15647cc48 rtc: Add Raspberry Pi 5 RTC driver
