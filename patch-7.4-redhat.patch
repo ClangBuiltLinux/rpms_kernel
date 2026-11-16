@@ -202,7 +202,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 7d8c4667e79f..80fbcaf7c2f0 100644
+index 5aac6f1b011e..9630e8823855 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -359,6 +359,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -288,10 +288,10 @@ index 0cc289a7184a..bc8f17748d25 100644
  	  The VM uses one page of physical memory for each page table.
  	  For systems with a lot of processes, this can use a lot of
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 1075bc661833..8ae79503c23f 100644
+index 9b08b2457a55..2752a3be1272 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -1608,7 +1608,7 @@ endchoice
+@@ -1646,7 +1646,7 @@ endchoice
  
  config ARM64_FORCE_52BIT
  	bool "Force 52-bit virtual addresses for userspace"
@@ -759,10 +759,10 @@ index a670722ddd5a..748d1250a852 100644
  	return ctx.rc;
  }
 diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index 96b8b0dfe339..ca74314437bc 100644
+index 9218264f8da1..c5bed6bdb5de 100644
 --- a/drivers/acpi/scan.c
 +++ b/drivers/acpi/scan.c
-@@ -1799,6 +1799,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
+@@ -1867,6 +1867,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
  	if (!acpi_match_device_ids(device, ignore_serial_bus_ids))
  		return false;
  
@@ -1732,10 +1732,10 @@ index 7a883c59976f..907ec60e500a 100644
  
  error_proc:
 diff --git a/fs/erofs/super.c b/fs/erofs/super.c
-index ce05557bd998..a34bb2e90fa3 100644
+index e92a7fa90ae3..062f68f5b4e3 100644
 --- a/fs/erofs/super.c
 +++ b/fs/erofs/super.c
-@@ -659,6 +659,9 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
+@@ -675,6 +675,9 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
  {
  	struct inode *inode;
  	struct erofs_sb_info *sbi = EROFS_SB(sb);
@@ -1745,7 +1745,7 @@ index ce05557bd998..a34bb2e90fa3 100644
  	int err;
  
  	sb->s_magic = EROFS_SUPER_MAGIC;
-@@ -808,6 +811,12 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
+@@ -825,6 +828,12 @@ static int erofs_fc_fill_super(struct super_block *sb, struct fs_context *fc)
  
  	sbi->dir_ra_bytes = EROFS_DIR_RA_BYTES;
  	erofs_info(sb, "mounted with root inode @ nid %llu.", sbi->root_nid);
