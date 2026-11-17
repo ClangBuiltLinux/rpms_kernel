@@ -1,6 +1,15 @@
-* Mon Nov 16 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc3.26]
+* Tue Nov 17 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc3.666539eecdf4.27]
 - Reapply "drm/pagemap: Guard HPAGE_PMD_ORDER use with CONFIG_ARCH_ENABLE_THP_MIGRATION" (Oleksii Baranov)
 - sched: move stack_canary to the start of the randomizable region (Scott Weaver)
+Resolves: 
+
+* Tue Nov 17 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc3.666539eecdf4.26]
+- redhat/self-test: update data for exported RHTEST and ARCH_MACH (Jan Stancek)
+- redhat/Makefile: export AUTOMOTIVE_BUILD for automotive sub-makes (Jan Stancek)
+- redhat/Makefile: export DIST for the dist-brew sub-make (Jan Stancek)
+- redhat/Makefile: export RHTEST and ARCH_MACH again (Jan Stancek)
+- redhat/Makefile: fix distg-koji target name (Jan Stancek)
+- Linux v7.4.0-0.rc3.666539eecdf4
 Resolves: 
 
 * Mon Nov 16 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc3.25]
