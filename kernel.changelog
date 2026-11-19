@@ -1,6 +1,15 @@
-* Tue Nov 17 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc3.666539eecdf4.27]
+* Thu Nov 19 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc3.4405c18c95d2.29]
 - Reapply "drm/pagemap: Guard HPAGE_PMD_ORDER use with CONFIG_ARCH_ENABLE_THP_MIGRATION" (Oleksii Baranov)
 - sched: move stack_canary to the start of the randomizable region (Scott Weaver)
+Resolves: 
+
+* Thu Nov 19 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc3.4405c18c95d2.28]
+- redhat/configs: automotive: enable TOUCHSCREEN_ILITEK (Jared Kangas)
+- Linux v7.4.0-0.rc3.4405c18c95d2
+Resolves: 
+
+* Wed Nov 18 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc3.20eef29b7c84.27]
+- Linux v7.4.0-0.rc3.20eef29b7c84
 Resolves: 
 
 * Tue Nov 17 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc3.666539eecdf4.26]
