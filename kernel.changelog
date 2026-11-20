@@ -1,7 +1,17 @@
-* Thu Nov 19 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc3.4405c18c95d2.29]
+* Fri Nov 20 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc3.65e4fd942f72.30]
 - Reapply "drm/pagemap: Guard HPAGE_PMD_ORDER use with CONFIG_ARCH_ENABLE_THP_MIGRATION" (Oleksii Baranov)
 - sched: move stack_canary to the start of the randomizable region (Scott Weaver)
 Resolves: 
+
+* Fri Nov 20 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc3.65e4fd942f72.29]
+- redhat/configs: Enable USB device/xDCI Device ID Support (Dennis Chen) [RHEL-288093]
+- redhat/configs: x86: Enable UFS Controller Device ID Support (Dennis Chen) [RHEL-288096]
+- redhat/configs: Enable CONFIG_EXTCON_PTN5150 for arm/aarch64 (Dennis Chen) [RHEL-287424]
+- redhat/configs: Update powerpc CONFIG_HZ_1000 config (Mamatha Inamdar) [RHEL-190828]
+- redhat/configs: disable MMC_USHC (Eric Chanudet) [RHEL-266570]
+- redhat/configs: fedora: set some qcom icc, and pinctrl drivers to built in (Vivek Puar)
+- Linux v7.4.0-0.rc3.65e4fd942f72
+Resolves: RHEL-190828, RHEL-266570, RHEL-287424, RHEL-288093, RHEL-288096
 
 * Thu Nov 19 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc3.4405c18c95d2.28]
 - redhat/configs: automotive: enable TOUCHSCREEN_ILITEK (Jared Kangas)
