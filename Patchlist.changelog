@@ -1,5 +1,11 @@
-https://gitlab.com/cki-project/kernel-ark/-/commit/5bfaa1170e0c7fbc403ff85a815d35f98700b870
- 5bfaa1170e0c7fbc403ff85a815d35f98700b870 Default af_alg_restrict to unrestricted for F44 and older
+https://gitlab.com/cki-project/kernel-ark/-/commit/e6b5d18a7009c39e5903b6e1965e0be625dcd9e5
+ e6b5d18a7009c39e5903b6e1965e0be625dcd9e5 Default af_alg_restrict to unrestricted for F44 and older
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/1cc5f432911469b9c3a748d0a5a42154f3479074
+ 1cc5f432911469b9c3a748d0a5a42154f3479074 btrfs: fix the fsverity callback where unexpected range is verified
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/8b3efeab1466ca4d96039ee6ba5a781370311259
+ 8b3efeab1466ca4d96039ee6ba5a781370311259 media: ipu-bridge: Add upside-down sensor quirk for Dell XPS 16 DA16260
 
 https://gitlab.com/cki-project/kernel-ark/-/commit/37ecb8d81683591090c7f6e6590f85e142d866d7
  37ecb8d81683591090c7f6e6590f85e142d866d7 drm/i915/dp: Fix source PHY updates for UHBR links with LTTPRs
