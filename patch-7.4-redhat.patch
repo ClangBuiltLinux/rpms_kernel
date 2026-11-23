@@ -202,7 +202,7 @@ index 000000000000..85771d74c34f
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 5aac6f1b011e..9630e8823855 100644
+index 9d5bfe5e0b43..0370f2821c24 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -359,6 +359,17 @@ ifneq ($(filter install,$(MAKECMDGOALS)),)
@@ -1577,7 +1577,7 @@ index 7efe808cdf0c..176272029472 100644
  		return rc;
  	if (rc < 0) {
 diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
-index 7f1f47ea2ee4..cea40e1ae689 100644
+index 4a02fc80755d..3b9cf2fb0ce0 100644
 --- a/drivers/pci/quirks.c
 +++ b/drivers/pci/quirks.c
 @@ -4652,6 +4652,30 @@ static void quirk_aspeed_pci_bridge_no_alias(struct pci_dev *pdev)
@@ -2712,10 +2712,10 @@ index 4ff92e24680c..cdafe39a38f0 100644
  obj-$(CONFIG_VHOST_TASK) += vhost_task.o
  
 diff --git a/kernel/bpf/core.c b/kernel/bpf/core.c
-index 0b8456f2dce9..9fe89f5cce04 100644
+index 0bfd23a41401..ca8c8a050dc7 100644
 --- a/kernel/bpf/core.c
 +++ b/kernel/bpf/core.c
-@@ -551,7 +551,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
+@@ -552,7 +552,12 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
  /* All BPF JIT sysctl knobs here. */
  int bpf_jit_enable   __read_mostly = IS_BUILTIN(CONFIG_BPF_JIT_DEFAULT_ON);
  int bpf_jit_kallsyms __read_mostly = IS_BUILTIN(CONFIG_BPF_JIT_DEFAULT_ON);

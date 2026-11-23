@@ -1,6 +1,19 @@
-* Fri Nov 20 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc3.65e4fd942f72.30]
+* Mon Nov 23 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc4.33]
 - Reapply "drm/pagemap: Guard HPAGE_PMD_ORDER use with CONFIG_ARCH_ENABLE_THP_MIGRATION" (Oleksii Baranov)
 - sched: move stack_canary to the start of the randomizable region (Scott Weaver)
+Resolves: 
+
+* Mon Nov 23 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc4.32]
+- Linux v7.4.0-0.rc4
+Resolves: 
+
+* Sun Nov 22 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc3.4843f6873f7c.31]
+- Linux v7.4.0-0.rc3.4843f6873f7c
+Resolves: 
+
+* Sat Nov 21 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc3.c44104f3642d.30]
+- redhat/configs: enable NVIDIA GB10 (Jiri Benc)
+- Linux v7.4.0-0.rc3.c44104f3642d
 Resolves: 
 
 * Fri Nov 20 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc3.65e4fd942f72.29]
