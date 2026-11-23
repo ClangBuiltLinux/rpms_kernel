@@ -169,18 +169,18 @@ Summary: The Linux kernel
 #  unreleased kernel development snapshot.
 %global released_kernel 1
 # define buildid .local
-%define specrpmversion 7.3.5
-%define specversion 7.3.5
+%define specrpmversion 7.3.6
+%define specversion 7.3.6
 %define patchversion 7.3
 %define pkgrelease 300
 %define kversion 7
-%define tarfile_release 7.3.5
+%define tarfile_release 7.3.6
 # This is needed to do merge window version magic
 %define patchlevel 3
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 300%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 7.3.5
+%define kabiversion 7.3.6
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -4827,6 +4827,12 @@ fi\
 #
 #
 %changelog
+* Mon Nov 23 2026 Augusto Caringi <acaringi@redhat.com> [7.3.6-0]
+- btrfs: fix the fsverity callback where unexpected range is verified (Qu Wenruo)
+- Fix up config for CONFIG_DRM_AMD_DC_DCE (Augusto Caringi)
+- media: ipu-bridge: Add upside-down sensor quirk for Dell XPS 16 DA16260 (Kate Hsuan)
+- Linux v7.3.6
+
 * Tue Nov 17 2026 Augusto Caringi <acaringi@redhat.com> [7.3.5-0]
 - drm/i915/dp: Fix source PHY updates for UHBR links with LTTPRs (Frederik Schwan)
 - Revert "phy: qcom: qmp-pcie: Skip PHY reset if already up" (Michael Burch)
