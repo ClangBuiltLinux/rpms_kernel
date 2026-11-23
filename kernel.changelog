@@ -1,3 +1,10 @@
+* Mon Nov 23 2026 Augusto Caringi <acaringi@redhat.com> [7.3.6-0]
+- btrfs: fix the fsverity callback where unexpected range is verified (Qu Wenruo)
+- Fix up config for CONFIG_DRM_AMD_DC_DCE (Augusto Caringi)
+- media: ipu-bridge: Add upside-down sensor quirk for Dell XPS 16 DA16260 (Kate Hsuan)
+- Linux v7.3.6
+Resolves: 
+
 * Tue Nov 17 2026 Augusto Caringi <acaringi@redhat.com> [7.3.5-0]
 - drm/i915/dp: Fix source PHY updates for UHBR links with LTTPRs (Frederik Schwan)
 - Revert "phy: qcom: qmp-pcie: Skip PHY reset if already up" (Michael Burch)
