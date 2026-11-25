@@ -1,6 +1,15 @@
-* Mon Nov 23 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc4.33]
+* Wed Nov 25 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc4.4dce97c6c265.35]
 - Reapply "drm/pagemap: Guard HPAGE_PMD_ORDER use with CONFIG_ARCH_ENABLE_THP_MIGRATION" (Oleksii Baranov)
 - sched: move stack_canary to the start of the randomizable region (Scott Weaver)
+Resolves: 
+
+* Wed Nov 25 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc4.4dce97c6c265.34]
+- Linux v7.4.0-0.rc4.4dce97c6c265
+Resolves: 
+
+* Tue Nov 24 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc4.8d7fe9885c62.33]
+- Increase PPC64LE Baseline to Power10 (Justin M. Forbes)
+- Linux v7.4.0-0.rc4.8d7fe9885c62
 Resolves: 
 
 * Mon Nov 23 2026 Fedora Kernel Team <kernel-team@fedoraproject.org> [7.4.0-0.rc4.32]

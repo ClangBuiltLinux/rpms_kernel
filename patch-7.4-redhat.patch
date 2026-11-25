@@ -79,10 +79,10 @@
  78 files changed, 2692 insertions(+), 115 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 176648941aec..856f21f825d6 100644
+index dce9b8f3ae98..de88df013953 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -6696,6 +6696,20 @@ Kernel parameters
+@@ -6699,6 +6699,20 @@ Kernel parameters
  		2	The "airplane mode" button toggles between everything
  			blocked and everything unblocked.
  
@@ -103,7 +103,7 @@ index 176648941aec..856f21f825d6 100644
  	ring3mwait=disable
  			[KNL] Disable ring 3 MONITOR/MWAIT feature on supported
  			CPUs.
-@@ -8118,6 +8132,15 @@ Kernel parameters
+@@ -8121,6 +8135,15 @@ Kernel parameters
  	unknown_nmi_panic
  			[X86] Cause panic on unknown NMI.
  
@@ -1759,10 +1759,10 @@ index e92a7fa90ae3..062f68f5b4e3 100644
  }
  
 diff --git a/fs/ext4/super.c b/fs/ext4/super.c
-index 9cae52471dee..aa17b6eea2fe 100644
+index 880f664d6c04..ba70c690cd8a 100644
 --- a/fs/ext4/super.c
 +++ b/fs/ext4/super.c
-@@ -5803,6 +5803,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
+@@ -5854,6 +5854,17 @@ static int __ext4_fill_super(struct fs_context *fc, struct super_block *sb)
  	atomic_set(&sbi->s_warning_count, 0);
  	atomic_set(&sbi->s_msg_count, 0);
  
